@@ -9,24 +9,29 @@ namespace HeartScript.Nodes
     public class ErrorNode : INode
     {
         public OperatorInfo OperatorInfo { get; }
-        public int CharOffset { get; }
+        public Token Token { get; }
         public string Message { get; }
 
-        private ErrorNode(OperatorInfo operatorInfo, int charOffset, string message)
+        private ErrorNode(OperatorInfo operatorInfo, Token token, string message)
         {
             OperatorInfo = operatorInfo;
-            CharOffset = charOffset;
+            Token = token;
             Message = message;
         }
 
-        public static ErrorNode UnexpectedToken(NodeBuilder nodeBuilder, int charOffset, Keyword expected)
+        public override string ToString()
         {
-            return new ErrorNode(nodeBuilder.OperatorInfo, charOffset, $"Expected '{expected}'");
+            return $"{Token}, {Message}";
         }
 
-        public static ErrorNode InvalidExpressionTerm(NodeBuilder nodeBuilder, int charOffset, Keyword invalid)
+        public static ErrorNode UnexpectedToken(NodeBuilder nodeBuilder, Token token, Keyword expected)
         {
-            return new ErrorNode(nodeBuilder.OperatorInfo, charOffset, $"Invalid expression term '{invalid}'");
+            return new ErrorNode(nodeBuilder.OperatorInfo, token, $"Expected '{expected}'");
+        }
+
+        public static ErrorNode InvalidExpressionTerm(NodeBuilder nodeBuilder, Token token)
+        {
+            return new ErrorNode(nodeBuilder.OperatorInfo, token, $"Invalid expression term");
         }
     }
 }

@@ -66,7 +66,7 @@ namespace HeartScript.Nodes
                     throw new System.ArgumentException($"{nameof(_target)}");
 
                 acknowledgeToken = false;
-                return ErrorNode.UnexpectedToken(this, current.CharOffset, Keyword.RoundClose);
+                return ErrorNode.UnexpectedToken(this, current, Keyword.RoundClose);
             }
         }
     }

@@ -24,13 +24,13 @@ namespace HeartScript.Nodes
             if (operand == null)
             {
                 acknowledgeToken = false;
-                return ErrorNode.InvalidExpressionTerm(this, current.CharOffset, current.Keyword);
+                return ErrorNode.InvalidExpressionTerm(this, current);
             }
 
             if (current.Keyword != _closingKeyword)
             {
                 acknowledgeToken = false;
-                return ErrorNode.UnexpectedToken(this, current.CharOffset, _closingKeyword);
+                return ErrorNode.UnexpectedToken(this, current, _closingKeyword);
             }
             else
             {

@@ -23,11 +23,19 @@ namespace HeartScript.Nodes
 
         public override INode? FeedOperand(Token current, INode? operand, out bool acknowledgeToken)
         {
+            if (current.Keyword == OperatorInfo.Keyword && operand == null)
+            {
+                acknowledgeToken = false;
+                return null;
+            }
+
             if (operand == null)
-                throw new System.ArgumentException($"{nameof(operand)}");
+            {
+                acknowledgeToken = false;
+                return ErrorNode.InvalidExpressionTerm(this, current);
+            }
 
             acknowledgeToken = false;
-
             return new UnaryNode(OperatorInfo.Keyword, operand);
         }
     }

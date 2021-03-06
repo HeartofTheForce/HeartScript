@@ -52,12 +52,17 @@ namespace HeartScript.Parsing
             new Pattern()
             {
                 Regex = new Regex("\\*"),
-                Keyword = Keyword.Asterisk,
+                Keyword = Keyword.Multiply,
             },
             new Pattern()
             {
                 Regex = new Regex("/"),
-                Keyword = Keyword.ForwardSlash,
+                Keyword = Keyword.Divide,
+            },
+            new Pattern()
+            {
+                Regex = new Regex("&"),
+                Keyword = Keyword.BitwiseAnd,
             },
             new Pattern()
             {

@@ -31,10 +31,10 @@ namespace HeartScript
                 (operatorInfo) => new UnaryNodeBuilder(operatorInfo)),
 
             new Operator(
-                new OperatorInfo(Keyword.Asterisk, 1, 1),
+                new OperatorInfo(Keyword.Multiply, 1, 1),
                 (operatorInfo) => new BinaryNodeBuilder(operatorInfo)),
             new Operator(
-                new OperatorInfo(Keyword.ForwardSlash, 1, 1),
+                new OperatorInfo(Keyword.Divide, 1, 1),
                 (operatorInfo) => new BinaryNodeBuilder(operatorInfo)),
 
             new Operator(

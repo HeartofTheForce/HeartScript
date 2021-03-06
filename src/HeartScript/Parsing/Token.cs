@@ -20,7 +20,7 @@ namespace HeartScript.Parsing
 
         public override string ToString()
         {
-            return $"{Keyword}, {Value}";
+            return $"({Keyword} '{Value}') @ {CharOffset}";
         }
 
         public override bool Equals(object obj)
@@ -28,7 +28,10 @@ namespace HeartScript.Parsing
             if (!(obj is Token other))
                 return base.Equals(obj);
 
-            return other.Keyword == Keyword && other.Value == Value;
+            return
+                other.Keyword == Keyword &&
+                other.Value == Value &&
+                other.CharOffset == CharOffset;
         }
 
         public override int GetHashCode()
@@ -47,8 +50,9 @@ namespace HeartScript.Parsing
         Comma,
         Plus,
         Minus,
-        Asterisk,
-        ForwardSlash,
+        Multiply,
+        Divide,
+        BitwiseAnd,
         Identifier,
         Constant,
         StartOfString,
