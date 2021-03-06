@@ -29,10 +29,10 @@ namespace HeartScript.Nodes
 
         public override INode? FeedOperand(Token current, INode? operand, out bool acknowledgeToken)
         {
-            if (operand == null)
-                throw new System.ArgumentException($"{nameof(operand)}");
-
             acknowledgeToken = false;
+
+            if (operand == null)
+                return ErrorNode.InvalidExpressionTerm(current.CharOffset, current.Keyword);
 
             _nodes.Add(operand);
             if (_nodes.Count == 2)
