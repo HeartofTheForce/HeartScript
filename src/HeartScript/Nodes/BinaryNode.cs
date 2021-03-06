@@ -16,6 +16,11 @@ namespace HeartScript.Nodes
             Left = left;
             Right = right;
         }
+
+        public override string ToString()
+        {
+            return $"{{{Keyword} {Left} {Right}}}";
+        }
     }
 
     public class BinaryNodeBuilder : NodeBuilder

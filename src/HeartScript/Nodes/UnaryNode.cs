@@ -13,6 +13,11 @@ namespace HeartScript.Nodes
             Keyword = keyword;
             Target = target;
         }
+
+        public override string ToString()
+        {
+            return $"{{{Keyword} {Target}}}";
+        }
     }
 
     public class PostfixNode : INode
@@ -24,6 +29,11 @@ namespace HeartScript.Nodes
         {
             Keyword = keyword;
             Target = target;
+        }
+
+        public override string ToString()
+        {
+            return $"{{{Keyword} {Target}}}";
         }
     }
 
