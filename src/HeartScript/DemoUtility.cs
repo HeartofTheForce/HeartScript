@@ -9,7 +9,7 @@ namespace HeartScript
         {
             new Operator(
                 new OperatorInfo(Keyword.StartOfString, null, int.MaxValue),
-                (operatorInfo) => new ConstantNodeBuilder(operatorInfo)),
+                (operatorInfo) => new BracketNodeBuilder(operatorInfo,Keyword.EndOfString)),
             new Operator(
                 new OperatorInfo(Keyword.Constant, null, null),
                 (operatorInfo) => new ConstantNodeBuilder(operatorInfo)),

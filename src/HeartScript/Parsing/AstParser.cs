@@ -40,11 +40,16 @@ namespace HeartScript.Parsing
 
                 if (op == null)
                 {
-                    while (_nodeBuilders.Count > 0 && TryPopNodeBuilder(out bool acknowledgeToken) && !acknowledgeToken)
+                    bool acknowledgeToken;
+                    do
                     {
-                        if (_operand == null)
+                        if (_nodeBuilders.Count == 0)
                             throw new Exception($"Unexpected Token: {current}");
-                    }
+
+                        if (!TryPopNodeBuilder(out acknowledgeToken) && !acknowledgeToken)
+                            throw new Exception($"Unexpected Token: {current}");
+
+                    } while (!acknowledgeToken);
                 }
                 else
                 {
