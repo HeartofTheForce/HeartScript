@@ -37,14 +37,14 @@ namespace HeartScript.Nodes
     public class Operator
     {
         public OperatorInfo OperatorInfo { get; }
-        private readonly Func<OperatorInfo, Token, INode?, INodeBuilder> _createNodeBuilder;
+        private readonly Func<OperatorInfo, NodeBuilder> _createNodeBuilder;
 
-        public Operator(OperatorInfo operatorInfo, Func<OperatorInfo, Token, INode?, INodeBuilder> createNodeBuilder)
+        public Operator(OperatorInfo operatorInfo, Func<OperatorInfo, NodeBuilder> createNodeBuilder)
         {
             OperatorInfo = operatorInfo;
             _createNodeBuilder = createNodeBuilder;
         }
 
-        public INodeBuilder CreateNodeBuilder(Token token, INode? operand) => _createNodeBuilder(OperatorInfo, token, operand);
+        public NodeBuilder CreateNodeBuilder() => _createNodeBuilder(OperatorInfo);
     }
 }

@@ -6,20 +6,16 @@ namespace HeartScript.Parsing
     {
         public Keyword Keyword { get; set; }
         public string Value { get; }
-
-        public int Line { get; }
-        public int Column { get; }
+        public int CharOffset { get; }
 
         public Token(
             Keyword keyword,
             string value,
-            int line,
-            int column)
+            int charOffset)
         {
             Keyword = keyword;
             Value = value;
-            Line = line;
-            Column = column;
+            CharOffset = charOffset;
         }
 
         public override string ToString()
@@ -55,5 +51,6 @@ namespace HeartScript.Parsing
         ForwardSlash,
         Identifier,
         Constant,
+        EndOfString,
     }
 }

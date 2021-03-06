@@ -9,37 +9,37 @@ namespace HeartScript
         {
             new Operator(
                 new OperatorInfo(Keyword.Constant, null, null),
-                (operatorInfo, token, left) => new ConstantNodeBuilder(operatorInfo, token, left!)),
+                (operatorInfo) => new ConstantNodeBuilder(operatorInfo)),
             new Operator(
                 new OperatorInfo(Keyword.Identifier, null, null),
-                (operatorInfo, token, left) => new IdentifierNodeBuilder(operatorInfo, token, left!)),
+                (operatorInfo) => new IdentifierNodeBuilder(operatorInfo)),
             new Operator(
                 new OperatorInfo(Keyword.RoundOpen, null, int.MaxValue),
-                (operatorInfo, token, left) => new BracketNodeBuilder(operatorInfo, token, left!, Keyword.RoundClose)),
+                (operatorInfo) => new BracketNodeBuilder(operatorInfo, Keyword.RoundClose)),
             new Operator(
                 new OperatorInfo(Keyword.RoundOpen, int.MaxValue - 1, int.MaxValue),
-                (operatorInfo, token, left) => new CallNodeBuilder(operatorInfo, token, left!)),
+                (operatorInfo) => new CallNodeBuilder(operatorInfo)),
 
             new Operator(
                 new OperatorInfo(Keyword.Plus, null, 0),
-                (operatorInfo, token, left) => new UnaryNodeBuilder(operatorInfo, token, left!)),
+                (operatorInfo) => new UnaryNodeBuilder(operatorInfo)),
             new Operator(
                 new OperatorInfo(Keyword.Minus, null, 0),
-                (operatorInfo, token, left) => new UnaryNodeBuilder(operatorInfo, token, left!)),
+                (operatorInfo) => new UnaryNodeBuilder(operatorInfo)),
 
             new Operator(
                 new OperatorInfo(Keyword.Asterisk, 1, 1),
-                (operatorInfo, token, left) => new BinaryNodeBuilder(operatorInfo, token, left!)),
+                (operatorInfo) => new BinaryNodeBuilder(operatorInfo)),
             new Operator(
                 new OperatorInfo(Keyword.ForwardSlash, 1, 1),
-                (operatorInfo, token, left) => new BinaryNodeBuilder(operatorInfo, token, left!)),
+                (operatorInfo) => new BinaryNodeBuilder(operatorInfo)),
 
             new Operator(
                 new OperatorInfo(Keyword.Plus, 2, 2),
-                (operatorInfo, token, left) => new BinaryNodeBuilder(operatorInfo, token, left!)),
+                (operatorInfo) => new BinaryNodeBuilder(operatorInfo)),
             new Operator(
                 new OperatorInfo(Keyword.Minus, 2, 2),
-                (operatorInfo, token, left) => new BinaryNodeBuilder(operatorInfo, token, left!)),
+                (operatorInfo) => new BinaryNodeBuilder(operatorInfo)),
     };
     }
 }

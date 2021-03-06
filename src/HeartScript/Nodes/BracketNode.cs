@@ -16,32 +16,31 @@ namespace HeartScript.Nodes
         }
     }
 
-    public class BracketNodeBuilder : NodeBuilder, INodeBuilder
+    public class BracketNodeBuilder : NodeBuilder
     {
-        private bool _isComplete;
         private readonly Keyword _closingKeyword;
 
-        public BracketNodeBuilder(OperatorInfo operatorInfo, Token token, INode leftNode, Keyword closingKeyword) : base(operatorInfo, token, leftNode)
+        public BracketNodeBuilder(OperatorInfo operatorInfo, Keyword closingKeyword) : base(operatorInfo)
         {
             _closingKeyword = closingKeyword;
         }
 
-        public bool IsComplete() => _isComplete;
-
-        public INode Build()
+        public override INode? FeedOperand(Token current, INode? operand, out bool acknowledgeToken)
         {
-            return new BracketNode(Token.Keyword, RightNodes.Single());
-        }
-
-        public override bool AllowUnexpectedToken(IEnumerator<Token> tokens)
-        {
-            if (tokens.Current.Keyword == _closingKeyword)
+            if (current.Keyword == OperatorInfo.Keyword && operand == null)
             {
-                _isComplete = true;
-                return true;
+                acknowledgeToken = false;
+                return null;
             }
+
+            if (operand == null)
+                throw new System.ArgumentException($"{nameof(operand)}"); ;
+
+            acknowledgeToken = true;
+            if (current.Keyword != _closingKeyword)
+                return ErrorNode.UnexpectedToken(current.CharOffset, _closingKeyword);
             else
-                return base.AllowUnexpectedToken(tokens);
+                return operand;
         }
     }
 }

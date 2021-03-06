@@ -78,20 +78,15 @@ namespace HeartScript.Parsing
             Keyword.Newline,
         };
 
-        private static bool TryMatch(
-            string input,
-            int line,
-            int column,
-            ref int offset,
-            out Token token)
+        private static bool TryMatch(string input, ref int offset, out Token token)
         {
             foreach (var pattern in s_patterns)
             {
                 var match = pattern.Regex.Match(input, offset);
                 if (match.Success && match.Index == offset)
                 {
+                    token = new Token(pattern.Keyword, match.Value, offset);
                     offset += match.Length;
-                    token = new Token(pattern.Keyword, match.Value, line, column);
                     return true;
                 }
             }
@@ -104,23 +99,11 @@ namespace HeartScript.Parsing
         {
             var output = new List<Token>();
 
-            int line = 0;
-            int column = 0;
             int offset = 0;
             while (offset < input.Length)
             {
-                if (!TryMatch(input, line, column, ref offset, out var token))
+                if (!TryMatch(input, ref offset, out var token))
                     throw new Exception($"No matching patterns '{offset}'");
-
-                if (token.Keyword == Keyword.Newline)
-                {
-                    line++;
-                    column = 0;
-                }
-                else
-                {
-                    column++;
-                }
 
                 if (s_nonSignificantKeywords.Contains(token.Keyword))
                     continue;
@@ -128,6 +111,7 @@ namespace HeartScript.Parsing
                 output.Add(token);
             }
 
+            output.Add(new Token(Keyword.EndOfString, null!, offset));
             return output;
         }
 

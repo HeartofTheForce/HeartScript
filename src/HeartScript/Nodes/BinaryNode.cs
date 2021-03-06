@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using HeartScript.Parsing;
 
@@ -17,17 +18,27 @@ namespace HeartScript.Nodes
         }
     }
 
-    public class BinaryNodeBuilder : NodeBuilder, INodeBuilder
+    public class BinaryNodeBuilder : NodeBuilder
     {
-        public BinaryNodeBuilder(OperatorInfo operatorInfo, Token token, INode leftNode) : base(operatorInfo, token, leftNode)
+        private readonly List<INode> _nodes;
+
+        public BinaryNodeBuilder(OperatorInfo operatorInfo) : base(operatorInfo)
         {
+            _nodes = new List<INode>();
         }
 
-        public bool IsComplete() => RightNodes.Count() == 1;
-
-        public INode Build()
+        public override INode? FeedOperand(Token current, INode? operand, out bool acknowledgeToken)
         {
-            return new BinaryNode(Token.Keyword, LeftNode, RightNodes.Single());
+            if (operand == null)
+                throw new System.ArgumentException($"{nameof(operand)}");
+
+            acknowledgeToken = false;
+
+            _nodes.Add(operand);
+            if (_nodes.Count == 2)
+                return new BinaryNode(OperatorInfo.Keyword, _nodes[0], _nodes[1]);
+            else
+                return null;
         }
     }
 }

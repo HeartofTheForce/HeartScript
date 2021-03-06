@@ -15,32 +15,61 @@ namespace HeartScript.Nodes
         }
     }
 
-    public class CallNodeBuilder : NodeBuilder, INodeBuilder
+    public class CallNodeBuilder : NodeBuilder
     {
-        private bool _isComplete;
+        private INode? _target;
+        private readonly List<INode> _parameters;
 
-        public CallNodeBuilder(OperatorInfo operatorInfo, Token token, INode leftNode) : base(operatorInfo, token, leftNode)
+        public CallNodeBuilder(OperatorInfo operatorInfo) : base(operatorInfo)
         {
+            _parameters = new List<INode>();
         }
 
-        public bool IsComplete() => _isComplete;
-
-        public INode Build()
+        public override INode? FeedOperand(Token current, INode? operand, out bool acknowledgeToken)
         {
-            return new CallNode(LeftNode, RightNodes);
-        }
 
-        public override bool AllowUnexpectedToken(IEnumerator<Token> tokens)
-        {
-            if (tokens.Current.Keyword == Keyword.RoundClose)
+
+            if (_target == null)
             {
-                _isComplete = true;
-                return true;
+                if (operand == null)
+                    throw new System.ArgumentException($"{nameof(operand)}");
+
+                _target = operand;
+
+                acknowledgeToken = false;
+                return null;
             }
-            else if (tokens.Current.Keyword == Keyword.Comma)
-                return true;
-            else
-                return base.AllowUnexpectedToken(tokens);
+
+            if (current.Keyword == Keyword.RoundClose)
+            {
+                if (_target == null)
+                    throw new System.ArgumentException($"{nameof(_target)}");
+
+                if (operand != null)
+                    _parameters.Add(operand);
+
+                acknowledgeToken = true;
+                return new CallNode(_target, _parameters);
+            }
+
+            if (operand == null)
+                throw new System.ArgumentException($"{nameof(operand)}");
+
+            if (current.Keyword == Keyword.Comma)
+            {
+                _parameters.Add(operand);
+
+                acknowledgeToken = true;
+                return null;
+            }
+
+            if (_target == null)
+                throw new System.ArgumentException($"{nameof(_target)}");
+
+            _parameters.Add(ErrorNode.UnexpectedToken(current.CharOffset, Keyword.RoundClose));
+
+            acknowledgeToken = false;
+            return new CallNode(_target, _parameters);
         }
     }
 }

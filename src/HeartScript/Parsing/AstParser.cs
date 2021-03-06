@@ -9,7 +9,7 @@ namespace HeartScript.Parsing
     {
         private readonly Operator[] _operators;
         private readonly IEnumerator<Token> _tokens;
-        private readonly Stack<INodeBuilder> _nodeBuilders;
+        private readonly Stack<NodeBuilder> _nodeBuilders;
 
         private INode? _operand;
 
@@ -17,7 +17,8 @@ namespace HeartScript.Parsing
         {
             _operators = operators;
             _tokens = tokens;
-            _nodeBuilders = new Stack<INodeBuilder>();
+            _nodeBuilders = new Stack<NodeBuilder>();
+            _nodeBuilders.Push(new RootNodeBuilder(new OperatorInfo(Keyword.EndOfString, null, int.MaxValue)));
         }
 
         public static INode Parse(Operator[] operators, IEnumerable<Token> tokens)
@@ -40,70 +41,54 @@ namespace HeartScript.Parsing
 
                 if (op == null)
                 {
-                    while (true)
+                    while (_nodeBuilders.Count > 0 && TryPopNodeBuilder(out bool acknowledgeToken) && !acknowledgeToken)
                     {
-                        if (_nodeBuilders.Count == 0)
+                        if (_operand == null)
                             throw new Exception($"Unexpected Token: {current}");
-
-                        var nodeBuilder = _nodeBuilders.Pop();
-                        nodeBuilder.FeedOperand(_operand!);
-
-                        if (!nodeBuilder.IsComplete())
-                        {
-                            nodeBuilder.AllowUnexpectedToken(_tokens);
-                            if (nodeBuilder.IsComplete())
-                                _operand = nodeBuilder.Build();
-                            else
-                            {
-                                _nodeBuilders.Push(nodeBuilder);
-                                _operand = null;
-                            }
-
-                            break;
-                        }
-                        else
-                        {
-                            _operand = nodeBuilder.Build();
-                        }
                     }
                 }
                 else
                 {
                     while (_nodeBuilders.TryPeek(out var left) && OperatorInfo.IsEvaluatedBefore(left.OperatorInfo, op.OperatorInfo))
                     {
-                        PopNodeBuilder();
+                        if (!TryPopNodeBuilder(out _))
+                            throw new Exception($"{nameof(NodeBuilder)} is incomplete");
                     }
 
-                    var nodeBuilder = op.CreateNodeBuilder(current, _operand);
-                    if (nodeBuilder.IsComplete())
-                        _operand = nodeBuilder.Build();
-                    else
-                    {
+                    var nodeBuilder = op.CreateNodeBuilder();
+
+                    _operand = nodeBuilder.FeedOperand(current, _operand, out _);
+                    if (_operand == null)
                         _nodeBuilders.Push(nodeBuilder);
-                        _operand = null;
-                    }
                 }
             }
 
-            return Reduce();
+            if (_nodeBuilders.Count != 0)
+                throw new Exception($"Expected 0 {nameof(NodeBuilder)}");
+
+            return _operand!;
         }
 
-        private void PopNodeBuilder()
+        private bool TryPopNodeBuilder(out bool acknowledgeToken)
         {
             var nodeBuilder = _nodeBuilders.Pop();
+            _operand = nodeBuilder.FeedOperand(_tokens.Current, _operand, out acknowledgeToken);
 
-            nodeBuilder.FeedOperand(_operand!);
-            if (!nodeBuilder.IsComplete())
-                throw new Exception($"{nameof(NodeBuilder)} is incomplete");
+            if (_operand == null)
+            {
+                _nodeBuilders.Push(nodeBuilder);
+                return false;
+            }
 
-            _operand = nodeBuilder.Build();
+            return true;
         }
 
         private INode Reduce()
         {
             while (_nodeBuilders.Count > 0)
             {
-                PopNodeBuilder();
+                if (!TryPopNodeBuilder(out _))
+                    throw new Exception($"{nameof(NodeBuilder)} is incomplete");
             }
 
             if (_nodeBuilders.Count != 0)

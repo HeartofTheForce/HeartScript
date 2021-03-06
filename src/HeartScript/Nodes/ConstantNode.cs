@@ -17,17 +17,20 @@ namespace HeartScript.Nodes
         }
     }
 
-    public class ConstantNodeBuilder : NodeBuilder, INodeBuilder
+    public class ConstantNodeBuilder : NodeBuilder
     {
-        public ConstantNodeBuilder(OperatorInfo operatorInfo, Token token, INode leftNode) : base(operatorInfo, token, leftNode)
+        public ConstantNodeBuilder(OperatorInfo operatorInfo) : base(operatorInfo)
         {
         }
 
-        public bool IsComplete() => true;
-
-        public INode Build()
+        public override INode? FeedOperand(Token current, INode? operand, out bool acknowledgeToken)
         {
-            return new ConstantNode(Token.Value);
+            if (operand != null)
+                throw new System.ArgumentException($"{nameof(operand)}");
+
+            acknowledgeToken = false;
+
+            return new ConstantNode(current.Value);
         }
     }
 }

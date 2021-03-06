@@ -15,17 +15,20 @@ namespace HeartScript.Nodes
         }
     }
 
-    public class UnaryNodeBuilder : NodeBuilder, INodeBuilder
+    public class UnaryNodeBuilder : NodeBuilder
     {
-        public UnaryNodeBuilder(OperatorInfo operatorInfo, Token token, INode leftNode) : base(operatorInfo, token, leftNode)
+        public UnaryNodeBuilder(OperatorInfo operatorInfo) : base(operatorInfo)
         {
         }
 
-        public bool IsComplete() => RightNodes.Count() == 1;
-
-        public INode Build()
+        public override INode? FeedOperand(Token current, INode? operand, out bool acknowledgeToken)
         {
-            return new UnaryNode(Token.Keyword, RightNodes.Single());
+            if (operand == null)
+                throw new System.ArgumentException($"{nameof(operand)}");
+
+            acknowledgeToken = false;
+
+            return new UnaryNode(OperatorInfo.Keyword, operand);
         }
     }
 }
