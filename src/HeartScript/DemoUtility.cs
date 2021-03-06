@@ -8,6 +8,9 @@ namespace HeartScript
         public static readonly Operator[] Operators = new Operator[]
         {
             new Operator(
+                new OperatorInfo(Keyword.StartOfString, null, int.MaxValue),
+                (operatorInfo) => new ConstantNodeBuilder(operatorInfo)),
+            new Operator(
                 new OperatorInfo(Keyword.Constant, null, null),
                 (operatorInfo) => new ConstantNodeBuilder(operatorInfo)),
             new Operator(

@@ -51,6 +51,7 @@ namespace HeartScript.Parsing
         ForwardSlash,
         Identifier,
         Constant,
+        StartOfString,
         EndOfString,
     }
 }

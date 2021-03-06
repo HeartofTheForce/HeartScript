@@ -18,7 +18,6 @@ namespace HeartScript.Parsing
             _operators = operators;
             _tokens = tokens;
             _nodeBuilders = new Stack<NodeBuilder>();
-            _nodeBuilders.Push(new RootNodeBuilder(new OperatorInfo(Keyword.EndOfString, null, int.MaxValue)));
         }
 
         public static INode Parse(Operator[] operators, IEnumerable<Token> tokens)
