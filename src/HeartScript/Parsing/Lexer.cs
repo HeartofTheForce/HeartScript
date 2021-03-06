@@ -41,6 +41,11 @@ namespace HeartScript.Parsing
             },
             new Pattern()
             {
+                Regex = new Regex("!"),
+                Keyword = Keyword.Factorial,
+            },
+            new Pattern()
+            {
                 Regex = new Regex("\\+"),
                 Keyword = Keyword.Plus,
             },

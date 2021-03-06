@@ -8,7 +8,7 @@ namespace HeartScript.Nodes
 
     public class ErrorNode : INode
     {
-        public OperatorInfo OperatorInfo { get; }
+        public OperatorInfo? OperatorInfo { get; }
         public Token Token { get; }
         public string Message { get; }
 
@@ -19,19 +19,30 @@ namespace HeartScript.Nodes
             Message = message;
         }
 
+        private ErrorNode(Token token, string message)
+        {
+            Token = token;
+            Message = message;
+        }
+
         public override string ToString()
         {
             return $"{Token}, {Message}";
         }
 
-        public static ErrorNode UnexpectedToken(NodeBuilder nodeBuilder, Token token, Keyword expected)
+        public static ErrorNode UnexpectedToken(OperatorInfo operatorInfo, Token token, Keyword expected)
         {
-            return new ErrorNode(nodeBuilder.OperatorInfo, token, $"Expected '{expected}'");
+            return new ErrorNode(operatorInfo, token, $"Expected '{expected}'");
         }
 
-        public static ErrorNode InvalidExpressionTerm(NodeBuilder nodeBuilder, Token token)
+        public static ErrorNode UnexpectedToken(Token token)
         {
-            return new ErrorNode(nodeBuilder.OperatorInfo, token, $"Invalid expression term");
+            return new ErrorNode(token, $"Unexpected '{token.Keyword}'");
+        }
+
+        public static ErrorNode InvalidExpressionTerm(OperatorInfo operatorInfo, Token token)
+        {
+            return new ErrorNode(operatorInfo, token, $"Invalid expression term");
         }
     }
 }

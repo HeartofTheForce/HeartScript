@@ -48,6 +48,7 @@ namespace HeartScript.Parsing
         RoundOpen,
         RoundClose,
         Comma,
+        Factorial,
         Plus,
         Minus,
         Multiply,

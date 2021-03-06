@@ -24,11 +24,15 @@ namespace HeartScript
                 (operatorInfo) => new CallNodeBuilder(operatorInfo)),
 
             new Operator(
+                new OperatorInfo(Keyword.Factorial, 1, null),
+                (operatorInfo) => new PostfixNodeBuilder(operatorInfo)),
+
+            new Operator(
                 new OperatorInfo(Keyword.Plus, null, 0),
-                (operatorInfo) => new UnaryNodeBuilder(operatorInfo)),
+                (operatorInfo) => new PrefixNodeBuilder(operatorInfo)),
             new Operator(
                 new OperatorInfo(Keyword.Minus, null, 0),
-                (operatorInfo) => new UnaryNodeBuilder(operatorInfo)),
+                (operatorInfo) => new PrefixNodeBuilder(operatorInfo)),
 
             new Operator(
                 new OperatorInfo(Keyword.Multiply, 1, 1),

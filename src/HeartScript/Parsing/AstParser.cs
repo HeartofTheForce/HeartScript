@@ -44,10 +44,10 @@ namespace HeartScript.Parsing
                     do
                     {
                         if (_nodeBuilders.Count == 0)
-                            throw new Exception($"Unexpected Token: {current}");
+                            return ErrorNode.UnexpectedToken(current);
 
                         if (!TryPopNodeBuilder(out acknowledgeToken) && !acknowledgeToken)
-                            throw new Exception($"Unexpected Token: {current}");
+                            return ErrorNode.UnexpectedToken(current);
 
                     } while (!acknowledgeToken);
                 }
