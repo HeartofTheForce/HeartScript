@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using HeartScript.Parsing;
 
 namespace HeartScript.Nodes
@@ -9,23 +8,25 @@ namespace HeartScript.Nodes
 
     public class ErrorNode : INode
     {
+        public OperatorInfo OperatorInfo { get; }
         public int CharOffset { get; }
         public string Message { get; }
 
-        private ErrorNode(int charOffset, string message)
+        private ErrorNode(OperatorInfo operatorInfo, int charOffset, string message)
         {
+            OperatorInfo = operatorInfo;
             CharOffset = charOffset;
             Message = message;
         }
 
-        public static ErrorNode UnexpectedToken(int charOffset, Keyword expected)
+        public static ErrorNode UnexpectedToken(NodeBuilder nodeBuilder, int charOffset, Keyword expected)
         {
-            return new ErrorNode(charOffset, $"Expected '{expected}'");
+            return new ErrorNode(nodeBuilder.OperatorInfo, charOffset, $"Expected '{expected}'");
         }
 
-        public static ErrorNode InvalidExpressionTerm(int charOffset, Keyword unexpected)
+        public static ErrorNode InvalidExpressionTerm(NodeBuilder nodeBuilder, int charOffset, Keyword invalid)
         {
-            return new ErrorNode(charOffset, $"Invalid expression term '{unexpected}'");
+            return new ErrorNode(nodeBuilder.OperatorInfo, charOffset, $"Invalid expression term '{invalid}'");
         }
     }
 }

@@ -32,7 +32,7 @@ namespace HeartScript.Nodes
             acknowledgeToken = false;
 
             if (operand == null)
-                return ErrorNode.InvalidExpressionTerm(current.CharOffset, current.Keyword);
+                return ErrorNode.InvalidExpressionTerm(this, current.CharOffset, current.Keyword);
 
             _nodes.Add(operand);
             if (_nodes.Count == 2)

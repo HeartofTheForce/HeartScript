@@ -27,8 +27,6 @@ namespace HeartScript.Nodes
 
         public override INode? FeedOperand(Token current, INode? operand, out bool acknowledgeToken)
         {
-
-
             if (_target == null)
             {
                 if (operand == null)
@@ -62,14 +60,14 @@ namespace HeartScript.Nodes
                 acknowledgeToken = true;
                 return null;
             }
+            else
+            {
+                if (_target == null)
+                    throw new System.ArgumentException($"{nameof(_target)}");
 
-            if (_target == null)
-                throw new System.ArgumentException($"{nameof(_target)}");
-
-            _parameters.Add(ErrorNode.UnexpectedToken(current.CharOffset, Keyword.RoundClose));
-
-            acknowledgeToken = false;
-            return new CallNode(_target, _parameters);
+                acknowledgeToken = false;
+                return ErrorNode.UnexpectedToken(this, current.CharOffset, Keyword.RoundClose);
+            }
         }
     }
 }

@@ -4,18 +4,6 @@ using HeartScript.Parsing;
 
 namespace HeartScript.Nodes
 {
-    public class BracketNode : INode
-    {
-        public Keyword Keyword { get; }
-        public INode Target { get; }
-
-        public BracketNode(Keyword keyword, INode target)
-        {
-            Keyword = keyword;
-            Target = target;
-        }
-    }
-
     public class BracketNodeBuilder : NodeBuilder
     {
         private readonly Keyword _closingKeyword;
@@ -33,15 +21,22 @@ namespace HeartScript.Nodes
                 return null;
             }
 
-            acknowledgeToken = true;
-
             if (operand == null)
-                return ErrorNode.InvalidExpressionTerm(current.CharOffset, current.Keyword);
+            {
+                acknowledgeToken = false;
+                return ErrorNode.InvalidExpressionTerm(this, current.CharOffset, current.Keyword);
+            }
 
             if (current.Keyword != _closingKeyword)
-                return ErrorNode.UnexpectedToken(current.CharOffset, _closingKeyword);
+            {
+                acknowledgeToken = false;
+                return ErrorNode.UnexpectedToken(this, current.CharOffset, _closingKeyword);
+            }
             else
+            {
+                acknowledgeToken = true;
                 return operand;
+            }
         }
     }
 }

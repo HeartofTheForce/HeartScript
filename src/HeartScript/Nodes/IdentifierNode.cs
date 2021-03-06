@@ -29,8 +29,7 @@ namespace HeartScript.Nodes
             if (operand != null)
                 throw new System.ArgumentException($"{nameof(operand)}");
 
-            acknowledgeToken = false;
-
+            acknowledgeToken = true;
             return new IdentifierNode(current.Value);
         }
     }

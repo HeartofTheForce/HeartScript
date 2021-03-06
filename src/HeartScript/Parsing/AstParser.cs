@@ -55,8 +55,10 @@ namespace HeartScript.Parsing
                 {
                     while (_nodeBuilders.TryPeek(out var left) && OperatorInfo.IsEvaluatedBefore(left.OperatorInfo, op.OperatorInfo))
                     {
-                        if (!TryPopNodeBuilder(out _))
+                        if (!TryPopNodeBuilder(out bool acknowledgeToken))
                             throw new Exception($"{nameof(NodeBuilder)} is incomplete");
+                        if (acknowledgeToken)
+                            throw new Exception($"Unexpected token acknowledge");
                     }
 
                     var nodeBuilder = op.CreateNodeBuilder();
@@ -91,8 +93,10 @@ namespace HeartScript.Parsing
         {
             while (_nodeBuilders.Count > 0)
             {
-                if (!TryPopNodeBuilder(out _))
+                if (!TryPopNodeBuilder(out bool acknowledgeToken))
                     throw new Exception($"{nameof(NodeBuilder)} is incomplete");
+                if (!acknowledgeToken)
+                    throw new Exception($"Unexpected token acknowledge");
             }
 
             if (_nodeBuilders.Count != 0)
