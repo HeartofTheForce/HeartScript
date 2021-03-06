@@ -33,10 +33,11 @@ namespace HeartScript.Nodes
                 return null;
             }
 
-            if (operand == null)
-                throw new System.ArgumentException($"{nameof(operand)}"); ;
-
             acknowledgeToken = true;
+
+            if (operand == null)
+                return ErrorNode.InvalidExpressionTerm(current.CharOffset, current.Keyword);
+
             if (current.Keyword != _closingKeyword)
                 return ErrorNode.UnexpectedToken(current.CharOffset, _closingKeyword);
             else

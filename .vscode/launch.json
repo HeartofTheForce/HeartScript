@@ -10,7 +10,7 @@
       "request": "launch",
       "preLaunchTask": "build",
       "program": "${workspaceFolder}/src/HeartScript.Cli/bin/Debug/netcoreapp3.1/HeartScript.Cli.dll",
-      // "args": ["(1)"],
+      // "args": ["()"],
       "args": ["a(1 * 2 + 3, 4)"],
       "cwd": "${workspaceFolder}",
       "console": "internalConsole",
