@@ -33,6 +33,9 @@ namespace HeartScript
             new Operator(
                 new OperatorInfo(Keyword.Minus, null, 0),
                 (operatorInfo) => new PrefixNodeBuilder(operatorInfo)),
+            new Operator(
+                new OperatorInfo(Keyword.BitwiseNot, null, 0),
+                (operatorInfo) => new PrefixNodeBuilder(operatorInfo)),
 
             new Operator(
                 new OperatorInfo(Keyword.Multiply, 1, 1),
@@ -46,6 +49,16 @@ namespace HeartScript
                 (operatorInfo) => new BinaryNodeBuilder(operatorInfo)),
             new Operator(
                 new OperatorInfo(Keyword.Minus, 2, 2),
+                (operatorInfo) => new BinaryNodeBuilder(operatorInfo)),
+
+            new Operator(
+                new OperatorInfo(Keyword.BitwiseAnd, 3, 3),
+                (operatorInfo) => new BinaryNodeBuilder(operatorInfo)),
+            new Operator(
+                new OperatorInfo(Keyword.BitwiseXor, 4, 4),
+                (operatorInfo) => new BinaryNodeBuilder(operatorInfo)),
+            new Operator(
+                new OperatorInfo(Keyword.BitwiseOr, 5, 5),
                 (operatorInfo) => new BinaryNodeBuilder(operatorInfo)),
     };
     }

@@ -66,8 +66,23 @@ namespace HeartScript.Parsing
             },
             new Pattern()
             {
+                Regex = new Regex("~"),
+                Keyword = Keyword.BitwiseNot,
+            },
+            new Pattern()
+            {
                 Regex = new Regex("&"),
                 Keyword = Keyword.BitwiseAnd,
+            },
+            new Pattern()
+            {
+                Regex = new Regex("\\^"),
+                Keyword = Keyword.BitwiseXor,
+            },
+            new Pattern()
+            {
+                Regex = new Regex("\\|"),
+                Keyword = Keyword.BitwiseOr,
             },
             new Pattern()
             {
