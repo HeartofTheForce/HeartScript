@@ -50,6 +50,9 @@ namespace HeartScript.Nodes
 
         public INode? FeedOperandLeft(Token current, INode? operand)
         {
+            if(current.Keyword != OperatorInfo.Keyword)
+                throw new ArgumentException(nameof(current));
+
             _token = current;
 
             if (_hasLeftNode)
@@ -74,7 +77,7 @@ namespace HeartScript.Nodes
             _rightNodes.Add(operand);
 
             if (_expectedRightOperands != null && _rightNodes.Count > _expectedRightOperands)
-                throw new Exception("Too many right operands");
+                throw new ArgumentException(nameof(operand));
 
             if (_terminator == null && _rightNodes.Count == _expectedRightOperands)
             {
