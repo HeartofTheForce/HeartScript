@@ -43,6 +43,9 @@ namespace HeartScript.Parsing
                     bool acknowledgeToken;
                     do
                     {
+                        if (_operand is ErrorNode)
+                            return _operand;
+
                         if (_nodeBuilders.Count == 0)
                             if (_operand != null)
                                 return _operand;
