@@ -15,21 +15,15 @@ namespace HeartScript.Nodes
         {
             return Value;
         }
-    }
 
-    public class ConstantNodeBuilder : NodeBuilder
-    {
-        public ConstantNodeBuilder(OperatorInfo operatorInfo) : base(operatorInfo)
+        public static NodeBuilder Builder(OperatorInfo operatorInfo)
         {
-        }
-
-        public override INode? FeedOperand(Token current, INode? operand, out bool acknowledgeToken)
-        {
-            if (operand != null)
-                throw new System.ArgumentException($"{nameof(operand)}");
-
-            acknowledgeToken = true;
-            return new ConstantNode(current.Value);
+            return new NodeBuilder(
+                operatorInfo,
+                0,
+                null,
+                null,
+                (token, leftNode, rightNodes) => new ConstantNode(token.Value));
         }
     }
 }

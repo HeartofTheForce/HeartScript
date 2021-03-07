@@ -21,34 +21,15 @@ namespace HeartScript.Nodes
         {
             return $"{{{Keyword} {Left} {Right}}}";
         }
-    }
 
-    public class BinaryNodeBuilder : NodeBuilder
-    {
-        private readonly List<INode> _nodes;
-
-        public BinaryNodeBuilder(OperatorInfo operatorInfo) : base(operatorInfo)
+        public static NodeBuilder Builder(OperatorInfo operatorInfo)
         {
-            _nodes = new List<INode>();
-        }
-
-        public override INode? FeedOperand(Token current, INode? operand, out bool acknowledgeToken)
-        {
-
-            if (operand == null)
-                throw new ExpressionTermException(current);
-
-            _nodes.Add(operand);
-            if (_nodes.Count == 2)
-            {
-                acknowledgeToken = false;
-                return new BinaryNode(OperatorInfo.Keyword, _nodes[0], _nodes[1]);
-            }
-            else
-            {
-                acknowledgeToken = false;
-                return null;
-            }
+            return new NodeBuilder(
+                operatorInfo,
+                1,
+                null,
+                null,
+                (token, leftNode, rightNodes) => new BinaryNode(token.Keyword, leftNode!, rightNodes[0]));
         }
     }
 }

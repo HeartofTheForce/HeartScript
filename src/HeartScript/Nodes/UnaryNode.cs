@@ -18,6 +18,16 @@ namespace HeartScript.Nodes
         {
             return $"{{{Keyword} {Target}}}";
         }
+
+        public static NodeBuilder Builder(OperatorInfo operatorInfo)
+        {
+            return new NodeBuilder(
+                operatorInfo,
+                1,
+                null,
+                null,
+                (token, leftNode, rightNodes) => new PostfixNode(token.Keyword, rightNodes[0]));
+        }
     }
 
     public class PostfixNode : INode
@@ -35,43 +45,15 @@ namespace HeartScript.Nodes
         {
             return $"{{{Keyword} {Target}}}";
         }
-    }
 
-    public class PrefixNodeBuilder : NodeBuilder
-    {
-        public PrefixNodeBuilder(OperatorInfo operatorInfo) : base(operatorInfo)
+        public static NodeBuilder Builder(OperatorInfo operatorInfo)
         {
-        }
-
-        public override INode? FeedOperand(Token current, INode? operand, out bool acknowledgeToken)
-        {
-            if (current.Keyword == OperatorInfo.Keyword && operand == null)
-            {
-                acknowledgeToken = false;
-                return null;
-            }
-
-            if (operand == null)
-                throw new ExpressionTermException(current);
-
-            acknowledgeToken = false;
-            return new PrefixNode(OperatorInfo.Keyword, operand);
-        }
-    }
-
-    public class PostfixNodeBuilder : NodeBuilder
-    {
-        public PostfixNodeBuilder(OperatorInfo operatorInfo) : base(operatorInfo)
-        {
-        }
-
-        public override INode? FeedOperand(Token current, INode? operand, out bool acknowledgeToken)
-        {
-            if (operand == null)
-                throw new System.ArgumentException($"{nameof(operand)}");
-
-            acknowledgeToken = false;
-            return new PostfixNode(OperatorInfo.Keyword, operand);
+            return new NodeBuilder(
+                operatorInfo,
+                0,
+                null,
+                null,
+                (token, leftNode, rightNodes) => new PostfixNode(token.Keyword, leftNode!));
         }
     }
 }

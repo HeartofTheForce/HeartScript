@@ -4,33 +4,16 @@ using HeartScript.Parsing;
 
 namespace HeartScript.Nodes
 {
-    public class BracketNodeBuilder : NodeBuilder
+    public static class BracketNode
     {
-        private readonly Keyword _closingKeyword;
-
-        public BracketNodeBuilder(OperatorInfo operatorInfo, Keyword closingKeyword) : base(operatorInfo)
+        public static NodeBuilder Builder(OperatorInfo operatorInfo, Keyword terminator)
         {
-            _closingKeyword = closingKeyword;
-        }
-
-        public override INode? FeedOperand(Token current, INode? operand, out bool acknowledgeToken)
-        {
-            if (current.Keyword == OperatorInfo.Keyword && operand == null)
-            {
-                acknowledgeToken = false;
-                return null;
-            }
-
-            if (operand == null)
-                throw new ExpressionTermException(current);
-
-            if (current.Keyword != _closingKeyword)
-                throw new UnexpectedTokenException(current, _closingKeyword);
-            else
-            {
-                acknowledgeToken = true;
-                return operand;
-            }
+            return new NodeBuilder(
+                operatorInfo,
+                1,
+                null,
+                terminator,
+                (token, leftNode, rightNodes) => rightNodes[0]);
         }
     }
 }

@@ -9,57 +9,57 @@ namespace HeartScript
         {
             new Operator(
                 new OperatorInfo(Keyword.StartOfString, null, int.MaxValue),
-                (operatorInfo) => new BracketNodeBuilder(operatorInfo,Keyword.EndOfString)),
+                (operatorInfo) => BracketNode.Builder(operatorInfo, Keyword.EndOfString)),
             new Operator(
                 new OperatorInfo(Keyword.Constant, null, null),
-                (operatorInfo) => new ConstantNodeBuilder(operatorInfo)),
+                ConstantNode.Builder),
             new Operator(
                 new OperatorInfo(Keyword.Identifier, null, null),
-                (operatorInfo) => new IdentifierNodeBuilder(operatorInfo)),
+                IdentifierNode.Builder),
             new Operator(
                 new OperatorInfo(Keyword.RoundOpen, null, int.MaxValue),
-                (operatorInfo) => new BracketNodeBuilder(operatorInfo, Keyword.RoundClose)),
+                (operatorInfo) => BracketNode.Builder(operatorInfo, Keyword.RoundClose)),
             new Operator(
                 new OperatorInfo(Keyword.RoundOpen, int.MaxValue - 1, int.MaxValue),
-                (operatorInfo) => new CallNodeBuilder(operatorInfo)),
+                CallNode.Builder),
 
             new Operator(
                 new OperatorInfo(Keyword.Factorial, 1, null),
-                (operatorInfo) => new PostfixNodeBuilder(operatorInfo)),
+                PostfixNode.Builder),
 
             new Operator(
                 new OperatorInfo(Keyword.Plus, null, 0),
-                (operatorInfo) => new PrefixNodeBuilder(operatorInfo)),
+                PrefixNode.Builder),
             new Operator(
                 new OperatorInfo(Keyword.Minus, null, 0),
-                (operatorInfo) => new PrefixNodeBuilder(operatorInfo)),
+                PrefixNode.Builder),
             new Operator(
                 new OperatorInfo(Keyword.BitwiseNot, null, 0),
-                (operatorInfo) => new PrefixNodeBuilder(operatorInfo)),
+                PrefixNode.Builder),
 
             new Operator(
                 new OperatorInfo(Keyword.Multiply, 1, 1),
-                (operatorInfo) => new BinaryNodeBuilder(operatorInfo)),
+                BinaryNode.Builder),
             new Operator(
                 new OperatorInfo(Keyword.Divide, 1, 1),
-                (operatorInfo) => new BinaryNodeBuilder(operatorInfo)),
+                BinaryNode.Builder),
 
             new Operator(
                 new OperatorInfo(Keyword.Plus, 2, 2),
-                (operatorInfo) => new BinaryNodeBuilder(operatorInfo)),
+                BinaryNode.Builder),
             new Operator(
                 new OperatorInfo(Keyword.Minus, 2, 2),
-                (operatorInfo) => new BinaryNodeBuilder(operatorInfo)),
+                BinaryNode.Builder),
 
             new Operator(
                 new OperatorInfo(Keyword.BitwiseAnd, 3, 3),
-                (operatorInfo) => new BinaryNodeBuilder(operatorInfo)),
+                BinaryNode.Builder),
             new Operator(
                 new OperatorInfo(Keyword.BitwiseXor, 4, 4),
-                (operatorInfo) => new BinaryNodeBuilder(operatorInfo)),
+                BinaryNode.Builder),
             new Operator(
                 new OperatorInfo(Keyword.BitwiseOr, 5, 5),
-                (operatorInfo) => new BinaryNodeBuilder(operatorInfo)),
+                BinaryNode.Builder),
     };
     }
 }
