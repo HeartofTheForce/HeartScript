@@ -22,16 +22,10 @@ namespace HeartScript.Nodes
             }
 
             if (operand == null)
-            {
-                acknowledgeToken = false;
-                return ErrorNode.InvalidExpressionTerm(OperatorInfo, current);
-            }
+                throw new ExpressionTermException(current);
 
             if (current.Keyword != _closingKeyword)
-            {
-                acknowledgeToken = false;
-                return ErrorNode.UnexpectedToken(OperatorInfo, current, _closingKeyword);
-            }
+                throw new UnexpectedTokenException(current);
             else
             {
                 acknowledgeToken = true;

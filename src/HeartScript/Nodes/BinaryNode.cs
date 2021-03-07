@@ -34,16 +34,21 @@ namespace HeartScript.Nodes
 
         public override INode? FeedOperand(Token current, INode? operand, out bool acknowledgeToken)
         {
-            acknowledgeToken = false;
 
             if (operand == null)
-                return ErrorNode.InvalidExpressionTerm(OperatorInfo, current);
+                throw new ExpressionTermException(current);
 
             _nodes.Add(operand);
             if (_nodes.Count == 2)
+            {
+                acknowledgeToken = false;
                 return new BinaryNode(OperatorInfo.Keyword, _nodes[0], _nodes[1]);
+            }
             else
+            {
+                acknowledgeToken = false;
                 return null;
+            }
         }
     }
 }

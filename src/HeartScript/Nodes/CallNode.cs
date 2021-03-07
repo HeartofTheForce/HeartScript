@@ -69,13 +69,7 @@ namespace HeartScript.Nodes
                 return null;
             }
             else
-            {
-                if (_target == null)
-                    throw new System.ArgumentException($"{nameof(_target)}");
-
-                acknowledgeToken = false;
-                return ErrorNode.UnexpectedToken(OperatorInfo, current, Keyword.RoundClose);
-            }
+                throw new UnexpectedTokenException(current);
         }
     }
 }

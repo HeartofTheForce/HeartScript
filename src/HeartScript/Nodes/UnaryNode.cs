@@ -52,10 +52,7 @@ namespace HeartScript.Nodes
             }
 
             if (operand == null)
-            {
-                acknowledgeToken = false;
-                return ErrorNode.InvalidExpressionTerm(OperatorInfo, current);
-            }
+                throw new ExpressionTermException(current);
 
             acknowledgeToken = false;
             return new PrefixNode(OperatorInfo.Keyword, operand);
@@ -71,10 +68,7 @@ namespace HeartScript.Nodes
         public override INode? FeedOperand(Token current, INode? operand, out bool acknowledgeToken)
         {
             if (operand == null)
-            {
-                acknowledgeToken = false;
-                return ErrorNode.InvalidExpressionTerm(OperatorInfo, current);
-            }
+                throw new ExpressionTermException(current);
 
             acknowledgeToken = false;
             return new PostfixNode(OperatorInfo.Keyword, operand);

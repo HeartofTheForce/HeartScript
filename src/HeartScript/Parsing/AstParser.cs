@@ -43,17 +43,11 @@ namespace HeartScript.Parsing
                     bool acknowledgeToken;
                     do
                     {
-                        if (_operand is ErrorNode)
-                            return _operand;
-
                         if (_nodeBuilders.Count == 0)
-                            if (_operand != null)
-                                return _operand;
-                            else
-                                return ErrorNode.UnexpectedToken(current);
+                            throw new UnexpectedTokenException(current);
 
                         if (!TryPopNodeBuilder(out acknowledgeToken) && !acknowledgeToken)
-                            return ErrorNode.UnexpectedToken(current);
+                            throw new UnexpectedTokenException(current);
 
                     } while (!acknowledgeToken);
                 }
