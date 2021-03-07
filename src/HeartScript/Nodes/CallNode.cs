@@ -53,13 +53,15 @@ namespace HeartScript.Nodes
 
                 if (operand != null)
                     _parameters.Add(operand);
+                else if (_parameters.Count != 0)
+                    throw new ExpressionTermException(current);
 
                 acknowledgeToken = true;
                 return new CallNode(OperatorInfo.Keyword, _target, _parameters);
             }
 
             if (operand == null)
-                throw new System.ArgumentException($"{nameof(operand)}");
+                throw new ExpressionTermException(current);
 
             if (current.Keyword == Keyword.Comma)
             {
@@ -69,7 +71,7 @@ namespace HeartScript.Nodes
                 return null;
             }
             else
-                throw new UnexpectedTokenException(current);
+                throw new UnexpectedTokenException(current, Keyword.RoundClose);
         }
     }
 }

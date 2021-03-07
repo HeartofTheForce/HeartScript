@@ -2,19 +2,9 @@ using System;
 
 namespace HeartScript.Parsing
 {
-    public class MissingTokenException : Exception
-    {
-        public Token Token { get; }
-
-        public MissingTokenException(Token token) : base($"Missing Token '{token}'")
-        {
-            Token = token;
-        }
-    }
-
     public class ExpressionTermException : Exception
     {
-        public Token Token { get; set; }
+        public Token Token { get; }
 
         public ExpressionTermException(Token token) : base($"Invalid Expression Term '{token}'")
         {
@@ -24,7 +14,14 @@ namespace HeartScript.Parsing
 
     public class UnexpectedTokenException : Exception
     {
-        public Token Token { get; set; }
+        public Token Token { get; }
+        public Keyword? ExpectedKeyword { get; }
+
+        public UnexpectedTokenException(Token token, Keyword expectedKeyword) : base($"Unexpected Token '{token}' expected '{expectedKeyword}'")
+        {
+            Token = token;
+            ExpectedKeyword = expectedKeyword;
+        }
 
         public UnexpectedTokenException(Token token) : base($"Unexpected Token '{token}'")
         {

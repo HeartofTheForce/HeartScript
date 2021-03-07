@@ -25,7 +25,7 @@ namespace HeartScript.Nodes
                 throw new ExpressionTermException(current);
 
             if (current.Keyword != _closingKeyword)
-                throw new UnexpectedTokenException(current);
+                throw new UnexpectedTokenException(current, _closingKeyword);
             else
             {
                 acknowledgeToken = true;
