@@ -68,7 +68,7 @@ namespace HeartScript.Nodes
         public override INode? FeedOperand(Token current, INode? operand, out bool acknowledgeToken)
         {
             if (operand == null)
-                throw new ExpressionTermException(current);
+                throw new System.ArgumentException($"{nameof(operand)}");
 
             acknowledgeToken = false;
             return new PostfixNode(OperatorInfo.Keyword, operand);
