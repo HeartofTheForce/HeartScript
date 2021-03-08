@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using HeartScript.Parsing;
+using HeartScript.Nodes;
 
-namespace HeartScript.Nodes
+namespace HeartScript.Parsing
 {
     public class NodeBuilder
     {
