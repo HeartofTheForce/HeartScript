@@ -88,7 +88,7 @@ namespace HeartScript.Nodes
             if (_expectedRightOperands != null && _rightNodes.Count > _expectedRightOperands)
                 throw new ArgumentException(nameof(operand));
 
-            if (current.Keyword == _delimiter)
+            if (current.Keyword == _delimiter && (_expectedRightOperands == null || _rightNodes.Count < _expectedRightOperands))
             {
                 acknowledgeToken = true;
                 return null;
