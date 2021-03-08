@@ -4,16 +4,16 @@ namespace HeartScript.Nodes
 {
     public class IdentifierNode : INode
     {
-        public string Name { get; }
+        public Token Token { get; }
 
-        public IdentifierNode(string name)
+        public IdentifierNode(Token token)
         {
-            Name = name;
+            Token = token;
         }
 
         public override string ToString()
         {
-            return Name;
+            return Token.Value;
         }
 
         public static OperatorInfo OperatorInfo()
@@ -25,7 +25,7 @@ namespace HeartScript.Nodes
                 0,
                 null,
                 null,
-                (token, leftNode, rightNodes) => new ConstantNode(token.Value));
+                (token, leftNode, rightNodes) => new IdentifierNode(token));
         }
     }
 }

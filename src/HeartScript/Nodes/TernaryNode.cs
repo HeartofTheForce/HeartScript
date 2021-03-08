@@ -4,12 +4,18 @@ namespace HeartScript.Nodes
 {
     public class TernaryNode : INode
     {
+        public Token Token { get; }
         public INode Target { get; }
         public INode OptionA { get; }
         public INode OptionB { get; }
 
-        public TernaryNode(INode target, INode optionA, INode optionB)
+        public TernaryNode(
+            Token token,
+            INode target,
+            INode optionA,
+            INode optionB)
         {
+            Token = token;
             Target = target;
             OptionA = optionA;
             OptionB = optionB;
@@ -17,7 +23,7 @@ namespace HeartScript.Nodes
 
         public override string ToString()
         {
-            return $"{{{Keyword.Ternary} {OptionA} {OptionB}}}";
+            return $"{Token.Value} {OptionA} {OptionB}";
         }
 
         public static OperatorInfo OperatorInfo()
@@ -29,7 +35,7 @@ namespace HeartScript.Nodes
                 2,
                 Keyword.Colon,
                 null,
-                (token, leftNode, rightNodes) => new TernaryNode(leftNode!, rightNodes[0], rightNodes[1]));
+                (token, leftNode, rightNodes) => new TernaryNode(token, leftNode!, rightNodes[0], rightNodes[1]));
         }
     }
 }

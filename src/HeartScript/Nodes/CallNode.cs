@@ -5,13 +5,13 @@ namespace HeartScript.Nodes
 {
     public class CallNode : INode
     {
-        public Keyword Keyword { get; }
+        public Token Token { get; }
         public INode Target { get; }
         public IEnumerable<INode> Parameters { get; }
 
-        public CallNode(Keyword keyword, INode target, IEnumerable<INode> parameters)
+        public CallNode(Token token, INode target, IEnumerable<INode> parameters)
         {
-            Keyword = keyword;
+            Token = token;
             Target = target;
             Parameters = parameters;
         }
@@ -19,7 +19,7 @@ namespace HeartScript.Nodes
         public override string ToString()
         {
             string parameters = string.Join(' ', Parameters);
-            return $"{{Call {Target} {parameters}}}";
+            return $"(Call {Target} {parameters})";
         }
 
         public static OperatorInfo OperatorInfo()
@@ -31,7 +31,7 @@ namespace HeartScript.Nodes
                 null,
                 Keyword.Comma,
                 Keyword.RoundClose,
-                (token, leftNode, rightNodes) => new CallNode(token.Keyword, leftNode!, rightNodes));
+                (token, leftNode, rightNodes) => new CallNode(token, leftNode!, rightNodes));
         }
     }
 }

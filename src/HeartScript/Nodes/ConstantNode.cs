@@ -4,16 +4,16 @@ namespace HeartScript.Nodes
 {
     public class ConstantNode : INode
     {
-        public string Value { get; }
+        public Token Token { get; }
 
-        public ConstantNode(string value)
+        public ConstantNode(Token token)
         {
-            Value = value;
+            Token = token;
         }
 
         public override string ToString()
         {
-            return Value;
+            return Token.Value;
         }
 
         public static OperatorInfo OperatorInfo()
@@ -25,7 +25,7 @@ namespace HeartScript.Nodes
                 0,
                 null,
                 null,
-                (token, leftNode, rightNodes) => new ConstantNode(token.Value));
+                (token, leftNode, rightNodes) => new ConstantNode(token));
         }
     }
 }

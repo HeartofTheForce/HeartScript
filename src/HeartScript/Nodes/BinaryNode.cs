@@ -4,20 +4,20 @@ namespace HeartScript.Nodes
 {
     public class BinaryNode : INode
     {
-        public Keyword Keyword { get; }
+        public Token Token { get; }
         public INode Left { get; }
         public INode Right { get; }
 
-        public BinaryNode(Keyword keyword, INode left, INode right)
+        public BinaryNode(Token token, INode left, INode right)
         {
-            Keyword = keyword;
+            Token = token;
             Left = left;
             Right = right;
         }
 
         public override string ToString()
         {
-            return $"{{{Keyword} {Left} {Right}}}";
+            return $"({Token.Value} {Left} {Right})";
         }
 
         public static OperatorInfo OperatorInfo(Keyword keyword, uint leftPrecedence, uint rightPrecedence)
@@ -29,7 +29,7 @@ namespace HeartScript.Nodes
                 1,
                 null,
                 null,
-                (token, leftNode, rightNodes) => new BinaryNode(token.Keyword, leftNode!, rightNodes[0]));
+                (token, leftNode, rightNodes) => new BinaryNode(token, leftNode!, rightNodes[0]));
         }
     }
 }

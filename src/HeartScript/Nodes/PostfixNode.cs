@@ -5,18 +5,18 @@ namespace HeartScript.Nodes
 
     public class PostfixNode : INode
     {
-        public Keyword Keyword { get; }
+        public Token Token { get; }
         public INode Target { get; }
 
-        public PostfixNode(Keyword keyword, INode target)
+        public PostfixNode(Token token, INode target)
         {
-            Keyword = keyword;
+            Token = token;
             Target = target;
         }
 
         public override string ToString()
         {
-            return $"{{{Keyword} {Target}}}";
+            return $"({Token.Value} {Target})";
         }
 
         public static OperatorInfo OperatorInfo(Keyword keyword, uint leftPrecedence)
@@ -28,7 +28,7 @@ namespace HeartScript.Nodes
                 0,
                 null,
                 null,
-                (token, leftNode, rightNodes) => new PostfixNode(token.Keyword, leftNode!));
+                (token, leftNode, rightNodes) => new PostfixNode(token, leftNode!));
         }
     }
 }

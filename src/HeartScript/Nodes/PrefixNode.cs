@@ -4,18 +4,18 @@ namespace HeartScript.Nodes
 {
     public class PrefixNode : INode
     {
-        public Keyword Keyword { get; }
+        public Token Token { get; }
         public INode Target { get; }
 
-        public PrefixNode(Keyword keyword, INode target)
+        public PrefixNode(Token token, INode target)
         {
-            Keyword = keyword;
+            Token = token;
             Target = target;
         }
 
         public override string ToString()
         {
-            return $"{{{Keyword} {Target}}}";
+            return $"({Token.Value} {Target})";
         }
 
         public static OperatorInfo OperatorInfo(Keyword keyword, uint rightPrecedence)
@@ -27,7 +27,7 @@ namespace HeartScript.Nodes
                 1,
                 null,
                 null,
-                (token, leftNode, rightNodes) => new PrefixNode(token.Keyword, rightNodes[0]));
+                (token, leftNode, rightNodes) => new PrefixNode(token, rightNodes[0]));
         }
     }
 }
