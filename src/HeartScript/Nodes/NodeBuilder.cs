@@ -77,6 +77,9 @@ namespace HeartScript.Nodes
 
         public INode? FeedOperandRight(Token current, INode? operand, out bool acknowledgeToken)
         {
+            if (_hasLeftNode && _leftNode == null)
+                throw new ArgumentException(nameof(_leftNode));
+
             if (operand == null)
                 throw new ExpressionTermException(current);
 
@@ -97,7 +100,12 @@ namespace HeartScript.Nodes
                     throw new ArgumentException(nameof(_token));
 
                 if (_expectedRightOperands != null && _rightNodes.Count < _expectedRightOperands)
-                    throw new ExpressionTermException(current);
+                {
+                    if (_delimiter != null)
+                        throw new UnexpectedTokenException(current, _delimiter.Value);
+                    else
+                        throw new ArgumentException(nameof(_delimiter));
+                }
 
                 acknowledgeToken = current.Keyword == _terminator;
                 return _buildNode(_token, _leftNode, _rightNodes);

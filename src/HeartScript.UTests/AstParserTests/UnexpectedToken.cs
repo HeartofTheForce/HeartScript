@@ -78,6 +78,13 @@ namespace HeartScript.UTests.AstParserTests
                 ExpectedToken = new Token(Keyword.Comma, ",", 2),
                 ExpectedKeyword = Keyword.RoundClose,
             },
+            //TooFewOperands
+            new UnexpectedTokenTestCase()
+            {
+                Infix = "a ? b",
+                ExpectedToken = new Token(Keyword.EndOfString, null, 5),
+                ExpectedKeyword = Keyword.Colon,
+            },
         };
 
         [TestCaseSource(nameof(s_testCases))]
