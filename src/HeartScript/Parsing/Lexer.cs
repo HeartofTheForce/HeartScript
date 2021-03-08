@@ -86,6 +86,16 @@ namespace HeartScript.Parsing
             },
             new Pattern()
             {
+                Regex = new Regex("\\?"),
+                Keyword = Keyword.Ternary,
+            },
+            new Pattern()
+            {
+                Regex = new Regex(":"),
+                Keyword = Keyword.Colon,
+            },
+            new Pattern()
+            {
                 Regex = new Regex("\\d+(?:\\.\\d+)?"),
                 Keyword = Keyword.Constant,
             },

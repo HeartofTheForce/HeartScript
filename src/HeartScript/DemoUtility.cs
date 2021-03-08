@@ -10,18 +10,23 @@ namespace HeartScript
             new Operator(
                 new OperatorInfo(Keyword.StartOfString, null, int.MaxValue),
                 (operatorInfo) => BracketNode.Builder(operatorInfo, Keyword.EndOfString)),
+
             new Operator(
                 new OperatorInfo(Keyword.Constant, null, null),
                 ConstantNode.Builder),
             new Operator(
                 new OperatorInfo(Keyword.Identifier, null, null),
                 IdentifierNode.Builder),
+
             new Operator(
                 new OperatorInfo(Keyword.RoundOpen, null, int.MaxValue),
                 (operatorInfo) => BracketNode.Builder(operatorInfo, Keyword.RoundClose)),
             new Operator(
                 new OperatorInfo(Keyword.RoundOpen, int.MaxValue - 1, int.MaxValue),
                 CallNode.Builder),
+            new Operator(
+                new OperatorInfo(Keyword.Ternary, 0, int.MaxValue),
+                TernaryNode.Builder),
 
             new Operator(
                 new OperatorInfo(Keyword.Factorial, 1, null),

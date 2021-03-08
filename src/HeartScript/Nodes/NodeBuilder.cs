@@ -38,6 +38,12 @@ namespace HeartScript.Nodes
                     throw new ArgumentException(nameof(terminator));
             }
 
+            if (expectedRightOperands == null || expectedRightOperands > 1)
+            {
+                if (delimiter == null)
+                    throw new ArgumentException(nameof(delimiter));
+            }
+
             _hasLeftNode = operatorInfo.LeftPrecedence != null;
             _expectedRightOperands = expectedRightOperands;
             _delimiter = delimiter;
@@ -50,7 +56,7 @@ namespace HeartScript.Nodes
 
         public INode? FeedOperandLeft(Token current, INode? operand)
         {
-            if(current.Keyword != OperatorInfo.Keyword)
+            if (current.Keyword != OperatorInfo.Keyword)
                 throw new ArgumentException(nameof(current));
 
             _token = current;
@@ -79,22 +85,13 @@ namespace HeartScript.Nodes
             if (_expectedRightOperands != null && _rightNodes.Count > _expectedRightOperands)
                 throw new ArgumentException(nameof(operand));
 
-            if (_terminator == null && _rightNodes.Count == _expectedRightOperands)
-            {
-                if (_token == null)
-                    throw new ArgumentException(nameof(_token));
-
-                acknowledgeToken = false;
-                return _buildNode(_token, _leftNode, _rightNodes);
-            }
-
             if (current.Keyword == _delimiter)
             {
                 acknowledgeToken = true;
                 return null;
             }
 
-            if (current.Keyword == _terminator)
+            if (_terminator == null || current.Keyword == _terminator)
             {
                 if (_token == null)
                     throw new ArgumentException(nameof(_token));
@@ -102,14 +99,11 @@ namespace HeartScript.Nodes
                 if (_expectedRightOperands != null && _rightNodes.Count < _expectedRightOperands)
                     throw new ExpressionTermException(current);
 
-                acknowledgeToken = true;
+                acknowledgeToken = current.Keyword == _terminator;
                 return _buildNode(_token, _leftNode, _rightNodes);
             }
 
-            if (_terminator != null)
-                throw new UnexpectedTokenException(current, _terminator.Value);
-            else
-                throw new UnexpectedTokenException(current);
+            throw new UnexpectedTokenException(current, _terminator.Value);
         }
     }
 }

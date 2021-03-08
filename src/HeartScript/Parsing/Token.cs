@@ -57,6 +57,8 @@ namespace HeartScript.Parsing
         BitwiseAnd,
         BitwiseXor,
         BitwiseOr,
+        Ternary,
+        Colon,
         Identifier,
         Constant,
         StartOfString,
