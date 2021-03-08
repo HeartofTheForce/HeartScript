@@ -27,7 +27,7 @@ namespace HeartScript.Nodes
                 1,
                 null,
                 null,
-                (token, leftNode, rightNodes) => new PrefixNode(token.Keyword, leftNode!));
+                (token, leftNode, rightNodes) => new PrefixNode(token.Keyword, rightNodes[0]));
         }
     }
 }
