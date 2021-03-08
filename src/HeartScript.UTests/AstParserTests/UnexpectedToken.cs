@@ -8,96 +8,89 @@ namespace HeartScript.UTests.AstParserTests
     {
         static readonly UnexpectedTokenTestCase[] s_testCases = new UnexpectedTokenTestCase[]
         {
-            //ConstantConstant
+            //Constant Constant
             new UnexpectedTokenTestCase()
             {
                 Infix = "1 1",
                 UnexpectedToken = new Token(Keyword.Constant, "1", 2),
                 ExpectedKeyword = Keyword.EndOfString,
             },
-            //IdentifierConstant
+            //Identifier Constant
             new UnexpectedTokenTestCase()
             {
                 Infix = "a 1",
                 UnexpectedToken = new Token(Keyword.Constant, "1", 2),
                 ExpectedKeyword = Keyword.EndOfString,
             },
-            //ConstantIdentifier
+            //Constant Identifier
             new UnexpectedTokenTestCase()
             {
                 Infix = "1 a",
                 UnexpectedToken = new Token(Keyword.Identifier, "a", 2),
                 ExpectedKeyword = Keyword.EndOfString,
             },
-            //IdentifierIdentifier
+            //Identifier Identifier
             new UnexpectedTokenTestCase()
             {
                 Infix = "a a",
                 UnexpectedToken = new Token(Keyword.Identifier, "a", 2),
                 ExpectedKeyword = Keyword.EndOfString,
             },
-            //RoundCloseIdentifier
+            //RoundClose Identifier
             new UnexpectedTokenTestCase()
             {
                 Infix = "(1) a",
                 UnexpectedToken = new Token(Keyword.Identifier, "a", 4),
                 ExpectedKeyword = Keyword.EndOfString,
             },
-            //RoundCloseConstant
+            //RoundClose Constant
             new UnexpectedTokenTestCase()
             {
                 Infix = "(a) 1",
                 UnexpectedToken = new Token(Keyword.Constant, "1", 4),
                 ExpectedKeyword = Keyword.EndOfString,
             },
-            //MissingOpen
+            //Unexpected Close
             new UnexpectedTokenTestCase()
             {
                 Infix = "(1+2))",
                 UnexpectedToken = new Token(Keyword.RoundClose, ")", 5),
                 ExpectedKeyword = Keyword.EndOfString,
             },
-            //MissingClose
+            //Bracket Missing Close
             new UnexpectedTokenTestCase()
             {
                 Infix = "(1+2",
                 UnexpectedToken = new Token(Keyword.EndOfString, null, 4),
                 ExpectedKeyword = Keyword.RoundClose,
             },
-            //MissingCloseFunction
+            //Function Missing Close
             new UnexpectedTokenTestCase()
             {
                 Infix = "max(1,2",
                 UnexpectedToken = new Token(Keyword.EndOfString, null, 7),
                 ExpectedKeyword = Keyword.RoundClose,
             },
-            //UnexpectedComma
+            //Unexpected Comma
             new UnexpectedTokenTestCase()
             {
                 Infix = "(1,)",
                 UnexpectedToken = new Token(Keyword.Comma, ",", 2),
                 ExpectedKeyword = Keyword.RoundClose,
             },
-            //TooFewOperands
+            //Too Few Operands
             new UnexpectedTokenTestCase()
             {
                 Infix = "a ? b",
                 UnexpectedToken = new Token(Keyword.EndOfString, null, 5),
                 ExpectedKeyword = Keyword.Colon,
             },
-            //TooManyOperands
+            //Too Many Operands
             new UnexpectedTokenTestCase()
             {
                 Infix = "a ? b : c : d",
                 UnexpectedToken = new Token(Keyword.Colon, ":", 10),
                 ExpectedKeyword = Keyword.EndOfString,
-            },
-            //TooManyOperands
-            new UnexpectedTokenTestCase()
-            {
-                Infix = "(a ? b : c : d)",
-                UnexpectedToken = new Token(Keyword.Colon, ":", 11),
-                ExpectedKeyword = Keyword.RoundClose,
             },
         };
 
@@ -116,6 +109,11 @@ namespace HeartScript.UTests.AstParserTests
             public string Infix { get; set; }
             public Token UnexpectedToken { get; set; }
             public Keyword? ExpectedKeyword { get; set; }
+
+            public override string ToString()
+            {
+                return $"\"{Infix}\"";
+            }
         }
     }
 }
