@@ -19,7 +19,7 @@ namespace HeartScript.Nodes
         public override string ToString()
         {
             string parameters = string.Join(' ', Parameters);
-            return $"{{{Keyword} {parameters}}}";
+            return $"{{Call {Target} {parameters}}}";
         }
 
         public static OperatorInfo OperatorInfo()
