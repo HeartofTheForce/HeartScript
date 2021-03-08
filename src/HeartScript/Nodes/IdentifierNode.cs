@@ -1,4 +1,3 @@
-using System.Linq;
 using HeartScript.Parsing;
 
 namespace HeartScript.Nodes
@@ -17,10 +16,12 @@ namespace HeartScript.Nodes
             return Name;
         }
 
-        public static NodeBuilder Builder(OperatorInfo operatorInfo)
+        public static OperatorInfo OperatorInfo()
         {
-            return new NodeBuilder(
-                operatorInfo,
+            return new OperatorInfo(
+                Keyword.Identifier,
+                null,
+                0,
                 0,
                 null,
                 null,

@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using System.Linq;
 using HeartScript.Parsing;
 
 namespace HeartScript.Nodes
@@ -22,10 +20,12 @@ namespace HeartScript.Nodes
             return $"{{{Keyword.Ternary} {OptionA} {OptionB}}}";
         }
 
-        public static NodeBuilder Builder(OperatorInfo operatorInfo)
+        public static OperatorInfo OperatorInfo()
         {
-            return new NodeBuilder(
-                operatorInfo,
+            return new OperatorInfo(
+                Keyword.Ternary,
+                0,
+                uint.MaxValue,
                 2,
                 Keyword.Colon,
                 null,

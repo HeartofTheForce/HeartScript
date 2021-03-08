@@ -4,54 +4,18 @@ using HeartScript.Parsing;
 
 namespace HeartScript.Nodes
 {
-    public delegate INode BuildNode(Token token, INode? leftNode, IReadOnlyList<INode> rightNodes);
-
     public class NodeBuilder
     {
         public OperatorInfo OperatorInfo { get; }
 
-        private readonly bool _hasLeftNode;
-        private readonly uint? _expectedRightOperands;
-        private readonly Keyword? _delimiter;
-        private readonly Keyword? _terminator;
-
-
         private Token? _token;
         private INode? _leftNode;
         private readonly List<INode> _rightNodes;
-        private readonly BuildNode _buildNode;
 
-        public NodeBuilder(
-            OperatorInfo operatorInfo,
-            uint? expectedRightOperands,
-            Keyword? delimiter,
-            Keyword? terminator,
-            BuildNode buildNode)
+        public NodeBuilder(OperatorInfo operatorInfo)
         {
-            if (expectedRightOperands == 0)
-            {
-                if (operatorInfo.RightPrecedence != null)
-                    throw new ArgumentException(nameof(expectedRightOperands));
-                if (delimiter != null)
-                    throw new ArgumentException(nameof(delimiter));
-                if (terminator != null)
-                    throw new ArgumentException(nameof(terminator));
-            }
-
-            if (expectedRightOperands == null || expectedRightOperands > 1)
-            {
-                if (delimiter == null)
-                    throw new ArgumentException(nameof(delimiter));
-            }
-
-            _hasLeftNode = operatorInfo.LeftPrecedence != null;
-            _expectedRightOperands = expectedRightOperands;
-            _delimiter = delimiter;
-            _terminator = terminator;
-
-            _rightNodes = new List<INode>();
-            _buildNode = buildNode;
             OperatorInfo = operatorInfo;
+            _rightNodes = new List<INode>();
         }
 
         public INode? FeedOperandLeft(Token current, INode? operand)
@@ -61,7 +25,7 @@ namespace HeartScript.Nodes
 
             _token = current;
 
-            if (_hasLeftNode)
+            if (OperatorInfo.LeftPrecedence != null)
             {
                 if (operand == null)
                     throw new ArgumentException(nameof(operand));
@@ -69,8 +33,8 @@ namespace HeartScript.Nodes
                 _leftNode = operand;
             }
 
-            if (_expectedRightOperands == 0)
-                return _buildNode(_token, _leftNode, _rightNodes);
+            if (OperatorInfo.RightOperands == 0)
+                return OperatorInfo.BuildNode(_token, _leftNode, _rightNodes);
 
             return null;
         }
@@ -82,33 +46,33 @@ namespace HeartScript.Nodes
 
             _rightNodes.Add(operand);
 
-            if (_expectedRightOperands != null && _rightNodes.Count > _expectedRightOperands)
+            if (OperatorInfo.RightOperands != null && _rightNodes.Count > OperatorInfo.RightOperands)
                 throw new ArgumentException(nameof(operand));
 
-            if (current.Keyword == _delimiter && (_expectedRightOperands == null || _rightNodes.Count < _expectedRightOperands))
+            if (current.Keyword == OperatorInfo.Delimiter && (OperatorInfo.RightOperands == null || _rightNodes.Count < OperatorInfo.RightOperands))
             {
                 acknowledgeToken = true;
                 return null;
             }
 
-            if (_terminator == null || current.Keyword == _terminator)
+            if (OperatorInfo.Terminator == null || current.Keyword == OperatorInfo.Terminator)
             {
                 if (_token == null)
                     throw new ArgumentException(nameof(_token));
 
-                if (_expectedRightOperands != null && _rightNodes.Count < _expectedRightOperands)
+                if (OperatorInfo.RightOperands != null && _rightNodes.Count < OperatorInfo.RightOperands)
                 {
-                    if (_delimiter != null)
-                        throw new UnexpectedTokenException(current, _delimiter.Value);
+                    if (OperatorInfo.Delimiter != null)
+                        throw new UnexpectedTokenException(current, OperatorInfo.Delimiter.Value);
                     else
-                        throw new ArgumentException(nameof(_delimiter));
+                        throw new ArgumentException(nameof(OperatorInfo.Delimiter));
                 }
 
-                acknowledgeToken = current.Keyword == _terminator;
-                return _buildNode(_token, _leftNode, _rightNodes);
+                acknowledgeToken = current.Keyword == OperatorInfo.Terminator;
+                return OperatorInfo.BuildNode(_token, _leftNode, _rightNodes);
             }
 
-            throw new UnexpectedTokenException(current, _terminator.Value);
+            throw new UnexpectedTokenException(current, OperatorInfo.Terminator.Value);
         }
     }
 }

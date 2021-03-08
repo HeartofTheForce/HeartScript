@@ -22,10 +22,12 @@ namespace HeartScript.Nodes
             return $"{{{Keyword} {parameters}}}";
         }
 
-        public static NodeBuilder Builder(OperatorInfo operatorInfo)
+        public static OperatorInfo OperatorInfo()
         {
-            return new NodeBuilder(
-                operatorInfo,
+            return new OperatorInfo(
+                Keyword.RoundOpen,
+                uint.MaxValue - 1,
+                uint.MaxValue,
                 null,
                 Keyword.Comma,
                 Keyword.RoundClose,

@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using System.Linq;
 using HeartScript.Parsing;
 
 namespace HeartScript.Nodes
@@ -22,10 +20,12 @@ namespace HeartScript.Nodes
             return $"{{{Keyword} {Left} {Right}}}";
         }
 
-        public static NodeBuilder Builder(OperatorInfo operatorInfo)
+        public static OperatorInfo OperatorInfo(Keyword keyword, uint leftPrecedence, uint rightPrecedence)
         {
-            return new NodeBuilder(
-                operatorInfo,
+            return new OperatorInfo(
+                keyword,
+                leftPrecedence,
+                rightPrecedence,
                 1,
                 null,
                 null,

@@ -7,20 +7,20 @@ namespace HeartScript.Parsing
 {
     public class AstParser
     {
-        private readonly Operator[] _operators;
+        private readonly OperatorInfo[] _operators;
         private readonly IEnumerator<Token> _tokens;
         private readonly Stack<NodeBuilder> _nodeBuilders;
 
         private INode? _operand;
 
-        public AstParser(Operator[] operators, IEnumerator<Token> tokens)
+        public AstParser(OperatorInfo[] operators, IEnumerator<Token> tokens)
         {
             _operators = operators;
             _tokens = tokens;
             _nodeBuilders = new Stack<NodeBuilder>();
         }
 
-        public static INode Parse(Operator[] operators, IEnumerable<Token> tokens)
+        public static INode Parse(OperatorInfo[] operators, IEnumerable<Token> tokens)
         {
             var astParser = new AstParser(operators, tokens.GetEnumerator());
             return astParser.Parse();
@@ -32,11 +32,11 @@ namespace HeartScript.Parsing
             {
                 var current = _tokens.Current;
 
-                Operator op;
+                OperatorInfo op;
                 if (_operand == null)
-                    op = _operators.FirstOrDefault(x => x.OperatorInfo.Keyword == current.Keyword && (x.OperatorInfo.IsPrefix() || x.OperatorInfo.IsNullary()));
+                    op = _operators.FirstOrDefault(x => x.Keyword == current.Keyword && (x.IsPrefix() || x.IsNullary()));
                 else
-                    op = _operators.FirstOrDefault(x => x.OperatorInfo.Keyword == current.Keyword && (x.OperatorInfo.IsInfix() || x.OperatorInfo.IsPostfix()));
+                    op = _operators.FirstOrDefault(x => x.Keyword == current.Keyword && (x.IsInfix() || x.IsPostfix()));
 
                 if (op == null)
                 {
@@ -53,7 +53,7 @@ namespace HeartScript.Parsing
                 }
                 else
                 {
-                    while (_nodeBuilders.TryPeek(out var left) && OperatorInfo.IsEvaluatedBefore(left.OperatorInfo, op.OperatorInfo))
+                    while (_nodeBuilders.TryPeek(out var left) && OperatorInfo.IsEvaluatedBefore(left.OperatorInfo, op))
                     {
                         if (!TryPopNodeBuilder(out bool acknowledgeToken))
                             throw new Exception($"{nameof(NodeBuilder)} is incomplete");

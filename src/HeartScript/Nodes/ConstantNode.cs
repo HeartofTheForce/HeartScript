@@ -16,10 +16,12 @@ namespace HeartScript.Nodes
             return Value;
         }
 
-        public static NodeBuilder Builder(OperatorInfo operatorInfo)
+        public static OperatorInfo OperatorInfo()
         {
-            return new NodeBuilder(
-                operatorInfo,
+            return new OperatorInfo(
+                Keyword.Constant,
+                null,
+                0,
                 0,
                 null,
                 null,

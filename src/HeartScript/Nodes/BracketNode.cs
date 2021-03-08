@@ -1,18 +1,18 @@
-using System.Collections.Generic;
-using System.Linq;
 using HeartScript.Parsing;
 
 namespace HeartScript.Nodes
 {
     public static class BracketNode
     {
-        public static NodeBuilder Builder(OperatorInfo operatorInfo, Keyword terminator)
+        public static OperatorInfo OperatorInfo(Keyword open, Keyword close)
         {
-            return new NodeBuilder(
-                operatorInfo,
+            return new OperatorInfo(
+                open,
+                null,
+                uint.MaxValue,
                 1,
                 null,
-                terminator,
+                close,
                 (token, leftNode, rightNodes) => rightNodes[0]);
         }
     }
