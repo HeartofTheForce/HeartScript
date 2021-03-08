@@ -71,7 +71,7 @@ namespace HeartScript.UTests.AstParserTests
                 ExpectedToken = new Token(Keyword.EndOfString, null, 7),
                 ExpectedKeyword = Keyword.RoundClose,
             },
-            //CommaInParenthesis
+            //UnexpectedComma
             new UnexpectedTokenTestCase()
             {
                 Infix = "(1,)",
