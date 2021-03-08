@@ -77,7 +77,7 @@ namespace HeartScript.Nodes
 
         public INode? FeedOperandRight(Token current, INode? operand, out bool acknowledgeToken)
         {
-            if (_hasLeftNode && _leftNode == null)
+            if (_hasLeftNode != (_leftNode != null))
                 throw new ArgumentException(nameof(_leftNode));
 
             if (operand == null)
