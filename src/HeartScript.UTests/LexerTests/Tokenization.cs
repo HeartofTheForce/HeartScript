@@ -15,7 +15,6 @@ namespace HeartScript.UTests.LexerTests
                 Infix = "(-1+a)",
                 ExpectedTokens = new Token[]
                 {
-                    new Token(Keyword.StartOfString, null, 0),
                     new Token(Keyword.RoundOpen, "(", 0),
                     new Token(Keyword.Minus, "-", 1),
                     new Token(Keyword.Constant, "1", 2),
@@ -31,7 +30,6 @@ namespace HeartScript.UTests.LexerTests
                 Infix = "( - 1 + a )",
                 ExpectedTokens = new Token[]
                 {
-                    new Token(Keyword.StartOfString, null, 0),
                     new Token(Keyword.RoundOpen, "(", 0),
                     new Token(Keyword.Minus, "-", 2),
                     new Token(Keyword.Constant, "1", 4),
@@ -47,7 +45,6 @@ namespace HeartScript.UTests.LexerTests
                 Infix = "a0 * a1 & 0",
                 ExpectedTokens = new Token[]
                 {
-                    new Token(Keyword.StartOfString, null, 0),
                     new Token(Keyword.Identifier, "a0", 0),
                     new Token(Keyword.Multiply, "*", 3),
                     new Token(Keyword.Identifier, "a1", 5),
@@ -62,7 +59,6 @@ namespace HeartScript.UTests.LexerTests
                 Infix = "min(1 + a , 5.3)",
                 ExpectedTokens = new Token[]
                 {
-                    new Token(Keyword.StartOfString, null, 0),
                     new Token(Keyword.Identifier, "min", 0),
                     new Token(Keyword.RoundOpen, "(", 3),
                     new Token(Keyword.Constant, "1", 4),
@@ -80,7 +76,6 @@ namespace HeartScript.UTests.LexerTests
                 Infix = "max(a,sin(c),d)",
                 ExpectedTokens = new Token[]
                 {
-                    new Token(Keyword.StartOfString, null, 0),
                     new Token(Keyword.Identifier, "max", 0),
                     new Token(Keyword.RoundOpen, "(", 3),
                     new Token(Keyword.Identifier, "a", 4),

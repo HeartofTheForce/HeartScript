@@ -61,7 +61,6 @@ namespace HeartScript.Parsing
         Colon,
         Identifier,
         Constant,
-        StartOfString,
         EndOfString,
     }
 }

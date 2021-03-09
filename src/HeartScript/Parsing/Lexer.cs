@@ -132,7 +132,7 @@ namespace HeartScript.Parsing
 
         public static IEnumerable<Token> Process(string input)
         {
-            var output = new List<Token>() { new Token(Keyword.StartOfString, null!, 0) };
+            var output = new List<Token>();
 
             int offset = 0;
             while (offset < input.Length)

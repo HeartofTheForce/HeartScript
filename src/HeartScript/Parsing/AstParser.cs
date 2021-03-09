@@ -22,8 +22,15 @@ namespace HeartScript.Parsing
 
         public static INode Parse(OperatorInfo[] operators, IEnumerable<Token> tokens)
         {
-            var astParser = new AstParser(operators, tokens.GetEnumerator());
-            return astParser.Parse();
+            var enumerator = tokens.GetEnumerator();
+
+            var astParser = new AstParser(operators, enumerator);
+            var node = astParser.Parse();
+
+            if (enumerator.Current.Keyword != Keyword.EndOfString)
+                throw new UnexpectedTokenException(enumerator.Current, Keyword.EndOfString);
+
+            return node;
         }
 
         private INode Parse()
@@ -44,7 +51,12 @@ namespace HeartScript.Parsing
                     do
                     {
                         if (_nodeBuilders.Count == 0)
-                            throw new UnexpectedTokenException(current);
+                        {
+                            if (_operand == null)
+                                throw new ExpressionTermException(current);
+
+                            return _operand;
+                        }
 
                         if (!TryPopNodeBuilder(out acknowledgeToken) && !acknowledgeToken)
                             throw new UnexpectedTokenException(current);
@@ -69,10 +81,7 @@ namespace HeartScript.Parsing
                 }
             }
 
-            if (_nodeBuilders.Count != 0)
-                throw new Exception($"Expected 0 {nameof(NodeBuilder)}");
-
-            return _operand!;
+            throw new ArgumentException(nameof(_tokens));
         }
 
         private bool TryPopNodeBuilder(out bool acknowledgeToken)
