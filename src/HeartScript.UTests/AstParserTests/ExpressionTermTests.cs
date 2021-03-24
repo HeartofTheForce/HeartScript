@@ -56,7 +56,7 @@ namespace HeartScript.UTests.AstParserTests
         public void TestCases(ExpressionTermTestCase testCase)
         {
             var tokens = Lexer.Process(testCase.Infix);
-            var ex = Assert.Throws<ExpressionTermException>(() => AstParser.Parse(DemoUtility.Operators, tokens));
+            var ex = Assert.Throws<ExpressionTermException>(() => AstParser.Parse(Demo.Operators, tokens));
 
             Assert.AreEqual(testCase.ExpectedToken, ex.Token);
         }

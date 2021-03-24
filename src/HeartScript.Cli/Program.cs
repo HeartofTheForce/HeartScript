@@ -11,7 +11,7 @@ namespace HeartScript.Cli
             Console.WriteLine(infix);
 
             var tokens = Lexer.Process(infix);
-            var node = AstParser.Parse(DemoUtility.Operators, tokens);
+            var node = AstParser.Parse(Demo.Operators, tokens);
         }
     }
 }

@@ -3,7 +3,7 @@ using HeartScript.Parsing;
 
 namespace HeartScript
 {
-    public static class DemoUtility
+    public static class Demo
     {
         public static readonly OperatorInfo[] Operators = new OperatorInfo[]
         {
