@@ -108,6 +108,13 @@ namespace HeartScript.UTests.End2EndTests
                 ExpectedNodeString = "(- ($ max 2 b))",
                 ExpectedFunction = (Context<double> ctx) => Math.Max(2, ctx.B),
             },
+            //EmptyCall
+            new End2EndTestCase<double>()
+            {
+                Infix = "max()",
+                ExpectedNodeString = "($ max)",
+                ExpectedFunction = null,
+            },
         };
 
         [TestCaseSource(nameof(s_testCases))]
