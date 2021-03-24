@@ -23,7 +23,7 @@ namespace HeartScript.Nodes
 
         public override string ToString()
         {
-            return $"{Token.Value} {OptionA} {OptionB}";
+            return $"({Token.Value} {Target} {OptionA} {OptionB})";
         }
 
         public static OperatorInfo OperatorInfo(uint leftPrecedence, uint rightPrecedence)

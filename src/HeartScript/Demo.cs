@@ -11,7 +11,7 @@ namespace HeartScript
             IdentifierNode.OperatorInfo(),
             BracketNode.OperatorInfo(Keyword.RoundOpen, Keyword.RoundClose),
             CallNode.OperatorInfo(0, uint.MaxValue),
-            TernaryNode.OperatorInfo(0, uint.MaxValue),
+            TernaryNode.OperatorInfo(uint.MaxValue - 1, uint.MaxValue),
             PostfixNode.OperatorInfo(Keyword.Factorial, 2),
             PrefixNode.OperatorInfo(Keyword.Plus, 1),
             PrefixNode.OperatorInfo(Keyword.Minus, 1),

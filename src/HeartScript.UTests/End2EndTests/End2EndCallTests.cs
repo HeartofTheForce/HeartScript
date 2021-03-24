@@ -7,7 +7,7 @@ using NUnit.Framework;
 namespace HeartScript.UTests.End2EndTests
 {
     [TestFixture]
-    public class End2EndFunctionTests
+    public class End2EndCallTests
     {
         static readonly Context<double> s_ctx = new Context<double>()
         {
@@ -24,63 +24,63 @@ namespace HeartScript.UTests.End2EndTests
 
         static readonly End2EndTestCase<double>[] s_testCases = new End2EndTestCase<double>[]
         {
-            //Function
+            //Call
             new End2EndTestCase<double>()
             {
                 Infix = "sin(a) + cos(b)",
                 ExpectedNodeString = "(+ ($ sin a) ($ cos b))",
                 ExpectedFunction = (Context<double> ctx) => Math.Sin(ctx.A) + Math.Cos(ctx.B),
             },
-            //FunctionExpressionParameter
+            //CallExpressionParameter
             new End2EndTestCase<double>()
             {
                 Infix = "tan(b + c)",
                 ExpectedNodeString = "($ tan (+ b c))",
                 ExpectedFunction = (Context<double> ctx) => Math.Tan(ctx.B + ctx.C),
             },
-            //FunctionChained
+            //CallChained
             new End2EndTestCase<double>()
             {
                 Infix = "sin(cos(b))",
                 ExpectedNodeString = "($ sin ($ cos b))",
                 ExpectedFunction = (Context<double> ctx) => Math.Sin(Math.Cos(ctx.B)),
             },
-            //FunctionMultiParameter
+            //CallMultiParameter
             new End2EndTestCase<double>()
             {
                 Infix = "max(a,b) + min(b,c)",
                 ExpectedNodeString = "(+ ($ max a b) ($ min b c))",
                 ExpectedFunction = (Context<double> ctx) => Math.Max(ctx.A, ctx.B) + Math.Min(ctx.B, ctx.C),
             },
-            //FunctionMultiExpressionParameter
+            //CallMultiExpressionParameter
             new End2EndTestCase<double>()
             {
                 Infix = "max(a + b, b + c)",
                 ExpectedNodeString = "($ max (+ a b) (+ b c))",
                 ExpectedFunction = (Context<double> ctx) => Math.Max(ctx.A + ctx.B, ctx.B + ctx.C),
             },
-            //FunctionNestedMultiExpressionParameter
+            //CallNestedMultiExpressionParameter
             new End2EndTestCase<double>()
             {
                 Infix = "max((a + b) * 2, (b / c))",
                 ExpectedNodeString = "($ max (* (+ a b) 2) (/ b c))",
                 ExpectedFunction = (Context<double> ctx) => Math.Max((ctx.A + ctx.B) * 2, (ctx.B / ctx.C)),
             },
-            //FunctionChainedMultiParameter
+            //CallChainedMultiParameter
             new End2EndTestCase<double>()
             {
                 Infix = "max(min(c, b), max(c, a))",
                 ExpectedNodeString = "($ max ($ min c b) ($ max c a))",
                 ExpectedFunction = (Context<double> ctx) => Math.Max(Math.Min(ctx.C, ctx.B), Math.Max(ctx.C, ctx.A)),
             },
-            //FunctionChainedMultiParameterUnary
+            //CallChainedMultiParameterUnary
             new End2EndTestCase<double>()
             {
                 Infix = "max(min(c, b), -a)",
                 ExpectedNodeString = "($ max ($ min c b) (- a))",
                 ExpectedFunction = (Context<double> ctx) => Math.Max(Math.Min(ctx.C, ctx.B), -ctx.A),
             },
-            //FunctionNestedExpressionParameter
+            //CallNestedExpressionParameter
             new End2EndTestCase<double>()
             {
                 Infix = "sin(min(c, b) - a)",
@@ -101,7 +101,7 @@ namespace HeartScript.UTests.End2EndTests
                 ExpectedNodeString = "($ clamp (+ a b) (- b c) (* c d))",
                 ExpectedFunction = (Context<double> ctx) => Math.Clamp(ctx.A + ctx.B, ctx.B - ctx.C, ctx.C * ctx.D),
             },
-            //UnaryFunctionCall
+            //UnaryCall
             new End2EndTestCase<double>()
             {
                 Infix = "-max(2, b)",

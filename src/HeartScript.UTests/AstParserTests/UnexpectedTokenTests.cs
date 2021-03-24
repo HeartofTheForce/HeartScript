@@ -64,7 +64,7 @@ namespace HeartScript.UTests.AstParserTests
                 UnexpectedToken = new Token(Keyword.EndOfString, null, 4),
                 ExpectedKeyword = Keyword.RoundClose,
             },
-            //Function Missing Close
+            //Call Missing Close
             new UnexpectedTokenTestCase()
             {
                 Infix = "max(1,2",
