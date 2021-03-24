@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using HeartScript.Parsing;
 
 namespace HeartScript.Nodes
@@ -18,8 +19,13 @@ namespace HeartScript.Nodes
 
         public override string ToString()
         {
-            string parameters = string.Join(' ', Parameters);
-            return $"(Call {Target} {parameters})";
+            if (Parameters.Any())
+            {
+                string parameters = string.Join(' ', Parameters);
+                return $"(Call {Target} {parameters})";
+            }
+
+            return $"(Call {Target})";
         }
 
         public static OperatorInfo OperatorInfo()

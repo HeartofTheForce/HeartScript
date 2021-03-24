@@ -41,31 +41,32 @@ namespace HeartScript.Parsing
 
         public INode? FeedOperandRight(Token current, INode? operand, out bool acknowledgeToken)
         {
-            if (operand == null)
-                throw new ExpressionTermException(current);
+            if (_token == null)
+                throw new ArgumentException(nameof(_token));
 
-            _rightNodes.Add(operand);
-
-            if (OperatorInfo.RightOperands != null && _rightNodes.Count > OperatorInfo.RightOperands)
-                throw new ArgumentException(nameof(operand));
+            if (operand != null)
+                _rightNodes.Add(operand);
 
             if (current.Keyword == OperatorInfo.Delimiter && (OperatorInfo.RightOperands == null || _rightNodes.Count < OperatorInfo.RightOperands))
             {
+                if (operand == null)
+                    throw new ExpressionTermException(current);
+
                 acknowledgeToken = true;
                 return null;
             }
 
+            if (operand == null && _rightNodes.Count > 0)
+                throw new ExpressionTermException(current);
+
             if (OperatorInfo.Terminator == null || current.Keyword == OperatorInfo.Terminator)
             {
-                if (_token == null)
-                    throw new ArgumentException(nameof(_token));
-
-                if (OperatorInfo.RightOperands != null && _rightNodes.Count < OperatorInfo.RightOperands)
+                if (OperatorInfo.RightOperands != null && _rightNodes.Count != OperatorInfo.RightOperands)
                 {
                     if (OperatorInfo.Delimiter != null)
                         throw new UnexpectedTokenException(current, OperatorInfo.Delimiter.Value);
                     else
-                        throw new ArgumentException(nameof(OperatorInfo.Delimiter));
+                        throw new ExpressionTermException(current);
                 }
 
                 acknowledgeToken = current.Keyword == OperatorInfo.Terminator;
