@@ -6,7 +6,7 @@ using NUnit.Framework;
 namespace HeartScript.UTests.End2EndTests
 {
     [TestFixture]
-    public class End2EndInt
+    public class End2EndIntTests
     {
         static readonly Context<int> s_ctx = new Context<int>()
         {

@@ -4,7 +4,7 @@ using NUnit.Framework;
 namespace HeartScript.UTests.AstParserTests
 {
     [TestFixture]
-    public class UnexpectedToken
+    public class UnexpectedTokenTests
     {
         static readonly UnexpectedTokenTestCase[] s_testCases = new UnexpectedTokenTestCase[]
         {

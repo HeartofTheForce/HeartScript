@@ -26,12 +26,12 @@ namespace HeartScript.Nodes
             return $"{Token.Value} {OptionA} {OptionB}";
         }
 
-        public static OperatorInfo OperatorInfo()
+        public static OperatorInfo OperatorInfo(uint leftPrecedence, uint rightPrecedence)
         {
             return new OperatorInfo(
                 Keyword.Ternary,
-                0,
-                uint.MaxValue,
+                leftPrecedence,
+                rightPrecedence,
                 2,
                 Keyword.Colon,
                 null,

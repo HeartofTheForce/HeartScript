@@ -7,7 +7,7 @@ using NUnit.Framework;
 namespace HeartScript.UTests.End2EndTests
 {
     [TestFixture]
-    public class End2EndMath
+    public class End2EndFunctionTests
     {
         static readonly Context<double> s_ctx = new Context<double>()
         {
@@ -28,78 +28,85 @@ namespace HeartScript.UTests.End2EndTests
             new End2EndTestCase<double>()
             {
                 Infix = "sin(a) + cos(b)",
-                ExpectedNodeString = "(+ (sin a) (cos b))",
+                ExpectedNodeString = "(+ ($ sin a) ($ cos b))",
                 ExpectedFunction = (Context<double> ctx) => Math.Sin(ctx.A) + Math.Cos(ctx.B),
             },
             //FunctionExpressionParameter
             new End2EndTestCase<double>()
             {
                 Infix = "tan(b + c)",
-                ExpectedNodeString = "(tan (+ b c))",
+                ExpectedNodeString = "($ tan (+ b c))",
                 ExpectedFunction = (Context<double> ctx) => Math.Tan(ctx.B + ctx.C),
             },
             //FunctionChained
             new End2EndTestCase<double>()
             {
                 Infix = "sin(cos(b))",
-                ExpectedNodeString = "(sin (cos b))",
+                ExpectedNodeString = "($ sin ($ cos b))",
                 ExpectedFunction = (Context<double> ctx) => Math.Sin(Math.Cos(ctx.B)),
             },
             //FunctionMultiParameter
             new End2EndTestCase<double>()
             {
                 Infix = "max(a,b) + min(b,c)",
-                ExpectedNodeString = "(+ (max a b) (min b c))",
+                ExpectedNodeString = "(+ ($ max a b) ($ min b c))",
                 ExpectedFunction = (Context<double> ctx) => Math.Max(ctx.A, ctx.B) + Math.Min(ctx.B, ctx.C),
             },
             //FunctionMultiExpressionParameter
             new End2EndTestCase<double>()
             {
                 Infix = "max(a + b, b + c)",
-                ExpectedNodeString = "(max (+ a b) (+ b c))",
+                ExpectedNodeString = "($ max (+ a b) (+ b c))",
                 ExpectedFunction = (Context<double> ctx) => Math.Max(ctx.A + ctx.B, ctx.B + ctx.C),
             },
             //FunctionNestedMultiExpressionParameter
             new End2EndTestCase<double>()
             {
                 Infix = "max((a + b) * 2, (b / c))",
-                ExpectedNodeString = "(max (* (+ a b) 2) (/ b c))",
+                ExpectedNodeString = "($ max (* (+ a b) 2) (/ b c))",
                 ExpectedFunction = (Context<double> ctx) => Math.Max((ctx.A + ctx.B) * 2, (ctx.B / ctx.C)),
             },
             //FunctionChainedMultiParameter
             new End2EndTestCase<double>()
             {
                 Infix = "max(min(c, b), max(c, a))",
-                ExpectedNodeString = "(max (min c b) (max c a))",
+                ExpectedNodeString = "($ max ($ min c b) ($ max c a))",
                 ExpectedFunction = (Context<double> ctx) => Math.Max(Math.Min(ctx.C, ctx.B), Math.Max(ctx.C, ctx.A)),
             },
             //FunctionChainedMultiParameterUnary
             new End2EndTestCase<double>()
             {
                 Infix = "max(min(c, b), -a)",
-                ExpectedNodeString = "(max (min c b) (- a))",
+                ExpectedNodeString = "($ max ($ min c b) (- a))",
                 ExpectedFunction = (Context<double> ctx) => Math.Max(Math.Min(ctx.C, ctx.B), -ctx.A),
             },
-            //FunctionNestedExpresionParameter
+            //FunctionNestedExpressionParameter
             new End2EndTestCase<double>()
             {
                 Infix = "sin(min(c, b) - a)",
-                ExpectedNodeString = "(sin (- (min c b) a))",
+                ExpectedNodeString = "($ sin (- ($ min c b) a))",
                 ExpectedFunction = (Context<double> ctx) => Math.Sin(Math.Min(ctx.C, ctx.B) - ctx.A),
             },
             //PostfixInfixUnary
             new End2EndTestCase<double>()
             {
                 Infix = "clamp(a,b,c) + - d",
-                ExpectedNodeString = "(+ (clamp a b c) (- d))",
+                ExpectedNodeString = "(+ ($ clamp a b c) (- d))",
                 ExpectedFunction = (Context<double> ctx) => Math.Clamp(ctx.A, ctx.B, ctx.C) + -ctx.D,
             },
             //Postfix
             new End2EndTestCase<double>()
             {
                 Infix = "clamp(a + b, b - c, c * d)",
-                ExpectedNodeString = "(clamp (+ a b) (- b c) (* c d))",
+                ExpectedNodeString = "($ clamp (+ a b) (- b c) (* c d))",
                 ExpectedFunction = (Context<double> ctx) => Math.Clamp(ctx.A + ctx.B, ctx.B - ctx.C, ctx.C * ctx.D),
+            },
+            //UnaryFunctionCall
+            new End2EndTestCase<double>()
+            {
+                Infix = "-max(2, b)",
+                ExpectedNodeString = "(- ($ max 2 b))",
+                ExpectedFunction = (Context<double> ctx) => Math.Max(2, ctx.B),
             },
         };
 

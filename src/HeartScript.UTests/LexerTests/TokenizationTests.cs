@@ -5,7 +5,7 @@ using NUnit.Framework;
 namespace HeartScript.UTests.LexerTests
 {
     [TestFixture]
-    public class Tokenization
+    public class TokenizationTests
     {
         static readonly TokenizationTestCase[] s_testCases = new TokenizationTestCase[]
         {

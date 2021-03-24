@@ -22,18 +22,18 @@ namespace HeartScript.Nodes
             if (Parameters.Any())
             {
                 string parameters = string.Join(' ', Parameters);
-                return $"(Call {Target} {parameters})";
+                return $"($ {Target} {parameters})";
             }
 
-            return $"(Call {Target})";
+            return $"($ {Target})";
         }
 
-        public static OperatorInfo OperatorInfo()
+        public static OperatorInfo OperatorInfo(uint leftPrecedence, uint rightPrecedence)
         {
             return new OperatorInfo(
                 Keyword.RoundOpen,
-                uint.MaxValue - 1,
-                uint.MaxValue,
+                leftPrecedence,
+                rightPrecedence,
                 null,
                 Keyword.Comma,
                 Keyword.RoundClose,

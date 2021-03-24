@@ -4,7 +4,7 @@ using NUnit.Framework;
 namespace HeartScript.UTests.AstParserTests
 {
     [TestFixture]
-    public class ExpressionTerm
+    public class ExpressionTermTests
     {
         static readonly ExpressionTermTestCase[] s_testCases = new ExpressionTermTestCase[]
         {
