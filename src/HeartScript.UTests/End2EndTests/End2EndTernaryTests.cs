@@ -38,6 +38,13 @@ namespace HeartScript.UTests.End2EndTests
                 ExpectedNodeString = "(? (? a b c) d e)",
                 ExpectedFunction = (Context<bool> ctx) => (ctx.A ? ctx.B : ctx.C) ? ctx.D : ctx.E,
             },
+            //TernaryBinary
+            new End2EndTestCase<bool>()
+            {
+                Infix = "a ? b : c + 1",
+                ExpectedNodeString = "(? a b (+ c 1))",
+                ExpectedFunction = (Context<bool> ctx) => (ctx.A ? ctx.B : ctx.C) ? ctx.D : ctx.E,
+            },
         };
 
         [TestCaseSource(nameof(s_testCases))]
