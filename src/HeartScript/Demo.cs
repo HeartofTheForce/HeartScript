@@ -7,6 +7,7 @@ namespace HeartScript
     {
         public static readonly OperatorInfo[] Operators = new OperatorInfo[]
         {
+            IfNode.OperatorInfo(),
             ConstantNode.OperatorInfo(),
             IdentifierNode.OperatorInfo(),
             BracketNode.OperatorInfo(Keyword.RoundOpen, Keyword.RoundClose),

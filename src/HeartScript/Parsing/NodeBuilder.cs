@@ -47,19 +47,22 @@ namespace HeartScript.Parsing
             if (operand != null)
                 _rightNodes.Add(operand);
 
-            if (current.Keyword == OperatorInfo.Delimiter && (OperatorInfo.RightOperands == null || _rightNodes.Count < OperatorInfo.RightOperands))
+            if (operand == null && _rightNodes.Count > 0)
+                throw new ExpressionTermException(current);
+
+            bool isTerminator = OperatorInfo.Terminator == null || current.Keyword == OperatorInfo.Terminator;
+            bool isDelimiter = (OperatorInfo.Delimiter == null && current.Keyword != OperatorInfo.Terminator) || current.Keyword == OperatorInfo.Delimiter;
+
+            if (isDelimiter && (OperatorInfo.RightOperands == null || _rightNodes.Count < OperatorInfo.RightOperands))
             {
                 if (operand == null)
                     throw new ExpressionTermException(current);
 
-                acknowledgeToken = true;
+                acknowledgeToken = current.Keyword == OperatorInfo.Delimiter;
                 return null;
             }
 
-            if (operand == null && _rightNodes.Count > 0)
-                throw new ExpressionTermException(current);
-
-            if (OperatorInfo.Terminator == null || current.Keyword == OperatorInfo.Terminator)
+            if (isTerminator)
             {
                 if (OperatorInfo.RightOperands != null && _rightNodes.Count != OperatorInfo.RightOperands)
                 {
@@ -73,7 +76,7 @@ namespace HeartScript.Parsing
                 return OperatorInfo.BuildNode(_token, _leftNode, _rightNodes);
             }
 
-            throw new UnexpectedTokenException(current, OperatorInfo.Terminator.Value);
+            throw new UnexpectedTokenException(current, OperatorInfo.Terminator!.Value);
         }
     }
 }

@@ -35,7 +35,8 @@ namespace HeartScript.Parsing
 
         private INode Parse()
         {
-            while (_tokens.MoveNext())
+            bool retry = false;
+            while (retry || _tokens.MoveNext())
             {
                 var current = _tokens.Current;
 
@@ -47,6 +48,9 @@ namespace HeartScript.Parsing
 
                 if (op == null)
                 {
+                    if (retry)
+                        throw new UnexpectedTokenException(current);
+
                     bool acknowledgeToken;
                     do
                     {
@@ -59,12 +63,13 @@ namespace HeartScript.Parsing
                         }
 
                         if (!TryPopNodeBuilder(out acknowledgeToken) && !acknowledgeToken)
-                            throw new UnexpectedTokenException(current);
+                            retry = true;
 
-                    } while (!acknowledgeToken);
+                    } while (!retry && !acknowledgeToken);
                 }
                 else
                 {
+                    retry = false;
                     while (_nodeBuilders.TryPeek(out var left) && OperatorInfo.IsEvaluatedBefore(left.OperatorInfo, op))
                     {
                         if (!TryPopNodeBuilder(out bool acknowledgeToken))
