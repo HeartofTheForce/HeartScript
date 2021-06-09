@@ -8,10 +8,15 @@ namespace HeartScript.Cli
         static void Main(string[] args)
         {
             string infix = string.Join(' ', args);
+
+            Console.WriteLine("Input");
             Console.WriteLine(infix);
 
             var tokens = Lexer.Process(infix);
             var node = AstParser.Parse(Demo.Operators, tokens);
+
+            Console.WriteLine("Output");
+            Console.WriteLine(node);
         }
     }
 }
