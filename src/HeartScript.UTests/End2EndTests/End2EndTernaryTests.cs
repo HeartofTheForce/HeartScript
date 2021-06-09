@@ -1,5 +1,3 @@
-using System;
-using HeartScript;
 using HeartScript.Parsing;
 using NUnit.Framework;
 #pragma warning disable IDE0047

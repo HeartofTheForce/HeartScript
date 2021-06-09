@@ -1,4 +1,4 @@
-using HeartScript;
+using System;
 using HeartScript.Parsing;
 using NUnit.Framework;
 #pragma warning disable IDE0047
@@ -10,15 +10,15 @@ namespace HeartScript.UTests.End2EndTests
     {
         static readonly Context<int> s_ctx = new Context<int>()
         {
-            A = 1,
-            B = 2,
-            C = 3,
-            D = 4,
-            E = 5,
-            F = 6,
-            G = 7,
-            H = 8,
-            I = 9,
+            A = 2,
+            B = 3,
+            C = 5,
+            D = 7,
+            E = 11,
+            F = 13,
+            G = 17,
+            H = 19,
+            I = 23,
         };
 
         static readonly End2EndTestCase<int>[] s_testCases = new End2EndTestCase<int>[]
@@ -42,7 +42,7 @@ namespace HeartScript.UTests.End2EndTests
             {
                 Infix = "2 * 1!",
                 ExpectedNodeString = "(* 2 (! 1))",
-                ExpectedFunction = (Context<int> ctx) => throw new System.NotImplementedException(),
+                ExpectedFunction = (Context<int> ctx) => throw new NotImplementedException(),
             },
         };
 

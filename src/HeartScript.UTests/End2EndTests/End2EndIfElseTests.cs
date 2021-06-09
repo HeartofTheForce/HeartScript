@@ -1,3 +1,4 @@
+using System;
 using HeartScript.Parsing;
 using NUnit.Framework;
 #pragma warning disable IDE0047
@@ -27,21 +28,21 @@ namespace HeartScript.UTests.End2EndTests
             {
                 Infix = "if a ? b : c d ? e : f else g ? h : i",
                 ExpectedNodeString = "(else (if (? a b c) (? d e f)) (? g h i))",
-                ExpectedFunction = (Context<bool> ctx) => throw new System.NotImplementedException(),
+                ExpectedFunction = (Context<bool> ctx) => throw new NotImplementedException(),
             },
             //ChainedIfElse
             new End2EndTestCase<bool>()
             {
                 Infix = "if a b else if c d else e",
                 ExpectedNodeString = "(else (if a b) (else (if c d) e))",
-                ExpectedFunction = (Context<bool> ctx) => throw new System.NotImplementedException(),
+                ExpectedFunction = (Context<bool> ctx) => throw new NotImplementedException(),
             },
             //If
             new End2EndTestCase<bool>()
             {
                 Infix = "if a b",
                 ExpectedNodeString = "(if a b)",
-                ExpectedFunction = (Context<bool> ctx) => throw new System.NotImplementedException(),
+                ExpectedFunction = (Context<bool> ctx) => throw new NotImplementedException(),
             },
         };
 

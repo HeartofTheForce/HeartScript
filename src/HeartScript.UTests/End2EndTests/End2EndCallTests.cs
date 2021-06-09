@@ -1,5 +1,4 @@
 using System;
-using HeartScript;
 using HeartScript.Parsing;
 using NUnit.Framework;
 #pragma warning disable IDE0047
@@ -11,15 +10,15 @@ namespace HeartScript.UTests.End2EndTests
     {
         static readonly Context<double> s_ctx = new Context<double>()
         {
-            A = 1.1,
-            B = 2.2,
-            C = 3.3,
-            D = 4.4,
-            E = 5.5,
-            F = 6.6,
-            G = 7.7,
-            H = 8.8,
-            I = 9.9,
+            A = 2.2,
+            B = 3.3,
+            C = 5.5,
+            D = 7.7,
+            E = 11.11,
+            F = 13.13,
+            G = 17.17,
+            H = 19.19,
+            I = 23.23,
         };
 
         static readonly End2EndTestCase<double>[] s_testCases = new End2EndTestCase<double>[]
@@ -113,7 +112,7 @@ namespace HeartScript.UTests.End2EndTests
             {
                 Infix = "max()",
                 ExpectedNodeString = "($ max)",
-                ExpectedFunction = null,
+                ExpectedFunction = (Context<double> ctx) => throw new NotImplementedException(),
             },
         };
 
