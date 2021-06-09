@@ -62,6 +62,7 @@ namespace HeartScript.Parsing
         Identifier,
         Constant,
         If,
+        Else,
         EndOfString,
     }
 }

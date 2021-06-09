@@ -106,6 +106,11 @@ namespace HeartScript.Parsing
             },
             new Pattern()
             {
+                Regex = new Regex("else"),
+                Keyword = Keyword.Else,
+            },
+            new Pattern()
+            {
                 Regex = new Regex("[a-zA-Z]\\w*"),
                 Keyword = Keyword.Identifier,
             },

@@ -8,11 +8,12 @@ namespace HeartScript
         public static readonly OperatorInfo[] Operators = new OperatorInfo[]
         {
             IfNode.OperatorInfo(),
+            ElseNode.OperatorInfo(),
             ConstantNode.OperatorInfo(),
             IdentifierNode.OperatorInfo(),
             BracketNode.OperatorInfo(Keyword.RoundOpen, Keyword.RoundClose),
-            CallNode.OperatorInfo(0, uint.MaxValue),
-            TernaryNode.OperatorInfo(uint.MaxValue - 1, uint.MaxValue),
+            CallNode.OperatorInfo(),
+            TernaryNode.OperatorInfo(),
             PostfixNode.OperatorInfo(Keyword.Factorial, 2),
             PrefixNode.OperatorInfo(Keyword.Plus, 1),
             PrefixNode.OperatorInfo(Keyword.Minus, 1),
