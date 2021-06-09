@@ -37,6 +37,13 @@ namespace HeartScript.UTests.End2EndTests
                 ExpectedNodeString = "(~ (| 1 4))",
                 ExpectedFunction = (Context<int> ctx) => ~(1 | 4),
             },
+            //BinaryPostfix
+            new End2EndTestCase<int>()
+            {
+                Infix = "2 * 1!",
+                ExpectedNodeString = "(* 2 (! 1))",
+                ExpectedFunction = (Context<int> ctx) => throw new System.NotImplementedException(),
+            },
         };
 
         [TestCaseSource(nameof(s_testCases))]

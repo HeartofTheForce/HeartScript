@@ -28,12 +28,12 @@ namespace HeartScript.Nodes
             return $"($ {Target})";
         }
 
-        public static OperatorInfo OperatorInfo(uint leftPrecedence, uint rightPrecedence)
+        public static OperatorInfo OperatorInfo()
         {
             return new OperatorInfo(
                 Keyword.RoundOpen,
-                leftPrecedence,
-                rightPrecedence,
+                0,
+                uint.MaxValue,
                 null,
                 Keyword.Comma,
                 Keyword.RoundClose,
