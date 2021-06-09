@@ -30,8 +30,8 @@ namespace HeartScript.Nodes
         {
             return new OperatorInfo(
                 Keyword.Ternary,
+                uint.MaxValue - 2,
                 uint.MaxValue - 1,
-                uint.MaxValue,
                 2,
                 Keyword.Colon,
                 null,

@@ -24,7 +24,7 @@ namespace HeartScript.Nodes
         {
             return new OperatorInfo(
                 Keyword.Else,
-                uint.MaxValue,
+                uint.MaxValue - 1,
                 uint.MaxValue,
                 1,
                 null,

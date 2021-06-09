@@ -18,13 +18,13 @@ namespace HeartScript
             PrefixNode.OperatorInfo(Keyword.Plus, 1),
             PrefixNode.OperatorInfo(Keyword.Minus, 1),
             PrefixNode.OperatorInfo(Keyword.BitwiseNot, 1),
-            BinaryNode.OperatorInfo(Keyword.Multiply, 2, 2),
-            BinaryNode.OperatorInfo(Keyword.Divide, 2, 2),
-            BinaryNode.OperatorInfo(Keyword.Plus, 3, 3),
-            BinaryNode.OperatorInfo(Keyword.Minus, 3, 3),
-            BinaryNode.OperatorInfo(Keyword.BitwiseAnd, 4, 4),
-            BinaryNode.OperatorInfo(Keyword.BitwiseXor, 5, 5),
-            BinaryNode.OperatorInfo(Keyword.BitwiseOr, 6, 6),
+            BinaryNode.OperatorInfo(Keyword.Multiply, 3, 3),
+            BinaryNode.OperatorInfo(Keyword.Divide, 3, 3),
+            BinaryNode.OperatorInfo(Keyword.Plus, 4, 4),
+            BinaryNode.OperatorInfo(Keyword.Minus, 4, 4),
+            BinaryNode.OperatorInfo(Keyword.BitwiseAnd, 5, 5),
+            BinaryNode.OperatorInfo(Keyword.BitwiseXor, 6, 6),
+            BinaryNode.OperatorInfo(Keyword.BitwiseOr, 7, 7),
         };
     }
 }
