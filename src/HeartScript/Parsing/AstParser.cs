@@ -70,6 +70,7 @@ namespace HeartScript.Parsing
                 else
                 {
                     retry = false;
+
                     while (_nodeBuilders.TryPeek(out var left) && OperatorInfo.IsEvaluatedBefore(left.OperatorInfo, op))
                     {
                         if (!TryPopNodeBuilder(out bool acknowledgeToken))
