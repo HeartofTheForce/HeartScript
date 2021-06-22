@@ -35,8 +35,7 @@ namespace HeartScript.Parsing
 
         private INode Parse()
         {
-            bool retry = false;
-            while (retry || _tokens.MoveNext())
+            while (_tokens.MoveNext())
             {
                 var current = _tokens.Current;
 
@@ -48,9 +47,6 @@ namespace HeartScript.Parsing
 
                 if (op == null)
                 {
-                    if (retry)
-                        throw new UnexpectedTokenException(current);
-
                     bool acknowledgeToken;
                     do
                     {
@@ -61,30 +57,32 @@ namespace HeartScript.Parsing
 
                             return _operand;
                         }
+                    } while (TryReduce(out acknowledgeToken) && !acknowledgeToken);
 
-                        if (!TryReduce(out acknowledgeToken) && !acknowledgeToken)
-                            retry = true;
-
-                    } while (!retry && !acknowledgeToken);
-                }
-                else
-                {
-                    retry = false;
-
-                    while (_nodeBuilders.TryPeek(out var left) && OperatorInfo.IsEvaluatedBefore(left.OperatorInfo, op))
-                    {
-                        if (!TryReduce(out bool acknowledgeToken))
-                            throw new Exception($"{nameof(NodeBuilder)} is incomplete");
-                        if (acknowledgeToken)
-                            throw new Exception($"Unexpected token acknowledge");
-                    }
-
-                    var nodeBuilder = op.CreateNodeBuilder();
-                    _operand = nodeBuilder.FeedOperandLeft(current, _operand);
+                    if (acknowledgeToken)
+                        continue;
 
                     if (_operand == null)
-                        _nodeBuilders.Push(nodeBuilder);
+                        op = _operators.FirstOrDefault(x => x.Keyword == current.Keyword && (x.IsPrefix() || x.IsNullary()));
+
+                    if (op == null)
+                        throw new ExpressionTermException(current);
                 }
+
+                while (_nodeBuilders.TryPeek(out var left) && OperatorInfo.IsEvaluatedBefore(left.OperatorInfo, op))
+                {
+                    if (!TryReduce(out bool acknowledgeToken))
+                        throw new Exception($"{nameof(NodeBuilder)} is incomplete");
+                    if (acknowledgeToken)
+                        throw new Exception($"Unexpected token acknowledge");
+                }
+
+                var nodeBuilder = op.CreateNodeBuilder();
+                _operand = nodeBuilder.FeedOperandLeft(current, _operand);
+
+                if (_operand == null)
+                    _nodeBuilders.Push(nodeBuilder);
+
             }
 
             throw new ArgumentException(nameof(_tokens));
