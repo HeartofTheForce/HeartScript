@@ -62,7 +62,7 @@ namespace HeartScript.Parsing
                             return _operand;
                         }
 
-                        if (!TryPopNodeBuilder(out acknowledgeToken) && !acknowledgeToken)
+                        if (!TryReduce(out acknowledgeToken) && !acknowledgeToken)
                             retry = true;
 
                     } while (!retry && !acknowledgeToken);
@@ -73,7 +73,7 @@ namespace HeartScript.Parsing
 
                     while (_nodeBuilders.TryPeek(out var left) && OperatorInfo.IsEvaluatedBefore(left.OperatorInfo, op))
                     {
-                        if (!TryPopNodeBuilder(out bool acknowledgeToken))
+                        if (!TryReduce(out bool acknowledgeToken))
                             throw new Exception($"{nameof(NodeBuilder)} is incomplete");
                         if (acknowledgeToken)
                             throw new Exception($"Unexpected token acknowledge");
@@ -90,7 +90,7 @@ namespace HeartScript.Parsing
             throw new ArgumentException(nameof(_tokens));
         }
 
-        private bool TryPopNodeBuilder(out bool acknowledgeToken)
+        private bool TryReduce(out bool acknowledgeToken)
         {
             var nodeBuilder = _nodeBuilders.Pop();
             _operand = nodeBuilder.FeedOperandRight(_tokens.Current, _operand, out acknowledgeToken);
@@ -102,22 +102,6 @@ namespace HeartScript.Parsing
             }
 
             return true;
-        }
-
-        private INode Reduce()
-        {
-            while (_nodeBuilders.Count > 0)
-            {
-                if (!TryPopNodeBuilder(out bool acknowledgeToken))
-                    throw new Exception($"{nameof(NodeBuilder)} is incomplete");
-                if (!acknowledgeToken)
-                    throw new Exception($"Unexpected token acknowledge");
-            }
-
-            if (_nodeBuilders.Count != 0)
-                throw new Exception($"Expected 0 {nameof(NodeBuilder)}");
-
-            return _operand!;
         }
     }
 }
