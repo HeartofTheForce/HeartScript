@@ -9,111 +9,27 @@ namespace HeartScript.Parsing
     {
         private static readonly Pattern[] s_patterns = new Pattern[]
         {
-            new Pattern()
-            {
-                Regex = new Regex("(\r\n|\r|\n)"),
-                Keyword = Keyword.Newline,
-            },
-            new Pattern()
-            {
-                Regex = new Regex(" +"),
-                Keyword = Keyword.Space,
-            },
-            new Pattern()
-            {
-                Regex = new Regex("\t+"),
-                Keyword = Keyword.Tab,
-            },
-            new Pattern()
-            {
-                Regex = new Regex("\\("),
-                Keyword = Keyword.RoundOpen,
-            },
-            new Pattern()
-            {
-                Regex = new Regex("\\)"),
-                Keyword = Keyword.RoundClose,
-            },
-            new Pattern()
-            {
-                Regex = new Regex(","),
-                Keyword = Keyword.Comma,
-            },
-            new Pattern()
-            {
-                Regex = new Regex("!"),
-                Keyword = Keyword.Factorial,
-            },
-            new Pattern()
-            {
-                Regex = new Regex("\\+"),
-                Keyword = Keyword.Plus,
-            },
-            new Pattern()
-            {
-                Regex = new Regex("-"),
-                Keyword = Keyword.Minus,
-            },
-            new Pattern()
-            {
-                Regex = new Regex("\\*"),
-                Keyword = Keyword.Multiply,
-            },
-            new Pattern()
-            {
-                Regex = new Regex("/"),
-                Keyword = Keyword.Divide,
-            },
-            new Pattern()
-            {
-                Regex = new Regex("~"),
-                Keyword = Keyword.BitwiseNot,
-            },
-            new Pattern()
-            {
-                Regex = new Regex("&"),
-                Keyword = Keyword.BitwiseAnd,
-            },
-            new Pattern()
-            {
-                Regex = new Regex("\\^"),
-                Keyword = Keyword.BitwiseXor,
-            },
-            new Pattern()
-            {
-                Regex = new Regex("\\|"),
-                Keyword = Keyword.BitwiseOr,
-            },
-            new Pattern()
-            {
-                Regex = new Regex("\\?"),
-                Keyword = Keyword.Ternary,
-            },
-            new Pattern()
-            {
-                Regex = new Regex(":"),
-                Keyword = Keyword.Colon,
-            },
-            new Pattern()
-            {
-                Regex = new Regex("\\d+(?:\\.\\d+)?"),
-                Keyword = Keyword.Constant,
-            },
-            new Pattern()
-            {
-                Regex = new Regex("if"),
-                Keyword = Keyword.If,
-            },
-            new Pattern()
-            {
-                Regex = new Regex("else"),
-                Keyword = Keyword.Else,
-            },
-            new Pattern()
-            {
-                Regex = new Regex("[a-zA-Z]\\w*"),
-                Keyword = Keyword.Identifier,
-            },
+            new Pattern("(\r\n|\r|\n)", Keyword.Newline),
+            new Pattern(" +", Keyword.Space),
+            new Pattern("\t+", Keyword.Tab),
+            new Pattern("\\(", Keyword.RoundOpen),
+            new Pattern("\\)", Keyword.RoundClose),
+            new Pattern(",", Keyword.Comma),
+            new Pattern("!", Keyword.Factorial),
+            new Pattern("\\+", Keyword.Plus),
+            new Pattern("-", Keyword.Minus),
+            new Pattern("\\*", Keyword.Multiply),
+            new Pattern("/", Keyword.Divide),
+            new Pattern("~", Keyword.BitwiseNot),
+            new Pattern("&", Keyword.BitwiseAnd),
+            new Pattern("\\^", Keyword.BitwiseXor),
+            new Pattern("\\|", Keyword.BitwiseOr),
+            new Pattern("\\?", Keyword.Ternary),
+            new Pattern(":", Keyword.Colon),
+            new Pattern("\\d+(?:\\.\\d+)?", Keyword.Constant),
+            new Pattern("if", Keyword.If),
+            new Pattern("else", Keyword.Else),
+            new Pattern("[a-zA-Z]\\w*", Keyword.Identifier),
         };
 
         private static readonly Keyword[] s_nonSignificantKeywords = new Keyword[]
@@ -128,7 +44,7 @@ namespace HeartScript.Parsing
             foreach (var pattern in s_patterns)
             {
                 var match = pattern.Regex.Match(input, offset);
-                if (match.Success && match.Index == offset)
+                if (match.Success)
                 {
                     token = new Token(pattern.Keyword, match.Value, offset);
                     offset += match.Length;
@@ -162,8 +78,14 @@ namespace HeartScript.Parsing
 
         private struct Pattern
         {
-            public Regex Regex { get; set; }
-            public Keyword Keyword { get; set; }
+            public Regex Regex { get; }
+            public Keyword Keyword { get; }
+
+            public Pattern(string regex, Keyword keyword)
+            {
+                Regex = new Regex($"\\G{regex}");
+                Keyword = keyword;
+            }
         }
     }
 }
