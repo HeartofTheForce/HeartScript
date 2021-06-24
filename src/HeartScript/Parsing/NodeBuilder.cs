@@ -25,13 +25,10 @@ namespace HeartScript.Parsing
 
             _token = current;
 
-            if (OperatorInfo.LeftPrecedence != null)
-            {
-                if (operand == null)
-                    throw new ArgumentException(nameof(operand));
+            if (OperatorInfo.LeftPrecedence == null != (operand == null))
+                throw new ArgumentException(nameof(operand));
 
-                _leftNode = operand;
-            }
+            _leftNode = operand;
 
             if (OperatorInfo.RightOperands == 0)
                 return OperatorInfo.BuildNode(_token, _leftNode, _rightNodes);

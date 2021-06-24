@@ -39,12 +39,7 @@ namespace HeartScript.Parsing
             {
                 var current = _tokens.Current;
 
-                OperatorInfo op;
-                if (_operand == null)
-                    op = _operators.FirstOrDefault(x => x.Keyword == current.Keyword && (x.IsPrefix() || x.IsNullary()));
-                else
-                    op = _operators.FirstOrDefault(x => x.Keyword == current.Keyword && (x.IsInfix() || x.IsPostfix()));
-
+                var op = TryGetOperator();
                 if (op == null)
                 {
                     bool acknowledgeToken;
@@ -62,8 +57,7 @@ namespace HeartScript.Parsing
                     if (acknowledgeToken)
                         continue;
 
-                    if (_operand == null)
-                        op = _operators.FirstOrDefault(x => x.Keyword == current.Keyword && (x.IsPrefix() || x.IsNullary()));
+                    op = TryGetOperator();
 
                     if (op == null)
                         throw new ExpressionTermException(current);
@@ -77,15 +71,30 @@ namespace HeartScript.Parsing
                         throw new Exception($"Unexpected token acknowledge");
                 }
 
-                var nodeBuilder = op.CreateNodeBuilder();
-                _operand = nodeBuilder.FeedOperandLeft(current, _operand);
-
-                if (_operand == null)
-                    _nodeBuilders.Push(nodeBuilder);
-
+                PushOperator(op);
             }
 
             throw new ArgumentException(nameof(_tokens));
+        }
+
+        private OperatorInfo? TryGetOperator()
+        {
+            OperatorInfo op;
+            if (_operand == null)
+                op = _operators.FirstOrDefault(x => x.Keyword == _tokens.Current.Keyword && (x.IsPrefix() || x.IsNullary()));
+            else
+                op = _operators.FirstOrDefault(x => x.Keyword == _tokens.Current.Keyword && (x.IsInfix() || x.IsPostfix()));
+
+            return op;
+        }
+
+        private void PushOperator(OperatorInfo op)
+        {
+            var nodeBuilder = op.CreateNodeBuilder();
+            _operand = nodeBuilder.FeedOperandLeft(_tokens.Current, _operand);
+
+            if (_operand == null)
+                _nodeBuilders.Push(nodeBuilder);
         }
 
         private bool TryReduce(out bool acknowledgeToken)
