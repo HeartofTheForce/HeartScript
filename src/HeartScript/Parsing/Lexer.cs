@@ -25,17 +25,10 @@ namespace HeartScript.Parsing
                     return false;
 
                 Current = new Token(Keyword.EndOfString, null!, _offset);
-            }
-            else
-            {
-                do
-                {
-                    if (!TryMatch())
-                        throw new Exception($"No matching patterns @ {_offset}");
-                } while (s_nonSignificantKeywords.Contains(Current.Keyword));
+                return true;
             }
 
-            return true;
+            return TryMatch();
         }
 
         private bool TryMatch()
@@ -45,7 +38,7 @@ namespace HeartScript.Parsing
                 var match = pattern.Regex.Match(_input, _offset);
                 if (match.Success)
                 {
-                    Current = new Token(pattern.Keyword, match.Value, _offset);
+                    Current = new Token(pattern.Keyword, match.Groups[1].Value, match.Groups[1].Index);
                     _offset += match.Length;
                     return true;
                 }
@@ -56,9 +49,6 @@ namespace HeartScript.Parsing
 
         private static readonly Pattern[] s_patterns = new Pattern[]
         {
-            new Pattern("(\r\n|\r|\n)", Keyword.Newline),
-            new Pattern(" +", Keyword.Space),
-            new Pattern("\t+", Keyword.Tab),
             new Pattern("\\(", Keyword.RoundOpen),
             new Pattern("\\)", Keyword.RoundClose),
             new Pattern(",", Keyword.Comma),
@@ -79,21 +69,14 @@ namespace HeartScript.Parsing
             new Pattern("[a-zA-Z]\\w*", Keyword.Identifier),
         };
 
-        private static readonly Keyword[] s_nonSignificantKeywords = new Keyword[]
-        {
-            Keyword.Space,
-            Keyword.Tab,
-            Keyword.Newline,
-        };
-
         private struct Pattern
         {
             public Regex Regex { get; }
             public Keyword Keyword { get; }
 
-            public Pattern(string regex, Keyword keyword)
+            public Pattern(string pattern, Keyword keyword)
             {
-                Regex = new Regex($"\\G{regex}");
+                Regex = new Regex($"\\G\\s*({pattern})");
                 Keyword = keyword;
             }
         }

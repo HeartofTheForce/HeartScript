@@ -42,9 +42,6 @@ namespace HeartScript.Parsing
 
     public enum Keyword
     {
-        Space,
-        Tab,
-        Newline,
         RoundOpen,
         RoundClose,
         Comma,
