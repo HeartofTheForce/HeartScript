@@ -1,12 +1,59 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace HeartScript.Parsing
 {
-    public static class Lexer
+    public class Lexer
     {
+        public Token Current { get; private set; } = default!;
+
+        private readonly string _input;
+        private int _offset;
+
+        public Lexer(string input)
+        {
+            _input = input;
+            _offset = 0;
+        }
+
+        public bool MoveNext()
+        {
+            if (_offset == _input.Length)
+            {
+                if (Current.Keyword == Keyword.EndOfString)
+                    return false;
+
+                Current = new Token(Keyword.EndOfString, null!, _offset);
+            }
+            else
+            {
+                do
+                {
+                    if (!TryMatch())
+                        throw new Exception($"No matching patterns @ {_offset}");
+                } while (s_nonSignificantKeywords.Contains(Current.Keyword));
+            }
+
+            return true;
+        }
+
+        private bool TryMatch()
+        {
+            foreach (var pattern in s_patterns)
+            {
+                var match = pattern.Regex.Match(_input, _offset);
+                if (match.Success)
+                {
+                    Current = new Token(pattern.Keyword, match.Value, _offset);
+                    _offset += match.Length;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         private static readonly Pattern[] s_patterns = new Pattern[]
         {
             new Pattern("(\r\n|\r|\n)", Keyword.Newline),
@@ -38,43 +85,6 @@ namespace HeartScript.Parsing
             Keyword.Tab,
             Keyword.Newline,
         };
-
-        private static bool TryMatch(string input, ref int offset, out Token token)
-        {
-            foreach (var pattern in s_patterns)
-            {
-                var match = pattern.Regex.Match(input, offset);
-                if (match.Success)
-                {
-                    token = new Token(pattern.Keyword, match.Value, offset);
-                    offset += match.Length;
-                    return true;
-                }
-            }
-
-            token = null!;
-            return false;
-        }
-
-        public static IEnumerable<Token> Process(string input)
-        {
-            var output = new List<Token>();
-
-            int offset = 0;
-            while (offset < input.Length)
-            {
-                if (!TryMatch(input, ref offset, out var token))
-                    throw new Exception($"No matching patterns '{offset}'");
-
-                if (s_nonSignificantKeywords.Contains(token.Keyword))
-                    continue;
-
-                output.Add(token);
-            }
-
-            output.Add(new Token(Keyword.EndOfString, null!, offset));
-            return output;
-        }
 
         private struct Pattern
         {

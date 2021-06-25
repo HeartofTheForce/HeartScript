@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using HeartScript.Parsing;
 using NUnit.Framework;
@@ -95,16 +96,16 @@ namespace HeartScript.UTests.LexerTests
         [TestCaseSource(nameof(s_testCases))]
         public void TestCases(TokenizationTestCase testCase)
         {
-            var tokens = Lexer.Process(testCase.Infix);
+            var lexer = new Lexer(testCase.Infix);
 
-            Assert.AreEqual(testCase.ExpectedTokens.Length, tokens.Count());
-
-            int i = 0;
-            foreach (var token in tokens)
+            int tokenCount = 0;
+            while (lexer.MoveNext())
             {
-                Assert.AreEqual(testCase.ExpectedTokens[i], token);
-                i++;
+                Assert.AreEqual(testCase.ExpectedTokens[tokenCount], lexer.Current);
+                tokenCount++;
             }
+
+            Assert.AreEqual(testCase.ExpectedTokens.Length, tokenCount);
         }
 
         public struct TokenizationTestCase

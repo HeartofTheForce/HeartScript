@@ -8,37 +8,33 @@ namespace HeartScript.Parsing
     public class AstParser
     {
         private readonly OperatorInfo[] _operators;
-        private readonly IEnumerator<Token> _tokens;
+        private readonly Lexer _lexer;
         private readonly Stack<NodeBuilder> _nodeBuilders;
 
         private INode? _operand;
 
-        public AstParser(OperatorInfo[] operators, IEnumerator<Token> tokens)
+        private AstParser(OperatorInfo[] operators, Lexer lexer)
         {
             _operators = operators;
-            _tokens = tokens;
+            _lexer = lexer;
             _nodeBuilders = new Stack<NodeBuilder>();
         }
 
-        public static INode Parse(OperatorInfo[] operators, IEnumerable<Token> tokens)
+        public static INode Parse(OperatorInfo[] operators, Lexer lexer)
         {
-            var enumerator = tokens.GetEnumerator();
-
-            var astParser = new AstParser(operators, enumerator);
+            var astParser = new AstParser(operators, lexer);
             var node = astParser.Parse();
 
-            if (enumerator.Current.Keyword != Keyword.EndOfString)
-                throw new UnexpectedTokenException(enumerator.Current, Keyword.EndOfString);
+            if (lexer.Current.Keyword != Keyword.EndOfString)
+                throw new UnexpectedTokenException(lexer.Current, Keyword.EndOfString);
 
             return node;
         }
 
         private INode Parse()
         {
-            while (_tokens.MoveNext())
+            while (_lexer.MoveNext())
             {
-                var current = _tokens.Current;
-
                 var op = TryGetOperator();
                 if (op == null)
                 {
@@ -48,7 +44,7 @@ namespace HeartScript.Parsing
                         if (_nodeBuilders.Count == 0)
                         {
                             if (_operand == null)
-                                throw new ExpressionTermException(current);
+                                throw new ExpressionTermException(_lexer.Current);
 
                             return _operand;
                         }
@@ -60,7 +56,7 @@ namespace HeartScript.Parsing
                     op = TryGetOperator();
 
                     if (op == null)
-                        throw new ExpressionTermException(current);
+                        throw new ExpressionTermException(_lexer.Current);
                 }
 
                 while (_nodeBuilders.TryPeek(out var left) && OperatorInfo.IsEvaluatedBefore(left.OperatorInfo, op))
@@ -74,16 +70,16 @@ namespace HeartScript.Parsing
                 PushOperator(op);
             }
 
-            throw new ArgumentException(nameof(_tokens));
+            throw new ArgumentException(nameof(_lexer));
         }
 
         private OperatorInfo? TryGetOperator()
         {
             OperatorInfo op;
             if (_operand == null)
-                op = _operators.FirstOrDefault(x => x.Keyword == _tokens.Current.Keyword && (x.IsPrefix() || x.IsNullary()));
+                op = _operators.FirstOrDefault(x => x.Keyword == _lexer.Current.Keyword && (x.IsPrefix() || x.IsNullary()));
             else
-                op = _operators.FirstOrDefault(x => x.Keyword == _tokens.Current.Keyword && (x.IsInfix() || x.IsPostfix()));
+                op = _operators.FirstOrDefault(x => x.Keyword == _lexer.Current.Keyword && (x.IsInfix() || x.IsPostfix()));
 
             return op;
         }
@@ -91,7 +87,7 @@ namespace HeartScript.Parsing
         private void PushOperator(OperatorInfo op)
         {
             var nodeBuilder = op.CreateNodeBuilder();
-            _operand = nodeBuilder.FeedOperandLeft(_tokens.Current, _operand);
+            _operand = nodeBuilder.FeedOperandLeft(_lexer.Current, _operand);
 
             if (_operand == null)
                 _nodeBuilders.Push(nodeBuilder);
@@ -100,7 +96,7 @@ namespace HeartScript.Parsing
         private bool TryReduce(out bool acknowledgeToken)
         {
             var nodeBuilder = _nodeBuilders.Pop();
-            _operand = nodeBuilder.FeedOperandRight(_tokens.Current, _operand, out acknowledgeToken);
+            _operand = nodeBuilder.FeedOperandRight(_lexer.Current, _operand, out acknowledgeToken);
 
             if (_operand == null)
             {

@@ -119,9 +119,9 @@ namespace HeartScript.UTests.End2EndTests
         [TestCaseSource(nameof(s_testCases))]
         public void TestCases(End2EndTestCase<double> testCase)
         {
-            var tokens = Lexer.Process(testCase.Infix);
+            var lexer = new Lexer(testCase.Infix);
 
-            var node = AstParser.Parse(Demo.Operators, tokens);
+            var node = AstParser.Parse(Demo.Operators, lexer);
             Assert.AreEqual(testCase.ExpectedNodeString, node.ToString());
 
             // var functionActual = ExpressionCompiler.Compile<Context<double>, double>(Demo.CompilerFunctions, node);
