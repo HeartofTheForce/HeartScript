@@ -48,9 +48,12 @@ namespace HeartScript.Parsing
                 throw new ExpressionTermException(current);
 
             bool isTerminator = OperatorInfo.Terminator == null || current.Keyword == OperatorInfo.Terminator;
-            bool isDelimiter = (OperatorInfo.Delimiter == null && current.Keyword != OperatorInfo.Terminator) || current.Keyword == OperatorInfo.Delimiter;
+            bool isDelimiter =
+                (OperatorInfo.Delimiter == null || current.Keyword == OperatorInfo.Delimiter) &&
+                (OperatorInfo.RightOperands == null || _rightNodes.Count < OperatorInfo.RightOperands) &&
+                (current.Keyword != OperatorInfo.Terminator);
 
-            if (isDelimiter && (OperatorInfo.RightOperands == null || _rightNodes.Count < OperatorInfo.RightOperands))
+            if (isDelimiter)
             {
                 if (operand == null)
                     throw new ExpressionTermException(current);
