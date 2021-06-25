@@ -21,7 +21,7 @@ namespace HeartScript.Parsing
         {
             if (_offset == _input.Length)
             {
-                if (Current.Keyword == Keyword.EndOfString)
+                if (Current?.Keyword == Keyword.EndOfString)
                     return false;
 
                 Current = new Token(Keyword.EndOfString, null!, _offset);

@@ -91,6 +91,15 @@ namespace HeartScript.UTests.LexerTests
                     new Token(Keyword.EndOfString, null, 15),
                 },
             },
+            //Empty
+            new TokenizationTestCase()
+            {
+                Infix = "",
+                ExpectedTokens = new Token[]
+                {
+                    new Token(Keyword.EndOfString, null, 0),
+                },
+            },
         };
 
         [TestCaseSource(nameof(s_testCases))]
