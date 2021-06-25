@@ -28,14 +28,4 @@ namespace HeartScript.Parsing
             Token = token;
         }
     }
-
-    public class ExpressionReductionException : Exception
-    {
-        public int RemainingValues { get; }
-
-        public ExpressionReductionException(int remainingValues) : base($"Expression incorrectly reduced to {remainingValues} values")
-        {
-            RemainingValues = remainingValues;
-        }
-    }
 }

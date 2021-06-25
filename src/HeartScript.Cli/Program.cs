@@ -7,16 +7,23 @@ namespace HeartScript.Cli
     {
         static void Main(string[] args)
         {
-            string infix = string.Join(' ', args);
+            try
+            {
+                string infix = string.Join(' ', args);
 
-            Console.WriteLine("Input");
-            Console.WriteLine(infix);
+                Console.WriteLine("Input");
+                Console.WriteLine(infix);
 
-            var lexer = new Lexer(infix);
-            var node = AstParser.Parse(Demo.Operators, lexer);
+                var lexer = new Lexer(infix);
+                var node = AstParser.Parse(Demo.Operators, lexer);
 
-            Console.WriteLine("Output");
-            Console.WriteLine(node);
+                Console.WriteLine("Output");
+                Console.WriteLine(node);
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
         }
     }
 }
