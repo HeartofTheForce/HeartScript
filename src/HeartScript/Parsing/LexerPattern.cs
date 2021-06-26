@@ -14,9 +14,17 @@ namespace HeartScript.Parsing
             IsRegex = isRegex;
 
             if (IsRegex)
-                Regex = new Regex($"\\G\\s*({pattern})");
+                Regex = new Regex($"\\G({pattern})\\s*");
             else
-                Regex = new Regex($"\\G\\s*({Regex.Escape(pattern)})");
+                Regex = new Regex($"\\G({Regex.Escape(pattern)})\\s*");
+        }
+
+        public override string ToString()
+        {
+            if (IsRegex)
+                return $"Regex: {Pattern}";
+            else
+                return Pattern;
         }
     }
 }

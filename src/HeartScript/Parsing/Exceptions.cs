@@ -4,28 +4,27 @@ namespace HeartScript.Parsing
 {
     public class ExpressionTermException : Exception
     {
-        public Token Token { get; }
+        public int CharIndex { get; }
 
-        public ExpressionTermException(Token token) : base($"Invalid Expression Term '{token}'")
+        public ExpressionTermException(int charIndex) : base($"Invalid Expression Term @ {charIndex}")
         {
-            Token = token;
+            CharIndex = charIndex;
         }
     }
 
     public class UnexpectedTokenException : Exception
     {
-        public Token Token { get; }
-        public Keyword? ExpectedKeyword { get; }
+        public int CharIndex { get; }
+        public string ExpectedPattern { get; }
 
-        public UnexpectedTokenException(Token token, Keyword expectedKeyword) : base($"Unexpected Token '{token}' expected '{expectedKeyword}'")
+        public UnexpectedTokenException(int charIndex, string expectedPattern) : base($"Unexpected Token @ {charIndex} expected {expectedPattern}")
         {
-            Token = token;
-            ExpectedKeyword = expectedKeyword;
+            CharIndex = charIndex;
+            ExpectedPattern = expectedPattern;
         }
 
-        public UnexpectedTokenException(Token token) : base($"Unexpected Token '{token}'")
+        public UnexpectedTokenException(int charIndex, LexerPattern lexerPattern) : this(charIndex, lexerPattern.ToString())
         {
-            Token = token;
         }
     }
 }

@@ -1,38 +1,41 @@
-﻿using System;
-using System.Linq;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 
 namespace HeartScript.Parsing
 {
     public class Lexer
     {
-        public Token Current { get; private set; } = default!;
+        public Token Current { get; private set; }
+        public int Offset { get; private set; }
 
         private readonly string _input;
-        private int _offset;
 
         public Lexer(string input)
         {
+            Current = default!;
+            Offset = 0;
+
             _input = input;
-            _offset = 0;
+
+            var match = Regex.Match(input, "^\\s*");
+            if (match.Success)
+                Offset += match.Length;
         }
 
         public bool Eat(LexerPattern lexerPattern)
         {
-            if (_offset == _input.Length)
+            if (Offset == _input.Length)
             {
-                if (Current?.CharOffset != _offset)
-                    return false;
+                if (Current == null || Current.Value != null)
+                    Current = new Token(null, Offset);
 
-                Current = new Token("EOF", _offset);
-                return true;
+                return false;
             }
 
-            var match = lexerPattern.Regex.Match(_input, _offset);
+            var match = lexerPattern.Regex.Match(_input, Offset);
             if (match.Success)
             {
                 Current = new Token(match.Groups[1].Value, match.Groups[1].Index);
-                _offset += match.Length;
+                Offset += match.Length;
                 return true;
             }
 

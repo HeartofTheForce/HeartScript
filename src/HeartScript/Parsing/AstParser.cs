@@ -25,46 +25,44 @@ namespace HeartScript.Parsing
             var astParser = new AstParser(operators, lexer);
             var node = astParser.Parse();
 
-            if (lexer.Current.Keyword != Keyword.EndOfString)
-                throw new UnexpectedTokenException(lexer.Current, Keyword.EndOfString);
+            if (lexer.Current.Value != null)
+                throw new UnexpectedTokenException(lexer.Offset, "EOF");
 
             return node;
         }
 
         private INode Parse()
         {
-            while (_lexer.MoveNext())
+            while (true)
             {
                 var op = TryGetOperator();
                 if (op == null)
                 {
-                    bool acknowledgeToken;
+                    int initialOffset = _lexer.Offset;
                     do
                     {
                         if (_nodeBuilders.Count == 0)
                         {
                             if (_operand == null)
-                                throw new ExpressionTermException(_lexer.Current);
+                                throw new ExpressionTermException(_lexer.Offset);
 
                             return _operand;
                         }
-                    } while (TryReduce(out acknowledgeToken) && !acknowledgeToken);
+                    } while (TryReduce() && initialOffset == _lexer.Offset);
 
-                    if (acknowledgeToken)
+                    if (initialOffset != _lexer.Offset)
                         continue;
 
                     op = TryGetOperator();
 
                     if (op == null)
-                        throw new ExpressionTermException(_lexer.Current);
+                        throw new ExpressionTermException(_lexer.Offset);
                 }
 
                 while (_nodeBuilders.TryPeek(out var left) && OperatorInfo.IsEvaluatedBefore(left.OperatorInfo, op))
                 {
-                    if (!TryReduce(out bool acknowledgeToken))
+                    if (!TryReduce())
                         throw new Exception($"{nameof(NodeBuilder)} is incomplete");
-                    if (acknowledgeToken)
-                        throw new Exception($"Unexpected token acknowledge");
                 }
 
                 PushOperator(op);
@@ -77,9 +75,9 @@ namespace HeartScript.Parsing
         {
             OperatorInfo op;
             if (_operand == null)
-                op = _operators.FirstOrDefault(x => x.Keyword == _lexer.Current.Keyword && (x.IsPrefix() || x.IsNullary()));
+                op = _operators.FirstOrDefault(x => (x.IsPrefix() || x.IsNullary()) && _lexer.Eat(x.Keyword));
             else
-                op = _operators.FirstOrDefault(x => x.Keyword == _lexer.Current.Keyword && (x.IsInfix() || x.IsPostfix()));
+                op = _operators.FirstOrDefault(x => (x.IsInfix() || x.IsPostfix()) && _lexer.Eat(x.Keyword));
 
             return op;
         }
@@ -93,10 +91,10 @@ namespace HeartScript.Parsing
                 _nodeBuilders.Push(nodeBuilder);
         }
 
-        private bool TryReduce(out bool acknowledgeToken)
+        private bool TryReduce()
         {
             var nodeBuilder = _nodeBuilders.Pop();
-            _operand = nodeBuilder.FeedOperandRight(_lexer.Current, _operand, out acknowledgeToken);
+            _operand = nodeBuilder.FeedOperandRight(_lexer, _operand);
 
             if (_operand == null)
             {

@@ -6,109 +6,109 @@ namespace HeartScript.UTests.AstParserTests
     [TestFixture]
     public class UnexpectedTokenTests
     {
-        static readonly UnexpectedTokenTestCase[] s_testCases = new UnexpectedTokenTestCase[]
+        static readonly UnexpectedTokenIndexTestCase[] s_testCases = new UnexpectedTokenIndexTestCase[]
         {
             //Constant Constant
-            new UnexpectedTokenTestCase()
+            new UnexpectedTokenIndexTestCase()
             {
                 Infix = "1 1",
-                UnexpectedToken = new Token(Keyword.Constant, "1", 2),
-                ExpectedKeyword = Keyword.EndOfString,
+                ExpectedCharIndex = 2,
+                ExpectedPattern = "EOF",
             },
             //Identifier Constant
-            new UnexpectedTokenTestCase()
+            new UnexpectedTokenIndexTestCase()
             {
                 Infix = "a 1",
-                UnexpectedToken = new Token(Keyword.Constant, "1", 2),
-                ExpectedKeyword = Keyword.EndOfString,
+                ExpectedCharIndex = 2,
+                ExpectedPattern = "EOF",
             },
             //Constant Identifier
-            new UnexpectedTokenTestCase()
+            new UnexpectedTokenIndexTestCase()
             {
                 Infix = "1 a",
-                UnexpectedToken = new Token(Keyword.Identifier, "a", 2),
-                ExpectedKeyword = Keyword.EndOfString,
+                ExpectedCharIndex = 2,
+                ExpectedPattern = "EOF",
             },
             //Identifier Identifier
-            new UnexpectedTokenTestCase()
+            new UnexpectedTokenIndexTestCase()
             {
                 Infix = "a a",
-                UnexpectedToken = new Token(Keyword.Identifier, "a", 2),
-                ExpectedKeyword = Keyword.EndOfString,
+                ExpectedCharIndex = 2,
+                ExpectedPattern = "EOF",
             },
             //RoundClose Identifier
-            new UnexpectedTokenTestCase()
+            new UnexpectedTokenIndexTestCase()
             {
                 Infix = "(1) a",
-                UnexpectedToken = new Token(Keyword.Identifier, "a", 4),
-                ExpectedKeyword = Keyword.EndOfString,
+                ExpectedCharIndex = 4,
+                ExpectedPattern = "EOF",
             },
             //RoundClose Constant
-            new UnexpectedTokenTestCase()
+            new UnexpectedTokenIndexTestCase()
             {
                 Infix = "(a) 1",
-                UnexpectedToken = new Token(Keyword.Constant, "1", 4),
-                ExpectedKeyword = Keyword.EndOfString,
+                ExpectedCharIndex = 4,
+                ExpectedPattern = "EOF",
             },
             //Unexpected Close
-            new UnexpectedTokenTestCase()
+            new UnexpectedTokenIndexTestCase()
             {
                 Infix = "(1+2))",
-                UnexpectedToken = new Token(Keyword.RoundClose, ")", 5),
-                ExpectedKeyword = Keyword.EndOfString,
+                ExpectedCharIndex = 5,
+                ExpectedPattern = "EOF",
             },
             //Bracket Missing Close
-            new UnexpectedTokenTestCase()
+            new UnexpectedTokenIndexTestCase()
             {
                 Infix = "(1+2",
-                UnexpectedToken = new Token(Keyword.EndOfString, null, 4),
-                ExpectedKeyword = Keyword.RoundClose,
+                ExpectedCharIndex = 4,
+                ExpectedPattern = ")",
             },
             //Call Missing Close
-            new UnexpectedTokenTestCase()
+            new UnexpectedTokenIndexTestCase()
             {
                 Infix = "max(1,2",
-                UnexpectedToken = new Token(Keyword.EndOfString, null, 7),
-                ExpectedKeyword = Keyword.RoundClose,
+                ExpectedCharIndex = 7,
+                ExpectedPattern = ")",
             },
             //Unexpected Comma
-            new UnexpectedTokenTestCase()
+            new UnexpectedTokenIndexTestCase()
             {
                 Infix = "(1,)",
-                UnexpectedToken = new Token(Keyword.Comma, ",", 2),
-                ExpectedKeyword = Keyword.RoundClose,
+                ExpectedCharIndex = 2,
+                ExpectedPattern = ")",
             },
             //Too Few Operands
-            new UnexpectedTokenTestCase()
+            new UnexpectedTokenIndexTestCase()
             {
                 Infix = "a ? b",
-                UnexpectedToken = new Token(Keyword.EndOfString, null, 5),
-                ExpectedKeyword = Keyword.Colon,
+                ExpectedCharIndex = 5,
+                ExpectedPattern = ":",
             },
             //Too Many Operands
-            new UnexpectedTokenTestCase()
+            new UnexpectedTokenIndexTestCase()
             {
                 Infix = "a ? b : c : d",
-                UnexpectedToken = new Token(Keyword.Colon, ":", 10),
-                ExpectedKeyword = Keyword.EndOfString,
+                ExpectedCharIndex = 10,
+                ExpectedPattern = "EOF",
             },
         };
 
         [TestCaseSource(nameof(s_testCases))]
-        public void TestCases(UnexpectedTokenTestCase testCase)
+        public void TestCases(UnexpectedTokenIndexTestCase testCase)
         {
             var lexer = new Lexer(testCase.Infix);
             var ex = Assert.Throws<UnexpectedTokenException>(() => AstParser.Parse(Demo.Operators, lexer));
 
-            Assert.AreEqual(testCase.UnexpectedToken, ex.Token);
-            Assert.AreEqual(testCase.ExpectedKeyword, ex.ExpectedKeyword);
+            Assert.AreEqual(testCase.ExpectedCharIndex, ex.CharIndex);
+            Assert.AreEqual(testCase.ExpectedPattern, ex.ExpectedPattern);
         }
 
-        public struct UnexpectedTokenTestCase
+        public struct UnexpectedTokenIndexTestCase
         {
             public string Infix { get; set; }
-            public Token UnexpectedToken { get; set; }
-            public Keyword? ExpectedKeyword { get; set; }
+            public int ExpectedCharIndex { get; set; }
+            public string ExpectedPattern { get; set; }
 
             public override string ToString()
             {
