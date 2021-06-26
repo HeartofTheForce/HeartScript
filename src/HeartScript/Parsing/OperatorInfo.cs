@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using HeartScript.Nodes;
-using static HeartScript.Parsing.Lexer;
 
 namespace HeartScript.Parsing
 {

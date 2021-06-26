@@ -34,7 +34,8 @@ namespace HeartScript.Parsing
             var match = lexerPattern.Regex.Match(_input, Offset);
             if (match.Success)
             {
-                Current = new Token(match.Groups[1].Value, match.Groups[1].Index);
+                int groupIndex = match.Groups.Count - 1;
+                Current = new Token(match.Groups[groupIndex].Value, match.Groups[groupIndex].Index);
                 Offset += match.Length;
                 return true;
             }

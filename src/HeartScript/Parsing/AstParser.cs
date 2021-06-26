@@ -7,20 +7,20 @@ namespace HeartScript.Parsing
 {
     public class AstParser
     {
-        private readonly OperatorInfo[] _operators;
+        private readonly IEnumerable<OperatorInfo> _operators;
         private readonly Lexer _lexer;
         private readonly Stack<NodeBuilder> _nodeBuilders;
 
         private INode? _operand;
 
-        private AstParser(OperatorInfo[] operators, Lexer lexer)
+        private AstParser(IEnumerable<OperatorInfo> operators, Lexer lexer)
         {
             _operators = operators;
             _lexer = lexer;
             _nodeBuilders = new Stack<NodeBuilder>();
         }
 
-        public static INode Parse(OperatorInfo[] operators, Lexer lexer)
+        public static INode Parse(IEnumerable<OperatorInfo> operators, Lexer lexer)
         {
             var astParser = new AstParser(operators, lexer);
             var node = astParser.Parse();
