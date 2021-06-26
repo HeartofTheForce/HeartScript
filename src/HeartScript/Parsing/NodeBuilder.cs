@@ -46,22 +46,16 @@ namespace HeartScript.Parsing
             if (operand == null && _rightNodes.Count > 0)
                 throw new ExpressionTermException(initialOffset);
 
-            bool isTerminator = OperatorInfo.Terminator != null && lexer.Eat(OperatorInfo.Terminator);
-
-            bool isDelimiter =
-                !isTerminator &&
-                (OperatorInfo.RightOperands == null || _rightNodes.Count < OperatorInfo.RightOperands) &&
-                (OperatorInfo.Delimiter == null || lexer.Eat(OperatorInfo.Delimiter));
-
-            if (isDelimiter)
+            if (_rightNodes.Count < OperatorInfo.RightOperands)
             {
                 if (operand == null)
                     throw new ExpressionTermException(initialOffset);
 
-                return null;
+                if (OperatorInfo.Delimiter == null || lexer.Eat(OperatorInfo.Delimiter))
+                    return null;
             }
 
-            if (OperatorInfo.Terminator == null || isTerminator)
+            if (OperatorInfo.Terminator == null || lexer.Eat(OperatorInfo.Terminator))
             {
                 if (OperatorInfo.RightOperands != null && _rightNodes.Count != OperatorInfo.RightOperands)
                 {
@@ -72,6 +66,15 @@ namespace HeartScript.Parsing
                 }
 
                 return OperatorInfo.BuildNode(_token, _leftNode, _rightNodes);
+            }
+
+            if (OperatorInfo.RightOperands == null)
+            {
+                if (operand == null)
+                    throw new ExpressionTermException(initialOffset);
+
+                if (OperatorInfo.Delimiter == null || lexer.Eat(OperatorInfo.Delimiter))
+                    return null;
             }
 
             throw new UnexpectedTokenException(initialOffset, OperatorInfo.Terminator);

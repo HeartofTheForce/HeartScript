@@ -38,9 +38,6 @@ namespace HeartScript.Parsing
                     throw new ArgumentException(nameof(terminator));
             }
 
-            if (rightOperands == null && delimiter == terminator)
-                throw new ArgumentException($"Variable parameter count requires {nameof(delimiter)} and {nameof(terminator)} to be distinct");
-
             Keyword = keyword;
 
             LeftPrecedence = leftPrecedence;
