@@ -38,45 +38,5 @@ namespace HeartScript.Parsing
 
             return false;
         }
-
-        private static readonly LexerPattern[] s_patterns = new LexerPattern[]
-        {
-            new LexerPattern("(", false),
-            new LexerPattern(")", false),
-            new LexerPattern(",", false),
-            new LexerPattern("!", false),
-            new LexerPattern("+", false),
-            new LexerPattern("-", false),
-            new LexerPattern("*", false),
-            new LexerPattern("/", false),
-            new LexerPattern("~", false),
-            new LexerPattern("&", false),
-            new LexerPattern("^", false),
-            new LexerPattern("|", false),
-            new LexerPattern("?", false),
-            new LexerPattern(":", false),
-            new LexerPattern("if", false),
-            new LexerPattern("else", false),
-            new LexerPattern("\\d+(?:\\.\\d+)?", true),
-            new LexerPattern("[a-zA-Z]\\w*", true),
-        };
-
-        public class LexerPattern
-        {
-            public Regex Regex { get; }
-            public string Pattern { get; }
-            public bool IsRegex { get; }
-
-            public LexerPattern(string pattern, bool isRegex)
-            {
-                Pattern = pattern;
-                IsRegex = isRegex;
-
-                if (IsRegex)
-                    Regex = new Regex($"\\G\\s*({pattern})");
-                else
-                    Regex = new Regex($"\\G\\s*({Regex.Escape(pattern)})");
-            }
-        }
     }
 }

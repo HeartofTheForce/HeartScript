@@ -19,7 +19,7 @@ namespace HeartScript.Nodes
         public static OperatorInfo OperatorInfo()
         {
             return new OperatorInfo(
-                Keyword.Identifier,
+                new LexerPattern("[a-zA-Z]\\w*", true),
                 null,
                 0,
                 0,
