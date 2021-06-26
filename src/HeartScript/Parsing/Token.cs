@@ -4,23 +4,20 @@ namespace HeartScript.Parsing
 {
     public class Token
     {
-        public Keyword Keyword { get; set; }
         public string Value { get; }
         public int CharOffset { get; }
 
         public Token(
-            Keyword keyword,
             string value,
             int charOffset)
         {
-            Keyword = keyword;
             Value = value;
             CharOffset = charOffset;
         }
 
         public override string ToString()
         {
-            return $"({Keyword} '{Value}') @ {CharOffset}";
+            return $"{Value} @ {CharOffset}";
         }
 
         public override bool Equals(object obj)
@@ -29,14 +26,13 @@ namespace HeartScript.Parsing
                 return base.Equals(obj);
 
             return
-                other.Keyword == Keyword &&
                 other.Value == Value &&
                 other.CharOffset == CharOffset;
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(Keyword, Value);
+            return HashCode.Combine(Value, CharOffset);
         }
     }
 

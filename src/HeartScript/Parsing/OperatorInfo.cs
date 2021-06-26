@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using HeartScript.Nodes;
+using static HeartScript.Parsing.Lexer;
 
 namespace HeartScript.Parsing
 {
@@ -8,29 +9,26 @@ namespace HeartScript.Parsing
 
     public class OperatorInfo
     {
-        public Keyword Keyword { get; }
+        public LexerPattern Keyword { get; }
 
         public uint? LeftPrecedence { get; }
         public uint RightPrecedence { get; }
         public uint? RightOperands { get; }
 
-        public Keyword? Delimiter { get; }
-        public Keyword? Terminator { get; }
+        public LexerPattern? Delimiter { get; }
+        public LexerPattern? Terminator { get; }
 
         public BuildNode BuildNode { get; }
 
         public OperatorInfo(
-            Keyword keyword,
+            LexerPattern keyword,
             uint? leftPrecedence,
             uint rightPrecedence,
             uint? rightOperands,
-            Keyword? delimiter,
-            Keyword? terminator,
+            LexerPattern? delimiter,
+            LexerPattern? terminator,
             BuildNode buildNode)
         {
-            Keyword = keyword;
-            LeftPrecedence = leftPrecedence;
-            RightPrecedence = rightPrecedence;
 
             if (rightOperands == 0)
             {
@@ -43,9 +41,15 @@ namespace HeartScript.Parsing
             if (rightOperands == null && delimiter == terminator)
                 throw new ArgumentException($"Variable parameter count requires {nameof(delimiter)} and {nameof(terminator)} to be distinct");
 
+            Keyword = keyword;
+
+            LeftPrecedence = leftPrecedence;
+            RightPrecedence = rightPrecedence;
             RightOperands = rightOperands;
+
             Delimiter = delimiter;
             Terminator = terminator;
+
             BuildNode = buildNode;
         }
 

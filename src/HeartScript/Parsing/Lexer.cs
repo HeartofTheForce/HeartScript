@@ -17,67 +17,65 @@ namespace HeartScript.Parsing
             _offset = 0;
         }
 
-        public bool MoveNext()
+        public bool Eat(LexerPattern lexerPattern)
         {
             if (_offset == _input.Length)
             {
-                if (Current?.Keyword == Keyword.EndOfString)
+                if (Current?.CharOffset != _offset)
                     return false;
 
-                Current = new Token(Keyword.EndOfString, null!, _offset);
+                Current = new Token("EOF", _offset);
                 return true;
             }
 
-            return TryMatch();
-        }
-
-        private bool TryMatch()
-        {
-            foreach (var pattern in s_patterns)
+            var match = lexerPattern.Regex.Match(_input, _offset);
+            if (match.Success)
             {
-                var match = pattern.Regex.Match(_input, _offset);
-                if (match.Success)
-                {
-                    Current = new Token(pattern.Keyword, match.Groups[1].Value, match.Groups[1].Index);
-                    _offset += match.Length;
-                    return true;
-                }
+                Current = new Token(match.Groups[1].Value, match.Groups[1].Index);
+                _offset += match.Length;
+                return true;
             }
 
             return false;
         }
 
-        private static readonly Pattern[] s_patterns = new Pattern[]
+        private static readonly LexerPattern[] s_patterns = new LexerPattern[]
         {
-            new Pattern("\\(", Keyword.RoundOpen),
-            new Pattern("\\)", Keyword.RoundClose),
-            new Pattern(",", Keyword.Comma),
-            new Pattern("!", Keyword.Factorial),
-            new Pattern("\\+", Keyword.Plus),
-            new Pattern("-", Keyword.Minus),
-            new Pattern("\\*", Keyword.Multiply),
-            new Pattern("/", Keyword.Divide),
-            new Pattern("~", Keyword.BitwiseNot),
-            new Pattern("&", Keyword.BitwiseAnd),
-            new Pattern("\\^", Keyword.BitwiseXor),
-            new Pattern("\\|", Keyword.BitwiseOr),
-            new Pattern("\\?", Keyword.Ternary),
-            new Pattern(":", Keyword.Colon),
-            new Pattern("\\d+(?:\\.\\d+)?", Keyword.Constant),
-            new Pattern("if", Keyword.If),
-            new Pattern("else", Keyword.Else),
-            new Pattern("[a-zA-Z]\\w*", Keyword.Identifier),
+            new LexerPattern("(", false),
+            new LexerPattern(")", false),
+            new LexerPattern(",", false),
+            new LexerPattern("!", false),
+            new LexerPattern("+", false),
+            new LexerPattern("-", false),
+            new LexerPattern("*", false),
+            new LexerPattern("/", false),
+            new LexerPattern("~", false),
+            new LexerPattern("&", false),
+            new LexerPattern("^", false),
+            new LexerPattern("|", false),
+            new LexerPattern("?", false),
+            new LexerPattern(":", false),
+            new LexerPattern("if", false),
+            new LexerPattern("else", false),
+            new LexerPattern("\\d+(?:\\.\\d+)?", true),
+            new LexerPattern("[a-zA-Z]\\w*", true),
         };
 
-        private struct Pattern
+        public class LexerPattern
         {
             public Regex Regex { get; }
-            public Keyword Keyword { get; }
+            public string Pattern { get; }
+            public bool IsRegex { get; }
 
-            public Pattern(string pattern, Keyword keyword)
+            public LexerPattern(string pattern, bool isRegex)
             {
-                Regex = new Regex($"\\G\\s*({pattern})");
-                Keyword = keyword;
+                Pattern = pattern;
+                IsRegex = isRegex;
+
+                if (IsRegex)
+                    Regex = new Regex($"\\G\\s*({pattern})");
+                else
+                    Regex = new Regex($"\\G\\s*({Regex.Escape(pattern)})");
             }
         }
     }
