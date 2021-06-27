@@ -98,7 +98,7 @@ namespace HeartScript.UTests.AstParserTests
         public void TestCases(UnexpectedTokenIndexTestCase testCase)
         {
             var lexer = new Lexer(testCase.Infix);
-            var ex = Assert.Throws<UnexpectedTokenException>(() => AstParser.Parse(Demo.Operators, lexer));
+            var ex = Assert.Throws<UnexpectedTokenException>(() => AstParser.Parse(Helpers.OperatorInfoBuilder.TestOperators, lexer));
 
             Assert.AreEqual(testCase.ExpectedCharIndex, ex.CharIndex);
             Assert.AreEqual(testCase.ExpectedPattern, ex.ExpectedPattern);

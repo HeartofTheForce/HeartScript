@@ -1,0 +1,53 @@
+#if
+none 'if' 99 2 any any
+
+#else
+99 'else' 100 1 any any
+
+#RoundBracket
+none '(' 100 1 any ')'
+
+#Call
+0 '(' 100 any ',' ')'
+
+#Ternary
+98 '?' 99 2 ':' any
+
+#Factorial
+2 '!' 0 0 any any
+
+#PrefixPlus
+none '+' 1 1 any any
+
+#PrefixMinus
+none '-' 1 1 any any
+
+#BitwiseNot
+none '~' 1 1 any any
+
+#Multiply
+3 '*' 3 1 any any
+
+#Divide
+3 '/' 3 1 any any
+
+#BinaryPlus
+4 '+' 4 1 any any
+
+#BinaryMinus
+4 '-' 4 1 any any
+
+#BitwiseAnd
+4 '&' 4 1 any any
+
+#BitwiseXor
+4 '^' 4 1 any any
+
+#BitwiseOr
+4 '|' 4 1 any any
+
+#Constant
+none `\d+(?:\.\d+)?` 0 0 any any
+
+#Identifier
+none `[a-zA-Z]\w*` 0 0 any any

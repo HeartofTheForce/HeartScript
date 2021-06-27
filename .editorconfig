@@ -8,6 +8,10 @@ root = true
 indent_style = space
 # (Please don't specify an indent_size here; that has too many unintended consequences.)
 
+# Custom files
+[*.ops]
+insert_final_newline = true
+
 # Code files
 [*.{cs,csx,vb,vbx}]
 indent_size = 4

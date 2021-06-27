@@ -51,7 +51,7 @@ namespace HeartScript.UTests.End2EndTests
         {
             var lexer = new Lexer(testCase.Infix);
 
-            var node = AstParser.Parse(Demo.Operators, lexer);
+            var node = AstParser.Parse(Helpers.OperatorInfoBuilder.TestOperators, lexer);
             Assert.AreEqual(testCase.ExpectedNodeString, node.ToString());
 
             // var functionActual = ExpressionCompiler.Compile<Context<int>, int>(Demo.CompilerFunctions, node);
