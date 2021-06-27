@@ -30,7 +30,7 @@ namespace HeartScript.Nodes
         {
             return new OperatorInfo(
                 new LexerPattern("?", false),
-                uint.MaxValue - 2,
+                2,
                 uint.MaxValue - 1,
                 2,
                 new LexerPattern(":", false),

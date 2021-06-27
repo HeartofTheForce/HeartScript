@@ -32,6 +32,18 @@ namespace HeartScript.UTests.End2EndTests
                 Infix = "a ? b ? c : d : e",
                 ExpectedNodeString = "(? a (? b c d) e)",
             },
+            //NestedTernary
+            new End2EndTestCase()
+            {
+                Infix = "a * b ? c : d",
+                ExpectedNodeString = "(* a (? b c d))",
+            },
+            //NestedTernary
+            new End2EndTestCase()
+            {
+                Infix = "-a ? b : c",
+                ExpectedNodeString = "(? (- a) b c)",
+            },
         };
 
         [TestCaseSource(nameof(s_testCases))]

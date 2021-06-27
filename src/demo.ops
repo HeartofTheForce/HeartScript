@@ -11,7 +11,7 @@ none '(' 100 1 any ')'
 0 '(' 100 any ',' ')'
 
 #Ternary
-98 '?' 99 2 ':' any
+2 '?' 99 2 ':' any
 
 #Factorial
 2 '!' 0 0 any any
