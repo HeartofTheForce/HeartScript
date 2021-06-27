@@ -23,7 +23,7 @@ namespace HeartScript.Nodes
         public static OperatorInfo OperatorInfo()
         {
             return new OperatorInfo(
-                Keyword.Else,
+                new LexerPattern("else", false),
                 uint.MaxValue - 1,
                 uint.MaxValue,
                 1,

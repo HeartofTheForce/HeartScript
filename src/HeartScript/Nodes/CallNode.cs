@@ -31,12 +31,12 @@ namespace HeartScript.Nodes
         public static OperatorInfo OperatorInfo()
         {
             return new OperatorInfo(
-                Keyword.RoundOpen,
+                new LexerPattern("(", false),
                 0,
                 uint.MaxValue,
                 null,
-                Keyword.Comma,
-                Keyword.RoundClose,
+                new LexerPattern(",", false),
+                new LexerPattern(")", false),
                 (token, leftNode, rightNodes) => new CallNode(token, leftNode!, rightNodes));
         }
     }

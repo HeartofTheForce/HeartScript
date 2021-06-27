@@ -29,11 +29,11 @@ namespace HeartScript.Nodes
         public static OperatorInfo OperatorInfo()
         {
             return new OperatorInfo(
-                Keyword.Ternary,
+                new LexerPattern("?", false),
                 uint.MaxValue - 2,
                 uint.MaxValue - 1,
                 2,
-                Keyword.Colon,
+                new LexerPattern(":", false),
                 null,
                 (token, leftNode, rightNodes) => new TernaryNode(token, leftNode!, rightNodes[0], rightNodes[1]));
         }

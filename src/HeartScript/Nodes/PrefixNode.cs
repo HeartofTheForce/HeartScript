@@ -18,7 +18,7 @@ namespace HeartScript.Nodes
             return $"({Token.Value} {Target})";
         }
 
-        public static OperatorInfo OperatorInfo(Keyword keyword, uint rightPrecedence)
+        public static OperatorInfo OperatorInfo(LexerPattern keyword, uint rightPrecedence)
         {
             return new OperatorInfo(
                 keyword,

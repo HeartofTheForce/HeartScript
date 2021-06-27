@@ -20,9 +20,6 @@ namespace HeartScript.Parsing
 
         public INode? FeedOperandLeft(Token current, INode? operand)
         {
-            if (current.Keyword != OperatorInfo.Keyword)
-                throw new ArgumentException(nameof(current));
-
             _token = current;
 
             if (OperatorInfo.LeftPrecedence == null != (operand == null))
@@ -36,7 +33,7 @@ namespace HeartScript.Parsing
             return null;
         }
 
-        public INode? FeedOperandRight(Token current, INode? operand, out bool acknowledgeToken)
+        public INode? FeedOperandRight(Lexer lexer, INode? operand)
         {
             if (_token == null)
                 throw new ArgumentException(nameof(_token));
@@ -44,39 +41,43 @@ namespace HeartScript.Parsing
             if (operand != null)
                 _rightNodes.Add(operand);
 
+            int initialOffset = lexer.Offset;
+
             if (operand == null && _rightNodes.Count > 0)
-                throw new ExpressionTermException(current);
+                throw new ExpressionTermException(initialOffset);
 
-            bool isTerminator = OperatorInfo.Terminator == null || current.Keyword == OperatorInfo.Terminator;
-            bool isDelimiter =
-                (OperatorInfo.Delimiter == null || current.Keyword == OperatorInfo.Delimiter) &&
-                (OperatorInfo.RightOperands == null || _rightNodes.Count < OperatorInfo.RightOperands) &&
-                (current.Keyword != OperatorInfo.Terminator);
-
-            if (isDelimiter)
+            if (_rightNodes.Count < OperatorInfo.RightOperands)
             {
                 if (operand == null)
-                    throw new ExpressionTermException(current);
+                    throw new ExpressionTermException(initialOffset);
 
-                acknowledgeToken = current.Keyword == OperatorInfo.Delimiter;
-                return null;
+                if (OperatorInfo.Delimiter == null || lexer.Eat(OperatorInfo.Delimiter))
+                    return null;
             }
 
-            if (isTerminator)
+            if (OperatorInfo.Terminator == null || lexer.Eat(OperatorInfo.Terminator))
             {
                 if (OperatorInfo.RightOperands != null && _rightNodes.Count != OperatorInfo.RightOperands)
                 {
                     if (OperatorInfo.Delimiter != null)
-                        throw new UnexpectedTokenException(current, OperatorInfo.Delimiter.Value);
+                        throw new UnexpectedTokenException(initialOffset, OperatorInfo.Delimiter);
                     else
-                        throw new ExpressionTermException(current);
+                        throw new ExpressionTermException(initialOffset);
                 }
 
-                acknowledgeToken = current.Keyword == OperatorInfo.Terminator;
                 return OperatorInfo.BuildNode(_token, _leftNode, _rightNodes);
             }
 
-            throw new UnexpectedTokenException(current, OperatorInfo.Terminator!.Value);
+            if (OperatorInfo.RightOperands == null)
+            {
+                if (operand == null)
+                    throw new ExpressionTermException(initialOffset);
+
+                if (OperatorInfo.Delimiter == null || lexer.Eat(OperatorInfo.Delimiter))
+                    return null;
+            }
+
+            throw new UnexpectedTokenException(initialOffset, OperatorInfo.Terminator);
         }
     }
 }
