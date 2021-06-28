@@ -56,6 +56,9 @@ namespace HeartScript.Parsing
         public bool IsPostfix() => LeftPrecedence != null && RightOperands == 0;
         public bool IsInfix() => LeftPrecedence != null && RightOperands != 0;
 
+        public bool ExpectDelimiter(int rightCount) => RightOperands == null || rightCount < RightOperands;
+        public bool ExpectTerminator(int rightCount) => RightOperands == null || rightCount >= RightOperands;
+
         public static bool IsEvaluatedBefore(OperatorInfo left, OperatorInfo right)
         {
             if (left.RightOperands == 0 || right.LeftPrecedence == null)

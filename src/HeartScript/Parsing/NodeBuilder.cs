@@ -6,15 +6,14 @@ namespace HeartScript.Parsing
 {
     public class NodeBuilder
     {
-        public OperatorInfo OperatorInfo { get; }
-
+        private readonly OperatorInfo _operatorInfo;
         private Token? _token;
         private INode? _leftNode;
         private readonly List<INode> _rightNodes;
 
         public NodeBuilder(OperatorInfo operatorInfo)
         {
-            OperatorInfo = operatorInfo;
+            _operatorInfo = operatorInfo;
             _rightNodes = new List<INode>();
         }
 
@@ -22,13 +21,13 @@ namespace HeartScript.Parsing
         {
             _token = current;
 
-            if (OperatorInfo.LeftPrecedence == null != (operand == null))
+            if (_operatorInfo.LeftPrecedence == null != (operand == null))
                 throw new ArgumentException(nameof(operand));
 
             _leftNode = operand;
 
-            if (OperatorInfo.RightOperands == 0)
-                return OperatorInfo.BuildNode(_token, _leftNode, _rightNodes);
+            if (_operatorInfo.RightOperands == 0)
+                return _operatorInfo.BuildNode(_token, _leftNode, _rightNodes);
 
             return null;
         }
@@ -38,46 +37,57 @@ namespace HeartScript.Parsing
             if (_token == null)
                 throw new ArgumentException(nameof(_token));
 
+            int initialOffset = lexer.Offset;
+
             if (operand != null)
                 _rightNodes.Add(operand);
-
-            int initialOffset = lexer.Offset;
 
             if (operand == null && _rightNodes.Count > 0)
                 throw new ExpressionTermException(initialOffset);
 
-            if (_rightNodes.Count < OperatorInfo.RightOperands)
-            {
-                if (operand == null)
-                    throw new ExpressionTermException(initialOffset);
+            bool expectDelimiter = _operatorInfo.ExpectDelimiter(_rightNodes.Count);
+            bool expectTerminator = _operatorInfo.ExpectTerminator(_rightNodes.Count);
 
-                if (OperatorInfo.Delimiter == null || lexer.Eat(OperatorInfo.Delimiter))
-                    return null;
-            }
-
-            if (OperatorInfo.Terminator == null || lexer.Eat(OperatorInfo.Terminator))
+            if (expectTerminator)
             {
-                if (OperatorInfo.RightOperands != null && _rightNodes.Count != OperatorInfo.RightOperands)
+                if (_operatorInfo.RightOperands != null && _rightNodes.Count != _operatorInfo.RightOperands)
                 {
-                    if (OperatorInfo.Delimiter != null)
-                        throw new UnexpectedTokenException(initialOffset, OperatorInfo.Delimiter);
+                    if (_operatorInfo.Delimiter != null)
+                        throw new UnexpectedTokenException(initialOffset, _operatorInfo.Delimiter);
                     else
                         throw new ExpressionTermException(initialOffset);
                 }
 
-                return OperatorInfo.BuildNode(_token, _leftNode, _rightNodes);
+                if (_operatorInfo.Terminator == null || lexer.Eat(_operatorInfo.Terminator))
+                    return _operatorInfo.BuildNode(_token, _leftNode, _rightNodes);
             }
 
-            if (OperatorInfo.RightOperands == null)
+            if (expectDelimiter)
             {
                 if (operand == null)
                     throw new ExpressionTermException(initialOffset);
 
-                if (OperatorInfo.Delimiter == null || lexer.Eat(OperatorInfo.Delimiter))
+                if (_operatorInfo.Delimiter == null || lexer.Eat(_operatorInfo.Delimiter))
                     return null;
+
+                if (_operatorInfo.Terminator != null && expectTerminator)
+                    throw new UnexpectedTokenException(initialOffset, _operatorInfo.Terminator);
+
+                throw new UnexpectedTokenException(initialOffset, _operatorInfo.Delimiter);
             }
 
-            throw new UnexpectedTokenException(initialOffset, OperatorInfo.Terminator);
+            throw new UnexpectedTokenException(initialOffset, _operatorInfo.Terminator!);
+        }
+
+        public bool IsEvaluatedBefore(OperatorInfo target)
+        {
+            if (_operatorInfo.Terminator != null)
+                return false;
+
+            if (!_operatorInfo.ExpectTerminator(_rightNodes.Count + 1))
+                return false;
+
+            return OperatorInfo.IsEvaluatedBefore(_operatorInfo, target);
         }
     }
 }

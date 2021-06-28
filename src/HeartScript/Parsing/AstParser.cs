@@ -59,7 +59,7 @@ namespace HeartScript.Parsing
                         throw new ExpressionTermException(_lexer.Offset);
                 }
 
-                while (_nodeBuilders.TryPeek(out var left) && OperatorInfo.IsEvaluatedBefore(left.OperatorInfo, op))
+                while (_nodeBuilders.TryPeek(out var left) && left.IsEvaluatedBefore(op))
                 {
                     if (!TryReduce())
                         throw new Exception($"{nameof(NodeBuilder)} is incomplete");
