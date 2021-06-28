@@ -1,25 +1,24 @@
 using System.Collections.Generic;
 using System.Linq;
-using HeartScript.Nodes;
 using HeartScript.Parsing;
 
-namespace HeartScript.UTests.Helpers
+namespace HeartScript.Nodes
 {
-    public class TestNode : INode
+    public class ExpressionNode : INode
     {
         public Token Token { get; }
 
         public INode? LeftNode { get; }
         public IEnumerable<INode> RightNodes { get; }
 
-        public TestNode(Token token, INode? leftNode, IEnumerable<INode> rightNodes)
+        public ExpressionNode(Token token, INode? leftNode, IEnumerable<INode> rightNodes)
         {
             Token = token;
             LeftNode = leftNode;
             RightNodes = rightNodes;
         }
 
-        public static INode BuildNode(Token token, INode? leftNode, IReadOnlyList<INode> rightNodes) => new TestNode(token, leftNode, rightNodes);
+        public static INode BuildNode(Token token, INode? leftNode, IReadOnlyList<INode> rightNodes) => new ExpressionNode(token, leftNode, rightNodes);
 
         public override string ToString()
         {

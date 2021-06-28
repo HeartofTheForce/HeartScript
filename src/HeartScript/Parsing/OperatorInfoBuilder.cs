@@ -1,19 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using HeartScript.Parsing;
+using HeartScript.Nodes;
+#pragma warning disable CS8604
 
-namespace HeartScript.UTests.Helpers
+namespace HeartScript.Parsing
 {
     public static class OperatorInfoBuilder
     {
-        public static readonly IEnumerable<OperatorInfo> TestOperators;
-
-        static OperatorInfoBuilder()
-        {
-            TestOperators = Parse("./demo.ops");
-        }
-
         private static readonly LexerPattern s_regex = new LexerPattern("`((?:``|[^`])*)`", true);
         private static readonly LexerPattern s_plainText = new LexerPattern("'((?:''|[^'])*)'", true);
         private static readonly LexerPattern s_digits = new LexerPattern("\\d+", true);
@@ -100,7 +94,7 @@ namespace HeartScript.UTests.Helpers
                 rightOperands,
                 delimiter,
                 terminator,
-                TestNode.BuildNode);
+                ExpressionNode.BuildNode);
         }
 
         private class OperatorInfoBuilderException : Exception

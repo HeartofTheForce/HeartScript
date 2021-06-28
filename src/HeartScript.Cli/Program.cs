@@ -9,18 +9,20 @@ namespace HeartScript.Cli
         {
             try
             {
+                var operatorInfos = OperatorInfoBuilder.Parse("./src/test.ops");
+
                 string infix = string.Join(' ', args);
 
                 Console.WriteLine("Input");
                 Console.WriteLine(infix);
 
                 var lexer = new Lexer(infix);
-                var node = AstParser.Parse(Demo.Operators, lexer);
+                var node = AstParser.Parse(operatorInfos, lexer);
 
                 Console.WriteLine("Output");
                 Console.WriteLine(node);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine("Error");
                 Console.WriteLine(ex.Message);
