@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System;
+using System.Text.RegularExpressions;
 
 namespace HeartScript.Parsing
 {
@@ -34,6 +35,9 @@ namespace HeartScript.Parsing
             var match = lexerPattern.Regex.Match(_input, Offset);
             if (match.Success)
             {
+                if (match.Groups[1].Length == 0)
+                    throw new Exception($"0 length match @ {match.Groups[1].Index}, {lexerPattern}");
+
                 int groupIndex = match.Groups.Count - 1;
                 Current = new Token(match.Groups[groupIndex].Value, match.Groups[groupIndex].Index);
                 Offset += match.Length;
