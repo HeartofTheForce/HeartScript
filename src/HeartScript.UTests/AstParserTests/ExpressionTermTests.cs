@@ -50,6 +50,12 @@ namespace HeartScript.UTests.AstParserTests
                 Infix = "-",
                 ExpectedCharIndex = 1,
             },
+            //Nested Empty Binary Right
+            new ExpressionTermTestCase()
+            {
+                Infix = "(1 + ) 2",
+                ExpectedCharIndex = 5,
+            },
         };
 
         [TestCaseSource(nameof(s_testCases))]
