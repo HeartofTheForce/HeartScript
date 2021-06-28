@@ -5,10 +5,10 @@ none 'if' 99 2 any any
 99 'else' 100 1 any any
 
 #RoundBracket
-none '(' 100 1 any ')'
+none '(' 0 1 any ')'
 
 #Call
-0 '(' 100 any ',' ')'
+0 '(' 0 any ',' ')'
 
 #Ternary
 2 '?' 99 2 ':' any
