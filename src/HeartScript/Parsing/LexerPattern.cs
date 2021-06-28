@@ -13,10 +13,13 @@ namespace HeartScript.Parsing
             Pattern = pattern;
             IsRegex = isRegex;
 
+            Regex temp;
             if (IsRegex)
-                Regex = new Regex($"\\G({pattern})\\s*");
+                temp = new Regex(pattern);
             else
-                Regex = new Regex($"\\G({Regex.Escape(pattern)})\\s*");
+                temp = new Regex(Regex.Escape(pattern));
+
+            Regex = new Regex($"\\G({temp})\\s*");
         }
 
         public override string ToString()
