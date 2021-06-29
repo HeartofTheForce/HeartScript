@@ -1,0 +1,44 @@
+#pre0
+none 'pre0' 0 1 any any
+#0post
+0 '0post' 0 0 any any
+#0in0
+0 '0in0' 0 1 any any
+
+#pre1
+none 'pre1' 1 1 any any
+#1post
+1 '1post' 0 0 any any
+#1in1
+1 '1in1' 1 1 any any
+
+#pre2
+none 'pre2' 2 1 any any
+#2post
+2 '2post' 0 0 any any
+#2in2
+2 '2in2' 2 1 any any
+
+#Delimiter Terminator VariableRightOperands
+0 '(' 0 any ',' ')'
+#AnyDelimiter Terminator VariableRightOperands
+0 '[' 0 any any ']'
+#Delimiter AnyTerminator VariableRightOperands
+2 '?' 0 any ':' any
+
+#Terminator ZeroRightOperands
+0 '(' 0 0 any ')'
+#Terminator ZeroRightOperands
+0 '[' 0 0 any ']'
+#AnyTerminator ZeroRightOperands
+2 '?' 0 0 any any
+
+#Delimiter Terminator FixedRightOperands
+0 '(' 0 2 ',' ')'
+#AnyDelimiter Terminator FixedRightOperands
+0 '[' 0 2 any ']'
+#Delimiter AnyTerminator FixedRightOperands
+2 '?' 0 2 ':' any
+
+#Identifier
+none `[a-zA-Z]\w*` 0 0 any any
