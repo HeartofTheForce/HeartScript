@@ -29,13 +29,8 @@ namespace HeartScript.Parsing
             BuildNode buildNode)
         {
 
-            if (rightOperands == 0)
-            {
-                if (delimiter != null)
-                    throw new ArgumentException(nameof(delimiter));
-                if (terminator != null)
-                    throw new ArgumentException(nameof(terminator));
-            }
+            if (rightOperands == 0 && delimiter != null)
+                throw new ArgumentException(nameof(delimiter));
 
             if (terminator != null && rightPrecedence != 0)
                 throw new ArgumentException(nameof(rightPrecedence));

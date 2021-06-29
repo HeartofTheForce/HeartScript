@@ -85,7 +85,7 @@ namespace HeartScript.Parsing
         private void PushOperator(OperatorInfo op)
         {
             var nodeBuilder = op.CreateNodeBuilder();
-            _operand = nodeBuilder.FeedOperandLeft(_lexer.Current, _operand);
+            _operand = nodeBuilder.FeedOperandLeft(_lexer, _operand);
 
             if (_operand == null)
                 _nodeBuilders.Push(nodeBuilder);

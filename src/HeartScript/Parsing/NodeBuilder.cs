@@ -19,17 +19,20 @@ namespace HeartScript.Parsing
             _rightNodes = new List<INode>();
         }
 
-        public INode? FeedOperandLeft(Token current, INode? operand)
+        public INode? FeedOperandLeft(Lexer lexer, INode? operand)
         {
-            _token = current;
+            _token = lexer.Current;
 
             if (_operatorInfo.LeftPrecedence == null != (operand == null))
                 throw new ArgumentException(nameof(operand));
 
             _leftNode = operand;
 
-            if (_operatorInfo.RightOperands == 0)
-                return _operatorInfo.BuildNode(_token, _leftNode, _rightNodes);
+            if (_operatorInfo.ExpectTerminator(_rightNodes.Count))
+            {
+                if (_operatorInfo.Terminator == null || lexer.Eat(_operatorInfo.Terminator))
+                    return _operatorInfo.BuildNode(_token, _leftNode, _rightNodes);
+            }
 
             return null;
         }
@@ -44,10 +47,7 @@ namespace HeartScript.Parsing
             if (operand != null)
                 _rightNodes.Add(operand);
 
-            bool expectDelimiter = _operatorInfo.ExpectDelimiter(_rightNodes.Count);
-            bool expectTerminator = _operatorInfo.ExpectTerminator(_rightNodes.Count);
-
-            if (expectTerminator)
+            if (_operatorInfo.ExpectTerminator(_rightNodes.Count))
             {
                 if (!AllowTrailingDelimiter && _rightNodes.Count > 0 && operand == null)
                     throw new ExpressionTermException(initialOffset);
@@ -59,7 +59,7 @@ namespace HeartScript.Parsing
             if (operand == null)
                 throw new ExpressionTermException(initialOffset);
 
-            if (expectDelimiter)
+            if (_operatorInfo.ExpectDelimiter(_rightNodes.Count))
             {
                 if (_operatorInfo.Delimiter == null || lexer.Eat(_operatorInfo.Delimiter))
                     return null;
