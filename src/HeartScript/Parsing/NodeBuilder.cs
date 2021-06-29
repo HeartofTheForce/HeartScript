@@ -28,7 +28,7 @@ namespace HeartScript.Parsing
 
             _leftNode = operand;
 
-            if (_operatorInfo.ExpectTerminator(_rightNodes.Count))
+            if (_operatorInfo.RightOperands == 0)
             {
                 if (_operatorInfo.Terminator == null || lexer.Eat(_operatorInfo.Terminator))
                     return _operatorInfo.BuildNode(_token, _leftNode, _rightNodes);
@@ -56,11 +56,11 @@ namespace HeartScript.Parsing
                     return _operatorInfo.BuildNode(_token, _leftNode, _rightNodes);
             }
 
-            if (operand == null)
-                throw new ExpressionTermException(initialOffset);
-
             if (_operatorInfo.ExpectDelimiter(_rightNodes.Count))
             {
+                if (operand == null)
+                    throw new ExpressionTermException(initialOffset);
+
                 if (_operatorInfo.Delimiter == null || lexer.Eat(_operatorInfo.Delimiter))
                     return null;
             }
