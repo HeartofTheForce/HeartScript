@@ -19,26 +19,32 @@ none 'pre2' 2 1 any any
 #2in2
 2 '2in2' 2 1 any any
 
-#Delimiter Terminator VariableRightOperands
+#Pass VariableRightOperands Delimiter Terminator
 0 '(' 0 any ',' ')'
-#AnyDelimiter Terminator VariableRightOperands
+#Pass VariableRightOperands AnyDelimiter Terminator
 0 '[' 0 any any ']'
-#Delimiter AnyTerminator VariableRightOperands
-2 '?' 0 any ':' any
+#Pass VariableRightOperands Delimiter AnyTerminator
+0 '?' 0 any ':' any
+#Fail VariableRightOperands AnyDelimiter AnyTerminator
+0 '|' 0 any any any
 
-#Terminator ZeroRightOperands
-0 '(' 0 0 any ')'
-#Terminator ZeroRightOperands
+#Fail ZeroRightOperands Delimiter Terminator
+0 '(' 0 0 ',' ')'
+#Pass ZeroRightOperands AnyDelimiter Terminator
 0 '[' 0 0 any ']'
-#AnyTerminator ZeroRightOperands
-2 '?' 0 0 any any
+#Fail ZeroRightOperands Delimiter AnyTerminator
+0 '?' 0 0 ':' any
+#Pass ZeroRightOperands AnyDelimiter AnyTerminator
+0 '|' 0 0 any any
 
-#Delimiter Terminator FixedRightOperands
+#Pass FixedRightOperands Delimiter Terminator
 0 '(' 0 2 ',' ')'
-#AnyDelimiter Terminator FixedRightOperands
+#Pass FixedRightOperands AnyDelimiter Terminator
 0 '[' 0 2 any ']'
-#Delimiter AnyTerminator FixedRightOperands
-2 '?' 0 2 ':' any
+#Pass FixedRightOperands Delimiter AnyTerminator
+0 '?' 0 2 ':' any
+#Pass FixedRightOperands AnyDelimiter AnyTerminator
+0 '|' 0 2 any any
 
 #Identifier
 none `[a-zA-Z]\w*` 0 0 any any
