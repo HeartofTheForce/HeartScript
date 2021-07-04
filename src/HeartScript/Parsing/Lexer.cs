@@ -1,10 +1,11 @@
 ﻿using System;
-using System.Text.RegularExpressions;
 
 namespace HeartScript.Parsing
 {
     public class Lexer
     {
+        private static readonly LexerPattern s_nonSignificant = new LexerPattern("\\s*", true);
+
         public Token Current { get; private set; }
         public int Offset { get; private set; }
 
@@ -16,10 +17,6 @@ namespace HeartScript.Parsing
             Offset = 0;
 
             _input = input;
-
-            var match = Regex.Match(input, "^\\s*");
-            if (match.Success)
-                Offset += match.Length;
         }
 
         public bool Eat(LexerPattern lexerPattern)
@@ -31,6 +28,10 @@ namespace HeartScript.Parsing
 
                 return false;
             }
+
+            var nonSignificantMatch = s_nonSignificant.Regex.Match(_input, Offset);
+            if (nonSignificantMatch.Success)
+                Offset += nonSignificantMatch.Length;
 
             var match = lexerPattern.Regex.Match(_input, Offset);
             if (match.Success)
