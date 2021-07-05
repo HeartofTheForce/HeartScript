@@ -1,4 +1,4 @@
-namespace HeartScript.UTests.End2EndTests
+namespace HeartScript.Tests.End2EndTests
 {
     public struct End2EndTestCase
     {

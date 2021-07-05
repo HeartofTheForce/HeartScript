@@ -1,36 +1,30 @@
 using HeartScript.Parsing;
 using NUnit.Framework;
 
-namespace HeartScript.UTests.End2EndTests
+namespace HeartScript.Tests.End2EndTests
 {
     [TestFixture]
-    public class End2EndFloatTests
+    public class End2EndIntTests
     {
         static readonly End2EndTestCase[] s_testCases = new End2EndTestCase[]
         {
-            //LeftToFloat
+            //ReturnFloat2Int
             new End2EndTestCase()
             {
-                Infix = "2 + 1.5",
-                ExpectedNodeString = "(+ 2 1.5)",
+                Infix = "2.5 + 3.3",
+                ExpectedNodeString = "(+ 2.5 3.3)",
             },
-            //RightToFloat
+            //IntOnlyBitwise
             new End2EndTestCase()
             {
-                Infix = "1.5 + 2",
-                ExpectedNodeString = "(+ 1.5 2)",
+                Infix = "~(1 | 4)",
+                ExpectedNodeString = "(~ (| 1 4))",
             },
-            //SinCosTan
+            //BinaryPostfix
             new End2EndTestCase()
             {
-                Infix = "sin(1.0) + cos(1.0) + tan(1.0)",
-                ExpectedNodeString = "(+ (+ ($ sin 1.0) ($ cos 1.0)) ($ tan 1.0))",
-            },
-            //MaxIntFloat
-            new End2EndTestCase()
-            {
-                Infix = "max(2, b)",
-                ExpectedNodeString = "($ max 2 b)",
+                Infix = "2 * 1!",
+                ExpectedNodeString = "(* 2 (! 1))",
             },
         };
 

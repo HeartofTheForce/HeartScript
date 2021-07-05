@@ -1,7 +1,7 @@
 using HeartScript.Parsing;
 using NUnit.Framework;
 
-namespace HeartScript.UTests.AstParserTests
+namespace HeartScript.Tests.AstParserTests
 {
     [TestFixture]
     public class ExpressionTermTests
