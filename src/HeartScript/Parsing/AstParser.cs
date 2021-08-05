@@ -25,7 +25,7 @@ namespace HeartScript.Parsing
             var astParser = new AstParser(operators, lexer);
             var node = astParser.Parse();
 
-            if (lexer.Current.Value != null)
+            if (!lexer.IsEOF)
                 throw new UnexpectedTokenException(lexer.Offset, "EOF");
 
             return node;

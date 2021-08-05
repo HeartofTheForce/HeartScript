@@ -1,13 +1,13 @@
 #Pass FixedRightOperands Delimiter Terminator
-0 '(' 0 2 ',' ')'
+none '{' 0 2 ',' '}'
 #Pass FixedRightOperands AnyDelimiter Terminator
-0 '[' 0 2 any ']'
+none '[' 0 2 any ']'
 #Pass FixedRightOperands Delimiter AnyTerminator
-0 '?' 0 2 ':' any
+none '?' 0 2 ':' any
 #Pass FixedRightOperands AnyDelimiter AnyTerminator
-0 '|' 0 2 any any
+none '|' 0 2 any any
 #Pass FixedRightOperands SameDelimiter SameDelimiter
-0 '&' 0 2 '~' '~'
+none '&' 0 2 '~' '~'
 
 #Identifier
 none `[a-zA-Z]\w*` 0 0 any any

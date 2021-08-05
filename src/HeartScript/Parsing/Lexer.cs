@@ -8,6 +8,7 @@ namespace HeartScript.Parsing
 
         public Token Current { get; private set; }
         public int Offset { get; private set; }
+        public bool IsEOF => Offset == _input.Length;
 
         private readonly string _input;
 
@@ -21,14 +22,6 @@ namespace HeartScript.Parsing
 
         public bool Eat(LexerPattern lexerPattern)
         {
-            if (Offset == _input.Length)
-            {
-                if (Current == null || Current.Value != null)
-                    Current = new Token(null, Offset);
-
-                return false;
-            }
-
             var nonSignificantMatch = s_nonSignificant.Regex.Match(_input, Offset);
             if (nonSignificantMatch.Success)
                 Offset += nonSignificantMatch.Length;
