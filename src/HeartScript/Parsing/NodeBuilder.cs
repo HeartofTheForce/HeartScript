@@ -69,7 +69,7 @@ namespace HeartScript.Parsing
 
             if (_operatorInfo.ExpectTerminator(_rightNodes.Count) && _operatorInfo.Terminator == null)
             {
-                if (!AllowTrailingDelimiter && _rightNodes.Count > 0 && operand == null)
+                if (_rightNodes.Count > 0 && operand == null)
                     throw new ExpressionTermException(initialOffset);
 
                 return _operatorInfo.BuildNode(_token, _leftNode, _rightNodes);
