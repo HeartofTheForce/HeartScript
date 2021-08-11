@@ -47,22 +47,32 @@ namespace HeartScript.Parsing
             if (operand != null)
                 _rightNodes.Add(operand);
 
-            if (_operatorInfo.ExpectTerminator(_rightNodes.Count))
+            if (_operatorInfo.ExpectTerminator(_rightNodes.Count) && _operatorInfo.Terminator != null)
             {
                 if (!AllowTrailingDelimiter && _rightNodes.Count > 0 && operand == null)
                     throw new ExpressionTermException(initialOffset);
 
-                if (_operatorInfo.Terminator == null || lexer.Eat(_operatorInfo.Terminator))
+                if (lexer.Eat(_operatorInfo.Terminator))
                     return _operatorInfo.BuildNode(_token, _leftNode, _rightNodes);
             }
 
             if (_operatorInfo.ExpectDelimiter(_rightNodes.Count))
             {
-                if (operand == null)
+                if (_operatorInfo.Delimiter == null || lexer.Eat(_operatorInfo.Delimiter))
+                {
+                    if (operand == null)
+                        throw new ExpressionTermException(initialOffset);
+
+                    return null;
+                }
+            }
+
+            if (_operatorInfo.ExpectTerminator(_rightNodes.Count) && _operatorInfo.Terminator == null)
+            {
+                if (!AllowTrailingDelimiter && _rightNodes.Count > 0 && operand == null)
                     throw new ExpressionTermException(initialOffset);
 
-                if (_operatorInfo.Delimiter == null || lexer.Eat(_operatorInfo.Delimiter))
-                    return null;
+                return _operatorInfo.BuildNode(_token, _leftNode, _rightNodes);
             }
 
             if (_operatorInfo.Terminator != null)

@@ -16,6 +16,7 @@ namespace HeartScript.Tests.AstParserTests
 
         static readonly AstTestCase[] s_testCases = new AstTestCase[]
         {
+            //{}
             new AstTestCase()
             {
                 Infix = "{x, y, z}",
@@ -30,6 +31,38 @@ namespace HeartScript.Tests.AstParserTests
             {
                 Infix = "{x}",
                 ExpectedOutput = "({ x)",
+            },
+            //[]
+            new AstTestCase()
+            {
+                Infix = "[x y z]",
+                ExpectedOutput = "([ x y z)",
+            },
+            new AstTestCase()
+            {
+                Infix = "[]",
+                ExpectedOutput = "[",
+            },
+            new AstTestCase()
+            {
+                Infix = "[x]",
+                ExpectedOutput = "([ x)",
+            },
+            //?:
+            new AstTestCase()
+            {
+                Infix = "? x : y : z",
+                ExpectedOutput = "(? x y z)",
+            },
+            new AstTestCase()
+            {
+                Infix = "?",
+                ExpectedOutput = "?",
+            },
+            new AstTestCase()
+            {
+                Infix = "? x",
+                ExpectedOutput = "(? x)",
             },
         };
 

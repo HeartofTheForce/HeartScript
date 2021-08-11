@@ -11,7 +11,7 @@ none '?' 0 any ':' any
 none '|' 0 any any any
 
 #Fail VariableRightOperands SameDelimiter SameTerminator
-none '&' 0 any '~' '~'
+none '&' 0 any '*' '*'
 
 #Identifier
 none `[a-zA-Z]\w*` 0 0 any any
