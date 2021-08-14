@@ -48,6 +48,8 @@ namespace HeartScript.Parsing
 
             if (operand != null)
                 _rightNodes.Add(operand);
+            else if (_rightNodes.Count < _operatorInfo.RightOperands)
+                throw new ExpressionTermException(initialOffset);
 
             if (_operatorInfo.ExpectTerminator(_rightNodes.Count) && _operatorInfo.Terminator != null)
             {
