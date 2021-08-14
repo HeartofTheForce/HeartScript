@@ -5,7 +5,7 @@ using HeartScript.Nodes;
 
 namespace HeartScript.Parsing
 {
-    public class AstParser
+    public class ExpressionParser
     {
         private readonly IEnumerable<OperatorInfo> _operators;
         private readonly Lexer _lexer;
@@ -13,7 +13,7 @@ namespace HeartScript.Parsing
 
         private INode? _operand;
 
-        private AstParser(IEnumerable<OperatorInfo> operators, Lexer lexer)
+        private ExpressionParser(IEnumerable<OperatorInfo> operators, Lexer lexer)
         {
             _operators = operators;
             _lexer = lexer;
@@ -22,10 +22,10 @@ namespace HeartScript.Parsing
 
         public static INode Parse(IEnumerable<OperatorInfo> operators, Lexer lexer)
         {
-            var astParser = new AstParser(operators, lexer);
-            var node = astParser.Parse();
+            var expressionParser = new ExpressionParser(operators, lexer);
+            var node = expressionParser.Parse();
 
-            if (lexer.Current.Value != null)
+            if (!lexer.IsEOF)
                 throw new UnexpectedTokenException(lexer.Offset, "EOF");
 
             return node;
@@ -59,7 +59,7 @@ namespace HeartScript.Parsing
                         throw new ExpressionTermException(_lexer.Offset);
                 }
 
-                while (_nodeBuilders.TryPeek(out var left) && OperatorInfo.IsEvaluatedBefore(left.OperatorInfo, op))
+                while (_nodeBuilders.TryPeek(out var left) && left.IsEvaluatedBefore(op))
                 {
                     if (!TryReduce())
                         throw new Exception($"{nameof(NodeBuilder)} is incomplete");
@@ -85,7 +85,7 @@ namespace HeartScript.Parsing
         private void PushOperator(OperatorInfo op)
         {
             var nodeBuilder = op.CreateNodeBuilder();
-            _operand = nodeBuilder.FeedOperandLeft(_lexer.Current, _operand);
+            _operand = nodeBuilder.FeedOperandLeft(_lexer, _operand);
 
             if (_operand == null)
                 _nodeBuilders.Push(nodeBuilder);

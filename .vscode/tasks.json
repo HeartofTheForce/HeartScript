@@ -17,7 +17,12 @@
       "label": "test",
       "command": "dotnet",
       "type": "process",
-      "args": ["test", "${workspaceFolder}/src/HeartScript.UTests"],
+      "args": [
+        "test",
+        "${workspaceFolder}/src/HeartScript.Tests",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
       "problemMatcher": "$msCompile"
     }
   ]

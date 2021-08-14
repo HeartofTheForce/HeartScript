@@ -1,7 +1,7 @@
 using HeartScript.Parsing;
 using NUnit.Framework;
 
-namespace HeartScript.UTests.AstParserTests
+namespace HeartScript.Tests.ExpressionParserTests
 {
     [TestFixture]
     public class ExpressionTermTests
@@ -50,26 +50,18 @@ namespace HeartScript.UTests.AstParserTests
                 Infix = "-",
                 ExpectedCharIndex = 1,
             },
+            //Nested Empty Binary Right
+            new ExpressionTermTestCase()
+            {
+                Infix = "(1 + ) 2",
+                ExpectedCharIndex = 5,
+            },
         };
 
         [TestCaseSource(nameof(s_testCases))]
         public void TestCases(ExpressionTermTestCase testCase)
         {
-            var lexer = new Lexer(testCase.Infix);
-            var ex = Assert.Throws<ExpressionTermException>(() => AstParser.Parse(Helper.TestOperators, lexer));
-
-            Assert.AreEqual(testCase.ExpectedCharIndex, ex.CharIndex);
-        }
-
-        public struct ExpressionTermTestCase
-        {
-            public string Infix { get; set; }
-            public int ExpectedCharIndex { get; set; }
-
-            public override string ToString()
-            {
-                return $"\"{Infix}\"";
-            }
+            testCase.Execute(Helper.TestOperators);
         }
     }
 }

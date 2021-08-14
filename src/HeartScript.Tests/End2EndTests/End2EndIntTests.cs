@@ -1,30 +1,30 @@
 using HeartScript.Parsing;
 using NUnit.Framework;
 
-namespace HeartScript.UTests.End2EndTests
+namespace HeartScript.Tests.End2EndTests
 {
     [TestFixture]
-    public class End2EndIfElseTests
+    public class End2EndIntTests
     {
         static readonly End2EndTestCase[] s_testCases = new End2EndTestCase[]
         {
-            //IfElseTernary
+            //ReturnFloat2Int
             new End2EndTestCase()
             {
-                Infix = "if a ? b : c d ? e : f else g ? h : i",
-                ExpectedNodeString = "(else (if (? a b c) (? d e f)) (? g h i))",
+                Infix = "2.5 + 3.3",
+                ExpectedNodeString = "(+ 2.5 3.3)",
             },
-            //ChainedIfElse
+            //IntOnlyBitwise
             new End2EndTestCase()
             {
-                Infix = "if a b else if c d else e",
-                ExpectedNodeString = "(else (if a b) (else (if c d) e))",
+                Infix = "~(1 | 4)",
+                ExpectedNodeString = "(~ (| 1 4))",
             },
-            //If
+            //BinaryPostfix
             new End2EndTestCase()
             {
-                Infix = "if a b",
-                ExpectedNodeString = "(if a b)",
+                Infix = "2 * 1!",
+                ExpectedNodeString = "(* 2 (! 1))",
             },
         };
 
@@ -33,7 +33,7 @@ namespace HeartScript.UTests.End2EndTests
         {
             var lexer = new Lexer(testCase.Infix);
 
-            var node = AstParser.Parse(Helper.TestOperators, lexer);
+            var node = ExpressionParser.Parse(Helper.TestOperators, lexer);
             Assert.AreEqual(testCase.ExpectedNodeString, node.ToString());
         }
     }

@@ -28,14 +28,12 @@ namespace HeartScript.Parsing
             LexerPattern? terminator,
             BuildNode buildNode)
         {
+            // Unused delimiter
+            // if (rightOperands == 0 && delimiter != null)
+            //     throw new ArgumentException(nameof(delimiter));
 
-            if (rightOperands == 0)
-            {
-                if (delimiter != null)
-                    throw new ArgumentException(nameof(delimiter));
-                if (terminator != null)
-                    throw new ArgumentException(nameof(terminator));
-            }
+            if (terminator != null && rightPrecedence != 0)
+                throw new ArgumentException(nameof(rightPrecedence));
 
             Keyword = keyword;
 
@@ -56,12 +54,7 @@ namespace HeartScript.Parsing
         public bool IsPostfix() => LeftPrecedence != null && RightOperands == 0;
         public bool IsInfix() => LeftPrecedence != null && RightOperands != 0;
 
-        public static bool IsEvaluatedBefore(OperatorInfo left, OperatorInfo right)
-        {
-            if (left.RightOperands == 0 || right.LeftPrecedence == null)
-                return left.RightOperands == 0;
-
-            return left.RightPrecedence <= right.LeftPrecedence;
-        }
+        public bool ExpectDelimiter(int rightCount) => RightOperands == null || rightCount < RightOperands;
+        public bool ExpectTerminator(int rightCount) => RightOperands == null || rightCount == RightOperands;
     }
 }

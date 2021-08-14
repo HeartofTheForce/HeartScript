@@ -1,12 +1,14 @@
 ﻿using System;
-using System.Text.RegularExpressions;
 
 namespace HeartScript.Parsing
 {
     public class Lexer
     {
+        private static readonly LexerPattern s_nonSignificant = new LexerPattern("\\s*", true);
+
         public Token Current { get; private set; }
         public int Offset { get; private set; }
+        public bool IsEOF => Offset == _input.Length;
 
         private readonly string _input;
 
@@ -17,21 +19,13 @@ namespace HeartScript.Parsing
 
             _input = input;
 
-            var match = Regex.Match(input, "^\\s*");
-            if (match.Success)
-                Offset += match.Length;
+            var nonSignificantMatch = s_nonSignificant.Regex.Match(_input, Offset);
+            if (nonSignificantMatch.Success)
+                Offset += nonSignificantMatch.Length;
         }
 
         public bool Eat(LexerPattern lexerPattern)
         {
-            if (Offset == _input.Length)
-            {
-                if (Current == null || Current.Value != null)
-                    Current = new Token(null, Offset);
-
-                return false;
-            }
-
             var match = lexerPattern.Regex.Match(_input, Offset);
             if (match.Success)
             {
@@ -41,10 +35,13 @@ namespace HeartScript.Parsing
                 int groupIndex = match.Groups.Count - 1;
                 Current = new Token(match.Groups[groupIndex].Value, match.Groups[groupIndex].Index);
                 Offset += match.Length;
-                return true;
             }
 
-            return false;
+            var nonSignificantMatch = s_nonSignificant.Regex.Match(_input, Offset);
+            if (nonSignificantMatch.Success)
+                Offset += nonSignificantMatch.Length;
+
+            return match.Success;
         }
     }
 }

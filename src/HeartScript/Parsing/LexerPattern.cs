@@ -19,7 +19,7 @@ namespace HeartScript.Parsing
             else
                 temp = new Regex(Regex.Escape(pattern));
 
-            Regex = new Regex($"\\G({temp})\\s*");
+            Regex = new Regex($"\\G({temp})");
         }
 
         public override string ToString()

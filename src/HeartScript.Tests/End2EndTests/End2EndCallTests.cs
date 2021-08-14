@@ -1,7 +1,7 @@
 using HeartScript.Parsing;
 using NUnit.Framework;
 
-namespace HeartScript.UTests.End2EndTests
+namespace HeartScript.Tests.End2EndTests
 {
     [TestFixture]
     public class End2EndCallTests
@@ -93,7 +93,7 @@ namespace HeartScript.UTests.End2EndTests
         {
             var lexer = new Lexer(testCase.Infix);
 
-            var node = AstParser.Parse(Helper.TestOperators, lexer);
+            var node = ExpressionParser.Parse(Helper.TestOperators, lexer);
             Assert.AreEqual(testCase.ExpectedNodeString, node.ToString());
         }
     }

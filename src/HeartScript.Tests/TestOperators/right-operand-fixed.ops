@@ -1,0 +1,17 @@
+#Pass FixedRightOperands Delimiter Terminator
+none '{' 0 3 ',' '}'
+
+#Pass FixedRightOperands AnyDelimiter Terminator
+none '[' 0 3 any ']'
+
+#Pass FixedRightOperands Delimiter AnyTerminator
+none '?' 0 3 ':' any
+
+#Pass FixedRightOperands AnyDelimiter AnyTerminator
+none '|' 0 3 any any
+
+#Pass FixedRightOperands SameDelimiter SameTerminator
+none '&' 0 3 '*' '*'
+
+#Identifier
+none `[a-zA-Z]\w*` 0 0 any any

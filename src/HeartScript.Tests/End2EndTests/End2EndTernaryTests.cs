@@ -1,7 +1,7 @@
 using HeartScript.Parsing;
 using NUnit.Framework;
 
-namespace HeartScript.UTests.End2EndTests
+namespace HeartScript.Tests.End2EndTests
 {
     [TestFixture]
     public class End2EndTernaryTests
@@ -32,17 +32,23 @@ namespace HeartScript.UTests.End2EndTests
                 Infix = "a ? b ? c : d : e",
                 ExpectedNodeString = "(? a (? b c d) e)",
             },
-            //NestedTernary
+            //InfixTernary
             new End2EndTestCase()
             {
                 Infix = "a * b ? c : d",
                 ExpectedNodeString = "(* a (? b c d))",
             },
-            //NestedTernary
+            //PrefixTernary
             new End2EndTestCase()
             {
                 Infix = "-a ? b : c",
                 ExpectedNodeString = "(? (- a) b c)",
+            },
+            //TernaryPostfix
+            new End2EndTestCase()
+            {
+                Infix = "a ? b : c!",
+                ExpectedNodeString = "(? a b (! c))",
             },
         };
 
@@ -51,7 +57,7 @@ namespace HeartScript.UTests.End2EndTests
         {
             var lexer = new Lexer(testCase.Infix);
 
-            var node = AstParser.Parse(Helper.TestOperators, lexer);
+            var node = ExpressionParser.Parse(Helper.TestOperators, lexer);
             Assert.AreEqual(testCase.ExpectedNodeString, node.ToString());
         }
     }

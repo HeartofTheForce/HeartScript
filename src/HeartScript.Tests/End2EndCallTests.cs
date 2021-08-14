@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using HeartScript.Parsing;
 
-namespace HeartScript.UTests
+namespace HeartScript.Tests
 {
     public static class Helper
     {

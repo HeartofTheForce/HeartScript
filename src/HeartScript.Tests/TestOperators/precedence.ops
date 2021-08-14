@@ -1,0 +1,30 @@
+#pre_a0
+none 'pre_a0' 0 1 any any
+#0post_a
+0 '0post_a' 0 0 any any
+#0in_a0
+0 '0in_a0' 0 1 any any
+
+#pre_a1
+none 'pre_a1' 1 1 any any
+#1post_a
+1 '1post_a' 0 0 any any
+#1in_a1
+1 '1in_a1' 1 1 any any
+
+#pre_b0
+none 'pre_b0' 0 1 any any
+#0post_b
+0 '0post_b' 0 0 any any
+#0in_b0
+0 '0in_b0' 0 1 any any
+
+#pre_b1
+none 'pre_b1' 1 1 any any
+#1post_b
+1 '1post_b' 0 0 any any
+#1in_b1
+1 '1in_b1' 1 1 any any
+
+#Identifier
+none `[a-zA-Z]\w*` 0 0 any any

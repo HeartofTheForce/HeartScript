@@ -6,29 +6,35 @@ namespace HeartScript.Parsing
 {
     public class NodeBuilder
     {
-        public OperatorInfo OperatorInfo { get; }
+        private const bool AllowTrailingDelimiter = false;
 
+        private readonly OperatorInfo _operatorInfo;
         private Token? _token;
         private INode? _leftNode;
         private readonly List<INode> _rightNodes;
 
         public NodeBuilder(OperatorInfo operatorInfo)
         {
-            OperatorInfo = operatorInfo;
+            _operatorInfo = operatorInfo;
             _rightNodes = new List<INode>();
         }
 
-        public INode? FeedOperandLeft(Token current, INode? operand)
+        public INode? FeedOperandLeft(Lexer lexer, INode? operand)
         {
-            _token = current;
+            _token = lexer.Current;
 
-            if (OperatorInfo.LeftPrecedence == null != (operand == null))
+            if (_operatorInfo.LeftPrecedence == null != (operand == null))
                 throw new ArgumentException(nameof(operand));
 
             _leftNode = operand;
 
-            if (OperatorInfo.RightOperands == 0)
-                return OperatorInfo.BuildNode(_token, _leftNode, _rightNodes);
+            if (_operatorInfo.RightOperands == 0)
+            {
+                if (_operatorInfo.Terminator == null || lexer.Eat(_operatorInfo.Terminator))
+                    return _operatorInfo.BuildNode(_token, _leftNode, _rightNodes);
+                else
+                    throw new UnexpectedTokenException(lexer.Offset, _operatorInfo.Terminator);
+            }
 
             return null;
         }
@@ -38,46 +44,66 @@ namespace HeartScript.Parsing
             if (_token == null)
                 throw new ArgumentException(nameof(_token));
 
-            if (operand != null)
-                _rightNodes.Add(operand);
-
             int initialOffset = lexer.Offset;
 
-            if (operand == null && _rightNodes.Count > 0)
+            if (operand != null)
+                _rightNodes.Add(operand);
+            else if (_rightNodes.Count < _operatorInfo.RightOperands)
                 throw new ExpressionTermException(initialOffset);
 
-            if (_rightNodes.Count < OperatorInfo.RightOperands)
+            if (_operatorInfo.ExpectTerminator(_rightNodes.Count) && _operatorInfo.Terminator != null)
             {
-                if (operand == null)
+                if (!AllowTrailingDelimiter && _rightNodes.Count > 0 && operand == null)
                     throw new ExpressionTermException(initialOffset);
 
-                if (OperatorInfo.Delimiter == null || lexer.Eat(OperatorInfo.Delimiter))
-                    return null;
+                if (lexer.Eat(_operatorInfo.Terminator))
+                    return _operatorInfo.BuildNode(_token, _leftNode, _rightNodes);
             }
 
-            if (OperatorInfo.Terminator == null || lexer.Eat(OperatorInfo.Terminator))
+            if (_operatorInfo.ExpectDelimiter(_rightNodes.Count) && _operatorInfo.Delimiter != null)
             {
-                if (OperatorInfo.RightOperands != null && _rightNodes.Count != OperatorInfo.RightOperands)
+                if (lexer.Eat(_operatorInfo.Delimiter))
                 {
-                    if (OperatorInfo.Delimiter != null)
-                        throw new UnexpectedTokenException(initialOffset, OperatorInfo.Delimiter);
-                    else
+                    if (operand == null)
                         throw new ExpressionTermException(initialOffset);
-                }
 
-                return OperatorInfo.BuildNode(_token, _leftNode, _rightNodes);
+                    return null;
+                }
             }
 
-            if (OperatorInfo.RightOperands == null)
+            if (_operatorInfo.ExpectTerminator(_rightNodes.Count) && _operatorInfo.Terminator == null)
+            {
+                if (_rightNodes.Count > 0 && operand == null)
+                    throw new ExpressionTermException(initialOffset);
+
+                return _operatorInfo.BuildNode(_token, _leftNode, _rightNodes);
+            }
+
+            if (_operatorInfo.ExpectDelimiter(_rightNodes.Count) && _operatorInfo.Delimiter == null)
             {
                 if (operand == null)
                     throw new ExpressionTermException(initialOffset);
 
-                if (OperatorInfo.Delimiter == null || lexer.Eat(OperatorInfo.Delimiter))
-                    return null;
+                return null;
             }
 
-            throw new UnexpectedTokenException(initialOffset, OperatorInfo.Terminator);
+            if (_operatorInfo.Terminator != null)
+                throw new UnexpectedTokenException(initialOffset, _operatorInfo.Terminator);
+            if (_operatorInfo.Delimiter != null)
+                throw new UnexpectedTokenException(initialOffset, _operatorInfo.Delimiter);
+
+            throw new Exception($"{nameof(NodeBuilder)} unhandled state");
+        }
+
+        public bool IsEvaluatedBefore(OperatorInfo right)
+        {
+            if (_operatorInfo.Terminator != null)
+                return false;
+
+            if (!_operatorInfo.ExpectTerminator(_rightNodes.Count + 1))
+                return false;
+
+            return _operatorInfo.RightPrecedence <= right.LeftPrecedence;
         }
     }
 }

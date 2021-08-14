@@ -1,0 +1,17 @@
+#Pass VariableRightOperands Delimiter Terminator
+none '{' 0 any ',' '}'
+
+#Pass VariableRightOperands AnyDelimiter Terminator
+none '[' 0 any any ']'
+
+#Pass VariableRightOperands Delimiter AnyTerminator
+none '?' 0 any ':' any
+
+#Fail VariableRightOperands AnyDelimiter AnyTerminator
+none '|' 0 any any any
+
+#Fail VariableRightOperands SameDelimiter SameTerminator
+none '&' 0 any '*' '*'
+
+#Identifier
+none `[a-zA-Z]\w*` 0 0 any any
