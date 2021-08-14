@@ -65,28 +65,38 @@ namespace HeartScript.Tests.ExpressionParserTests
                 ExpectedOutput = "(? x)",
             },
             //|
-            new ExpressionTestCase()
-            {
-                Infix = "| x",
-                ExpectedOutput = "(| x)",
-            },
             new UnexpectedTokenTestCase()
             {
                 Infix = "| x y z",
                 ExpectedCharIndex = 4,
                 ExpectedPattern = "EOF",
             },
+            new ExpressionTestCase()
+            {
+                Infix = "|",
+                ExpectedOutput = "|",
+            },
+            new ExpressionTestCase()
+            {
+                Infix = "| x",
+                ExpectedOutput = "(| x)",
+            },
             //&*
+            new UnexpectedTokenTestCase()
+            {
+                Infix = "& x * y * z *",
+                ExpectedCharIndex = 6,
+                ExpectedPattern = "EOF",
+            },
+            new ExpressionTestCase()
+            {
+                Infix = "& *",
+                ExpectedOutput = "&",
+            },
             new ExpressionTestCase()
             {
                 Infix = "& x *",
                 ExpectedOutput = "(& x)",
-            },
-            new UnexpectedTokenTestCase()
-            {
-                Infix = "& x * y * z",
-                ExpectedCharIndex = 6,
-                ExpectedPattern = "EOF",
             },
         };
 
