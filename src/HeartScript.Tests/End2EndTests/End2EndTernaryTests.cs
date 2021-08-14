@@ -32,17 +32,23 @@ namespace HeartScript.Tests.End2EndTests
                 Infix = "a ? b ? c : d : e",
                 ExpectedNodeString = "(? a (? b c d) e)",
             },
-            //NestedTernary
+            //InfixTernary
             new End2EndTestCase()
             {
                 Infix = "a * b ? c : d",
                 ExpectedNodeString = "(* a (? b c d))",
             },
-            //NestedTernary
+            //PrefixTernary
             new End2EndTestCase()
             {
                 Infix = "-a ? b : c",
                 ExpectedNodeString = "(? (- a) b c)",
+            },
+            //TernaryPostfix
+            new End2EndTestCase()
+            {
+                Infix = "a ? b : c!",
+                ExpectedNodeString = "(? a b (! c))",
             },
         };
 
