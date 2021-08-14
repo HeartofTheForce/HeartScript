@@ -16,6 +16,36 @@ namespace HeartScript.Tests.ExpressionParserTests
 
         static readonly IExpressionTestCase[] s_testCases = new IExpressionTestCase[]
         {
+            //{}
+            new ExpressionTestCase()
+            {
+                Infix = "{}",
+                ExpectedOutput = "{",
+            },
+            //[]
+            new ExpressionTestCase()
+            {
+                Infix = "[]",
+                ExpectedOutput = "[",
+            },
+            //?:
+            new ExpressionTestCase()
+            {
+                Infix = "?",
+                ExpectedOutput = "?",
+            },
+            //|
+            new ExpressionTestCase()
+            {
+                Infix = "|",
+                ExpectedOutput = "|",
+            },
+            //&*
+            new ExpressionTestCase()
+            {
+                Infix = "& *",
+                ExpectedOutput = "&",
+            },
         };
 
         [TestCaseSource(nameof(s_testCases))]

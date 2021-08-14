@@ -28,9 +28,9 @@ namespace HeartScript.Parsing
             LexerPattern? terminator,
             BuildNode buildNode)
         {
-
-            if (rightOperands == 0 && delimiter != null)
-                throw new ArgumentException(nameof(delimiter));
+            // Unused delimiter
+            // if (rightOperands == 0 && delimiter != null)
+            //     throw new ArgumentException(nameof(delimiter));
 
             if (terminator != null && rightPrecedence != 0)
                 throw new ArgumentException(nameof(rightPrecedence));
