@@ -14,7 +14,7 @@ namespace HeartScript.Tests.AstParserTests
             s_testOperators = OperatorInfoBuilder.Parse("./TestOperators/right-operand-variable.ops");
         }
 
-        static readonly AstTestCase[] s_testCases = new AstTestCase[]
+        static readonly IExpressionTestCase[] s_testCases = new IExpressionTestCase[]
         {
             //{}
             new AstTestCase()
@@ -64,15 +64,36 @@ namespace HeartScript.Tests.AstParserTests
                 Infix = "? x",
                 ExpectedOutput = "(? x)",
             },
+            //|
+            new AstTestCase()
+            {
+                Infix = "| x",
+                ExpectedOutput = "(| x)",
+            },
+            new UnexpectedTokenTestCase()
+            {
+                Infix = "| x y z",
+                ExpectedCharIndex = 3,
+                ExpectedPattern = "EOF",
+            },
+            //&*
+            new AstTestCase()
+            {
+                Infix = "& x *",
+                ExpectedOutput = "(& x)",
+            },
+            new UnexpectedTokenTestCase()
+            {
+                Infix = "& x * y * z &",
+                ExpectedCharIndex = 5,
+                ExpectedPattern = "EOF",
+            },
         };
 
         [TestCaseSource(nameof(s_testCases))]
-        public void TestCases(AstTestCase testCase)
+        public void TestCases(IExpressionTestCase testCase)
         {
-            var lexer = new Lexer(testCase.Infix);
-
-            var node = AstParser.Parse(s_testOperators, lexer);
-            Assert.AreEqual(testCase.ExpectedOutput, node.ToString());
+            testCase.Execute(s_testOperators);
         }
     }
 }

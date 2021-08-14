@@ -61,21 +61,7 @@ namespace HeartScript.Tests.AstParserTests
         [TestCaseSource(nameof(s_testCases))]
         public void TestCases(ExpressionTermTestCase testCase)
         {
-            var lexer = new Lexer(testCase.Infix);
-            var ex = Assert.Throws<ExpressionTermException>(() => AstParser.Parse(Helper.TestOperators, lexer));
-
-            Assert.AreEqual(testCase.ExpectedCharIndex, ex.CharIndex);
-        }
-
-        public struct ExpressionTermTestCase
-        {
-            public string Infix { get; set; }
-            public int ExpectedCharIndex { get; set; }
-
-            public override string ToString()
-            {
-                return $"\"{Infix}\"";
-            }
+            testCase.Execute(Helper.TestOperators);
         }
     }
 }
