@@ -32,6 +32,8 @@ namespace HeartScript.Parsing
             {
                 if (_operatorInfo.Terminator == null || lexer.Eat(_operatorInfo.Terminator))
                     return _operatorInfo.BuildNode(_token, _leftNode, _rightNodes);
+                else
+                    throw new UnexpectedTokenException(lexer.Offset, _operatorInfo.Terminator);
             }
 
             return null;
