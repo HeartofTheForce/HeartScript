@@ -22,11 +22,23 @@ namespace HeartScript.Tests.ExpressionParserTests
                 Infix = "{x, y, z}",
                 ExpectedOutput = "({ x y z)",
             },
+            new UnexpectedTokenTestCase()
+            {
+                Infix = "{x, y, z, w}",
+                ExpectedCharIndex = 8,
+                ExpectedPattern = "}",
+            },
             //[]
             new ExpressionTestCase()
             {
                 Infix = "[x y z]",
                 ExpectedOutput = "([ x y z)",
+            },
+            new UnexpectedTokenTestCase()
+            {
+                Infix = "[x y z w]",
+                ExpectedCharIndex = 7,
+                ExpectedPattern = "]",
             },
             //?:
             new ExpressionTestCase()
@@ -35,16 +47,35 @@ namespace HeartScript.Tests.ExpressionParserTests
                 ExpectedOutput = "(? x y z)",
             },
             //|
+            new UnexpectedTokenTestCase()
+            {
+                Infix = "? x : y : z : w",
+                ExpectedCharIndex = 12,
+                ExpectedPattern = "EOF",
+            },
+            //|
             new ExpressionTestCase()
             {
                 Infix = "| x y z",
                 ExpectedOutput = "(| x y z)",
+            },
+            new UnexpectedTokenTestCase()
+            {
+                Infix = "| x y z w",
+                ExpectedCharIndex = 8,
+                ExpectedPattern = "EOF",
             },
             //&*
             new ExpressionTestCase()
             {
                 Infix = "& x * y * z *",
                 ExpectedOutput = "(& x y z)",
+            },
+            new UnexpectedTokenTestCase()
+            {
+                Infix = "& x * y * z * w *",
+                ExpectedCharIndex = 14,
+                ExpectedPattern = "EOF",
             },
         };
 

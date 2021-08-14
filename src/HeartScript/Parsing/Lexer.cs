@@ -18,14 +18,14 @@ namespace HeartScript.Parsing
             Offset = 0;
 
             _input = input;
+
+            var nonSignificantMatch = s_nonSignificant.Regex.Match(_input, Offset);
+            if (nonSignificantMatch.Success)
+                Offset += nonSignificantMatch.Length;
         }
 
         public bool Eat(LexerPattern lexerPattern)
         {
-            var nonSignificantMatch = s_nonSignificant.Regex.Match(_input, Offset);
-            if (nonSignificantMatch.Success)
-                Offset += nonSignificantMatch.Length;
-
             var match = lexerPattern.Regex.Match(_input, Offset);
             if (match.Success)
             {
@@ -35,10 +35,13 @@ namespace HeartScript.Parsing
                 int groupIndex = match.Groups.Count - 1;
                 Current = new Token(match.Groups[groupIndex].Value, match.Groups[groupIndex].Index);
                 Offset += match.Length;
-                return true;
             }
 
-            return false;
+            var nonSignificantMatch = s_nonSignificant.Regex.Match(_input, Offset);
+            if (nonSignificantMatch.Success)
+                Offset += nonSignificantMatch.Length;
+
+            return match.Success;
         }
     }
 }

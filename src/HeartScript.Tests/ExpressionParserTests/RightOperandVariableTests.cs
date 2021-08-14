@@ -73,7 +73,7 @@ namespace HeartScript.Tests.ExpressionParserTests
             new UnexpectedTokenTestCase()
             {
                 Infix = "| x y z",
-                ExpectedCharIndex = 3,
+                ExpectedCharIndex = 4,
                 ExpectedPattern = "EOF",
             },
             //&*
@@ -84,8 +84,8 @@ namespace HeartScript.Tests.ExpressionParserTests
             },
             new UnexpectedTokenTestCase()
             {
-                Infix = "& x * y * z &",
-                ExpectedCharIndex = 5,
+                Infix = "& x * y * z",
+                ExpectedCharIndex = 6,
                 ExpectedPattern = "EOF",
             },
         };
