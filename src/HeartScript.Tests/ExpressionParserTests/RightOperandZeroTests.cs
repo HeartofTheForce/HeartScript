@@ -14,17 +14,14 @@ namespace HeartScript.Tests.ExpressionParserTests
             s_testOperators = OperatorInfoBuilder.Parse("./TestOperators/right-operand-zero.ops");
         }
 
-        static readonly ExpressionTestCase[] s_testCases = new ExpressionTestCase[]
+        static readonly IExpressionTestCase[] s_testCases = new IExpressionTestCase[]
         {
         };
 
         [TestCaseSource(nameof(s_testCases))]
-        public void TestCases(ExpressionTestCase testCase)
+        public void TestCases(IExpressionTestCase testCase)
         {
-            var lexer = new Lexer(testCase.Infix);
-
-            var node = ExpressionParser.Parse(s_testOperators, lexer);
-            Assert.AreEqual(testCase.ExpectedOutput, node.ToString());
+            testCase.Execute(s_testOperators);
         }
     }
 }
