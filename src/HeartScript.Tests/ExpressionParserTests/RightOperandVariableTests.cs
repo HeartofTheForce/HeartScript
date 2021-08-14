@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using HeartScript.Parsing;
 using NUnit.Framework;
 
-namespace HeartScript.Tests.AstParserTests
+namespace HeartScript.Tests.ExpressionParserTests
 {
     [TestFixture]
     public class RightOperandVariableTests
@@ -17,55 +17,55 @@ namespace HeartScript.Tests.AstParserTests
         static readonly IExpressionTestCase[] s_testCases = new IExpressionTestCase[]
         {
             //{}
-            new AstTestCase()
+            new ExpressionTestCase()
             {
                 Infix = "{x, y, z}",
                 ExpectedOutput = "({ x y z)",
             },
-            new AstTestCase()
+            new ExpressionTestCase()
             {
                 Infix = "{}",
                 ExpectedOutput = "{",
             },
-            new AstTestCase()
+            new ExpressionTestCase()
             {
                 Infix = "{x}",
                 ExpectedOutput = "({ x)",
             },
             //[]
-            new AstTestCase()
+            new ExpressionTestCase()
             {
                 Infix = "[x y z]",
                 ExpectedOutput = "([ x y z)",
             },
-            new AstTestCase()
+            new ExpressionTestCase()
             {
                 Infix = "[]",
                 ExpectedOutput = "[",
             },
-            new AstTestCase()
+            new ExpressionTestCase()
             {
                 Infix = "[x]",
                 ExpectedOutput = "([ x)",
             },
             //?:
-            new AstTestCase()
+            new ExpressionTestCase()
             {
                 Infix = "? x : y : z",
                 ExpectedOutput = "(? x y z)",
             },
-            new AstTestCase()
+            new ExpressionTestCase()
             {
                 Infix = "?",
                 ExpectedOutput = "?",
             },
-            new AstTestCase()
+            new ExpressionTestCase()
             {
                 Infix = "? x",
                 ExpectedOutput = "(? x)",
             },
             //|
-            new AstTestCase()
+            new ExpressionTestCase()
             {
                 Infix = "| x",
                 ExpectedOutput = "(| x)",
@@ -77,7 +77,7 @@ namespace HeartScript.Tests.AstParserTests
                 ExpectedPattern = "EOF",
             },
             //&*
-            new AstTestCase()
+            new ExpressionTestCase()
             {
                 Infix = "& x *",
                 ExpectedOutput = "(& x)",

@@ -33,7 +33,7 @@ namespace HeartScript.Tests.End2EndTests
         {
             var lexer = new Lexer(testCase.Infix);
 
-            var node = AstParser.Parse(Helper.TestOperators, lexer);
+            var node = ExpressionParser.Parse(Helper.TestOperators, lexer);
             Assert.AreEqual(testCase.ExpectedNodeString, node.ToString());
         }
     }

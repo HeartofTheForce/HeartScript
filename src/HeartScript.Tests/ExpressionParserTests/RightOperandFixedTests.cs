@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using HeartScript.Parsing;
 using NUnit.Framework;
 
-namespace HeartScript.Tests.AstParserTests
+namespace HeartScript.Tests.ExpressionParserTests
 {
     [TestFixture]
     public class RightOperandFixedTests
@@ -14,16 +14,16 @@ namespace HeartScript.Tests.AstParserTests
             s_testOperators = OperatorInfoBuilder.Parse("./TestOperators/right-operand-fixed.ops");
         }
 
-        static readonly AstTestCase[] s_testCases = new AstTestCase[]
+        static readonly ExpressionTestCase[] s_testCases = new ExpressionTestCase[]
         {
         };
 
         [TestCaseSource(nameof(s_testCases))]
-        public void TestCases(AstTestCase testCase)
+        public void TestCases(ExpressionTestCase testCase)
         {
             var lexer = new Lexer(testCase.Infix);
 
-            var node = AstParser.Parse(s_testOperators, lexer);
+            var node = ExpressionParser.Parse(s_testOperators, lexer);
             Assert.AreEqual(testCase.ExpectedOutput, node.ToString());
         }
     }

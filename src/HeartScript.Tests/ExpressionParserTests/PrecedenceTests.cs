@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using HeartScript.Parsing;
 using NUnit.Framework;
 
-namespace HeartScript.Tests.AstParserTests
+namespace HeartScript.Tests.ExpressionParserTests
 {
     [TestFixture]
     public class PrecedenceTests
@@ -14,132 +14,132 @@ namespace HeartScript.Tests.AstParserTests
             s_testOperators = OperatorInfoBuilder.Parse("./TestOperators/precedence.ops");
         }
 
-        static readonly AstTestCase[] s_testCases = new AstTestCase[]
+        static readonly ExpressionTestCase[] s_testCases = new ExpressionTestCase[]
         {
             //PrePost
-            new AstTestCase()
+            new ExpressionTestCase()
             {
                 Infix = "pre_a0 x 0post_b",
                 ExpectedOutput = "(0post_b (pre_a0 x))",
             },
-            new AstTestCase()
+            new ExpressionTestCase()
             {
                 Infix = "pre_a1 x 0post_b",
                 ExpectedOutput = "(pre_a1 (0post_b x))",
             },
-            new AstTestCase()
+            new ExpressionTestCase()
             {
                 Infix = "pre_a0 x 1post_b",
                 ExpectedOutput = "(1post_b (pre_a0 x))",
             },
             //PreIn
-            new AstTestCase()
+            new ExpressionTestCase()
             {
                 Infix = "pre_a0 x 0in_b0 y",
                 ExpectedOutput = "(0in_b0 (pre_a0 x) y)",
             },
-            new AstTestCase()
+            new ExpressionTestCase()
             {
                 Infix = "pre_a1 x 0in_b0 y",
                 ExpectedOutput = "(pre_a1 (0in_b0 x y))",
             },
-            new AstTestCase()
+            new ExpressionTestCase()
             {
                 Infix = "pre_a0 x 1in_b1 y",
                 ExpectedOutput = "(1in_b1 (pre_a0 x) y)",
             },
             //InPost
-            new AstTestCase()
+            new ExpressionTestCase()
             {
                 Infix = "x 0in_a0 y 0post_b",
                 ExpectedOutput = "(0post_b (0in_a0 x y))",
             },
-            new AstTestCase()
+            new ExpressionTestCase()
             {
                 Infix = "x 1in_a1 y 0post_b",
                 ExpectedOutput = "(1in_a1 x (0post_b y))",
             },
-            new AstTestCase()
+            new ExpressionTestCase()
             {
                 Infix = "x 0in_a0 y 1post_b",
                 ExpectedOutput = "(1post_b (0in_a0 x y))",
             },
             //InIn
-            new AstTestCase()
+            new ExpressionTestCase()
             {
                 Infix = "x 0in_a0 y 0in_b0 z",
                 ExpectedOutput = "(0in_b0 (0in_a0 x y) z)",
             },
-            new AstTestCase()
+            new ExpressionTestCase()
             {
                 Infix = "x 1in_a1 y 0in_b0 z",
                 ExpectedOutput = "(1in_a1 x (0in_b0 y z))",
             },
-            new AstTestCase()
+            new ExpressionTestCase()
             {
                 Infix = "x 0in_a0 y 1in_b1 z",
                 ExpectedOutput = "(1in_b1 (0in_a0 x y) z)",
             },
             //PrePre
-            new AstTestCase()
+            new ExpressionTestCase()
             {
                 Infix = "pre_a0 pre_b0 x",
                 ExpectedOutput = "(pre_a0 (pre_b0 x))",
             },
-            new AstTestCase()
+            new ExpressionTestCase()
             {
                 Infix = "pre_a1 pre_b0 x",
                 ExpectedOutput = "(pre_a1 (pre_b0 x))",
             },
-            new AstTestCase()
+            new ExpressionTestCase()
             {
                 Infix = "pre_a0 pre_b1 x",
                 ExpectedOutput = "(pre_a0 (pre_b1 x))",
             },
             //PostPost
-            new AstTestCase()
+            new ExpressionTestCase()
             {
                 Infix = "x 0post_a 0post_b",
                 ExpectedOutput = "(0post_b (0post_a x))",
             },
-            new AstTestCase()
+            new ExpressionTestCase()
             {
                 Infix = "x 1post_a 0post_b",
                 ExpectedOutput = "(0post_b (1post_a x))",
             },
-            new AstTestCase()
+            new ExpressionTestCase()
             {
                 Infix = "x 0post_a 1post_b",
                 ExpectedOutput = "(1post_b (0post_a x))",
             },
             //PostIn
-            new AstTestCase()
+            new ExpressionTestCase()
             {
                 Infix = "x 0post_a 0in_b0 y",
                 ExpectedOutput = "(0in_b0 (0post_a x) y)",
             },
-            new AstTestCase()
+            new ExpressionTestCase()
             {
                 Infix = "x 1post_a 0in_b0 y",
                 ExpectedOutput = "(0in_b0 (1post_a x) y)",
             },
-            new AstTestCase()
+            new ExpressionTestCase()
             {
                 Infix = "x 0post_a 1in_b1 y",
                 ExpectedOutput = "(1in_b1 (0post_a x) y)",
             },
             //InPre
-            new AstTestCase()
+            new ExpressionTestCase()
             {
                 Infix = "x 0in_a0 pre_b0 y",
                 ExpectedOutput = "(0in_a0 x (pre_b0 y))",
             },
-            new AstTestCase()
+            new ExpressionTestCase()
             {
                 Infix = "x 1in_a1 pre_b0 y",
                 ExpectedOutput = "(1in_a1 x (pre_b0 y))",
             },
-            new AstTestCase()
+            new ExpressionTestCase()
             {
                 Infix = "x 0in_a0 pre_b1 y",
                 ExpectedOutput = "(0in_a0 x (pre_b1 y))",
@@ -147,11 +147,11 @@ namespace HeartScript.Tests.AstParserTests
         };
 
         [TestCaseSource(nameof(s_testCases))]
-        public void TestCases(AstTestCase testCase)
+        public void TestCases(ExpressionTestCase testCase)
         {
             var lexer = new Lexer(testCase.Infix);
 
-            var node = AstParser.Parse(s_testOperators, lexer);
+            var node = ExpressionParser.Parse(s_testOperators, lexer);
             Assert.AreEqual(testCase.ExpectedOutput, node.ToString());
         }
     }
