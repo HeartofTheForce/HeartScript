@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using HeartScript.Nodes;
+#pragma warning disable CS8600
+#pragma warning disable CS8602
 #pragma warning disable CS8604
 
 namespace HeartScript.Parsing
@@ -11,8 +13,8 @@ namespace HeartScript.Parsing
         private static readonly LexerPattern s_regex = new LexerPattern("`((?:``|[^`])*)`", true);
         private static readonly LexerPattern s_plainText = new LexerPattern("'((?:''|[^'])*)'", true);
         private static readonly LexerPattern s_digits = new LexerPattern("\\d+", true);
-        private static readonly LexerPattern s_none = new LexerPattern("none", true);
-        private static readonly LexerPattern s_any = new LexerPattern("any", true);
+        private static readonly LexerPattern s_none = new LexerPattern("none", false);
+        private static readonly LexerPattern s_any = new LexerPattern("any", false);
 
         public static IEnumerable<OperatorInfo> Parse(string filePath)
         {
@@ -46,10 +48,10 @@ namespace HeartScript.Parsing
                 throw new OperatorInfoBuilderException(nameof(leftPrecedence), lineNumber, lexer.Offset);
 
             LexerPattern keyword;
-            if (lexer.Eat(s_regex))
-                keyword = new LexerPattern(lexer.Current.Value, true);
-            else if (lexer.Eat(s_plainText))
-                keyword = new LexerPattern(lexer.Current.Value, false);
+            if (TryEatRegex(lexer, out var rKeyword))
+                keyword = rKeyword;
+            else if (TryEatPlainText(lexer, out var ptKeyword))
+                keyword = ptKeyword;
             else
                 throw new OperatorInfoBuilderException(nameof(keyword), lineNumber, lexer.Offset);
 
@@ -67,21 +69,21 @@ namespace HeartScript.Parsing
             else
                 throw new OperatorInfoBuilderException(nameof(rightOperands), lineNumber, lexer.Offset);
 
-            LexerPattern? delimiter = null;
-            if (lexer.Eat(s_regex))
-                delimiter = new LexerPattern(lexer.Current.Value, true);
-            else if (lexer.Eat(s_plainText))
-                delimiter = new LexerPattern(lexer.Current.Value, false);
+            LexerPattern? delimiter;
+            if (TryEatRegex(lexer, out var rDelimiter))
+                delimiter = rDelimiter;
+            else if (TryEatPlainText(lexer, out var ptDelimiter))
+                delimiter = ptDelimiter;
             else if (lexer.Eat(s_any))
                 delimiter = null;
             else
                 throw new OperatorInfoBuilderException(nameof(delimiter), lineNumber, lexer.Offset);
 
             LexerPattern? terminator;
-            if (lexer.Eat(s_regex))
-                terminator = new LexerPattern(lexer.Current.Value, true);
-            else if (lexer.Eat(s_plainText))
-                terminator = new LexerPattern(lexer.Current.Value, false);
+            if (TryEatRegex(lexer, out var rTerminator))
+                terminator = rTerminator;
+            else if (TryEatPlainText(lexer, out var ptTerminator))
+                terminator = ptTerminator;
             else if (lexer.Eat(s_any))
                 terminator = null;
             else
@@ -95,6 +97,30 @@ namespace HeartScript.Parsing
                 delimiter,
                 terminator,
                 ExpressionNode.BuildNode);
+        }
+
+        private static bool TryEatRegex(Lexer lexer, out LexerPattern? lexerPattern)
+        {
+            bool success = lexer.Eat(s_regex);
+
+            if (success)
+                lexerPattern = new LexerPattern(lexer.Current.Value.Replace("``", "`"), true);
+            else
+                lexerPattern = null;
+
+            return success;
+        }
+
+        private static bool TryEatPlainText(Lexer lexer, out LexerPattern? lexerPattern)
+        {
+            bool success = lexer.Eat(s_plainText);
+
+            if (success)
+                lexerPattern = new LexerPattern(lexer.Current.Value.Replace("''", "'"), false);
+            else
+                lexerPattern = null;
+
+            return success;
         }
 
         private class OperatorInfoBuilderException : Exception
