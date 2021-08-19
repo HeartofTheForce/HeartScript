@@ -9,7 +9,7 @@
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "build",
-      "program": "${workspaceFolder}/src/HeartScript.Cli/bin/Debug/netcoreapp3.1/HeartScript.Cli.dll",
+      "program": "${workspaceFolder}/src/HeartScript.Cli/bin/Debug/net5.0/HeartScript.Cli.dll",
       "logging": { "moduleLoad": false },
       "args": ["a(1 * 2 + 3!, 4)"],
       "cwd": "${workspaceFolder}",
