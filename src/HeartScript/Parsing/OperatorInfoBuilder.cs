@@ -10,8 +10,8 @@ namespace HeartScript.Parsing
 {
     public static class OperatorInfoBuilder
     {
-        private static readonly LexerPattern s_regex = new LexerPattern("`((?:``|[^`])*)`", true);
-        private static readonly LexerPattern s_plainText = new LexerPattern("'((?:''|[^'])*)'", true);
+        private static readonly LexerPattern s_regex = new LexerPattern("`(?:``|[^`])*`", true);
+        private static readonly LexerPattern s_plainText = new LexerPattern("'(?:''|[^'])*'", true);
         private static readonly LexerPattern s_digits = new LexerPattern("\\d+", true);
         private static readonly LexerPattern s_none = new LexerPattern("none", false);
         private static readonly LexerPattern s_any = new LexerPattern("any", false);
@@ -104,7 +104,10 @@ namespace HeartScript.Parsing
             bool success = lexer.Eat(s_regex);
 
             if (success)
-                lexerPattern = new LexerPattern(lexer.Current.Value.Replace("``", "`"), true);
+            {
+                string? pattern = lexer.Current.Value[1..^1].Replace("``", "`");
+                lexerPattern = new LexerPattern(pattern, true);
+            }
             else
                 lexerPattern = null;
 
@@ -116,7 +119,10 @@ namespace HeartScript.Parsing
             bool success = lexer.Eat(s_plainText);
 
             if (success)
-                lexerPattern = new LexerPattern(lexer.Current.Value.Replace("''", "'"), false);
+            {
+                string? pattern = lexer.Current.Value[1..^1].Replace("''", "'");
+                lexerPattern = new LexerPattern(pattern, false);
+            }
             else
                 lexerPattern = null;
 
