@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using HeartScript.Parsing;
 
 namespace HeartScript.Cli
@@ -71,11 +72,11 @@ namespace HeartScript.Cli
 
     class SequenceNode : IPegNode
     {
-        public IEnumerable<IPegNode> Values { get; }
+        public IPegNode[] Values { get; }
 
         public SequenceNode(IEnumerable<IPegNode> values)
         {
-            Values = values;
+            Values = values.ToArray();
         }
     }
 
@@ -179,11 +180,11 @@ namespace HeartScript.Cli
 
     class MinOrMoreNode : IPegNode
     {
-        public IEnumerable<IPegNode> Values { get; }
+        public IPegNode[] Values { get; }
 
         public MinOrMoreNode(IEnumerable<IPegNode> values)
         {
-            Values = values;
+            Values = values.ToArray();
         }
     }
 
@@ -285,50 +286,159 @@ namespace HeartScript.Cli
         private static readonly LexerPattern s_regex = LexerPattern.FromRegex("`(?:``|[^`])*`");
         private static readonly LexerPattern s_plainText = LexerPattern.FromRegex("'(?:''|[^'])*'");
 
-
         static IPegPattern BuildParser()
         {
             string input = File.ReadAllText("src/peg.ops");
             var lexer = new Lexer(input);
             var ctx = new PegContext(lexer);
 
-            ctx.Patterns["key"] = TerminalPattern.Create(LexerPattern.FromRegex("\\w+"));
-            ctx.Patterns["string"] = ChoicePattern.Create()
-                    .Or(TerminalPattern.Create(s_regex))
-                    .Or(TerminalPattern.Create(s_plainText));
             ctx.Patterns["term"] = ChoicePattern.Create()
-                    .Or(KeyPattern.Create("string"))
+                    .Or(ChoicePattern.Create()
+                        .Or(TerminalPattern.Create(s_regex))
+                        .Or(TerminalPattern.Create(s_plainText)))
                     .Or(SequencePattern.Create()
                         .Then(TerminalPattern.Create(LexerPattern.FromPlainText("(")))
-                        .Then(KeyPattern.Create("string"))
+                        .Then(KeyPattern.Create("choice"))
                         .Then(TerminalPattern.Create(LexerPattern.FromPlainText(")"))))
-                    .Or(KeyPattern.Create("key"))
-            ;
+                    .Or(TerminalPattern.Create(LexerPattern.FromRegex("\\w+")));
 
-            var op = MinOrMorePattern.Create(
+            ctx.Patterns["sequence"] = MinOrMorePattern.Create(
                 1,
-                KeyPattern.Create("term")
+                ChoicePattern.Create()
+                    .Or(KeyPattern.Create("zero-or-more"))
+                    .Or(KeyPattern.Create("term"))
             );
 
-            var result = op.Parse(ctx);
-            return op;
+            ctx.Patterns["zero-or-more"] = SequencePattern.Create()
+                .Then(KeyPattern.Create("term"))
+                .Then(TerminalPattern.Create(LexerPattern.FromPlainText("*")));
+
+            ctx.Patterns["choice"] = SequencePattern.Create()
+                .Then(KeyPattern.Create("sequence"))
+                .Then(MinOrMorePattern.Create(
+                        0,
+                        SequencePattern.Create()
+                            .Then(TerminalPattern.Create(LexerPattern.FromPlainText("/")))
+                            .Then(KeyPattern.Create("sequence"))));
+
+            var builderPattern = KeyPattern.Create("choice");
+
+            var result = builderPattern.Parse(ctx);
+            var parserPattern = BuildRoot(result);
+
+            return parserPattern;
+        }
+
+        static IPegPattern BuildRoot(PegResult result)
+        {
+            return BuildKey(result.Value);
+        }
+
+        static IPegPattern BuildKey(IPegNode node)
+        {
+            var keyNode = (KeyNode)node;
+            return keyNode.Key switch
+            {
+                "sequence" => BuildSequence(keyNode.Value),
+                "choice" => BuildChoice(keyNode.Value),
+                "term" => BuildTerm(keyNode.Value),
+                "zero-or-more" => BuildZeroOrMore(keyNode.Value),
+                _ => throw new Exception($"Unexpected Key, {keyNode.Key}"),
+            };
+        }
+
+        static IPegPattern BuildChoice(IPegNode node)
+        {
+            var root = (SequenceNode)node;
+            var minOrMoreNode = (MinOrMoreNode)root.Values[1];
+
+            if (minOrMoreNode.Values.Length == 0)
+                return BuildKey(root.Values[0]);
+            else
+            {
+                var output = ChoicePattern.Create()
+                   .Or(BuildKey(root.Values[0]));
+
+                foreach (var value in minOrMoreNode.Values)
+                {
+                    var sequenceNode = (SequenceNode)value;
+                    output.Or(BuildKey(sequenceNode.Values[0]));
+                }
+
+                return output;
+            }
+        }
+
+        static IPegPattern BuildSequence(IPegNode node)
+        {
+            var root = (MinOrMoreNode)node;
+
+            var output = SequencePattern.Create();
+            foreach (var value in root.Values)
+            {
+                var choice = (ChoiceNode)value;
+                output.Then(BuildKey(choice.Value));
+            }
+
+            return output;
+        }
+
+        static IPegPattern BuildZeroOrMore(IPegNode node)
+        {
+            var root = (SequenceNode)node;
+
+            var pattern = BuildKey(root.Values[0]);
+            return MinOrMorePattern.Create(0, pattern);
+        }
+
+        static IPegPattern BuildTerm(IPegNode node)
+        {
+            var root = (ChoiceNode)node;
+
+            switch (root.ChoiceIndex)
+            {
+                case 0:
+                    {
+                        var choiceNode = (ChoiceNode)root.Value;
+                        var terminalNode = (TerminalNode)choiceNode.Value;
+
+                        switch (choiceNode.ChoiceIndex)
+                        {
+                            case 0:
+                                {
+                                    string? pattern = terminalNode.Value[1..^1].Replace("``", "`");
+                                    var lexerPattern = LexerPattern.FromRegex(pattern);
+                                    return TerminalPattern.Create(lexerPattern);
+                                }
+                            case 1:
+                                {
+                                    string? pattern = terminalNode.Value[1..^1].Replace("''", "'");
+                                    var lexerPattern = LexerPattern.FromPlainText(pattern);
+                                    return TerminalPattern.Create(lexerPattern);
+                                }
+                            default: throw new Exception();
+                        }
+                    };
+                case 1:
+                    {
+                        var sequenceNode = (SequenceNode)root.Value;
+                        return BuildKey(sequenceNode.Values[1]);
+                    }
+                case 2:
+                    {
+                        var terminalNode = (TerminalNode)root.Value;
+                        return KeyPattern.Create(terminalNode.Value);
+                    }
+                default: throw new Exception();
+            }
         }
 
         public static void Test(Lexer lexer)
         {
             var ctx = new PegContext(lexer);
-            var pattern = SequencePattern.Create()
-                .Then(TerminalPattern.Create(LexerPattern.FromRegex("\\w+")))
-                .Then(TerminalPattern.Create(LexerPattern.FromPlainText("?")))
-                .Then(MinOrMorePattern.Create(
-                    0,
-                    SequencePattern.Create()
-                        .Then(TerminalPattern.Create(LexerPattern.FromRegex("\\w+")))
-                        .Then(TerminalPattern.Create(LexerPattern.FromPlainText(":")))
-                ))
-                .Then(TerminalPattern.Create(LexerPattern.FromRegex("\\w+")));
+            ctx.Patterns["expr"] = TerminalPattern.Create(LexerPattern.FromRegex("\\w+"));
 
-            BuildParser();
+            var pattern = BuildParser();
             var result = pattern.Parse(ctx);
         }
     }
