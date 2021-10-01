@@ -17,10 +17,11 @@ namespace HeartScript.Cli
                 Console.WriteLine(infix);
 
                 var lexer = new Lexer(infix);
-                var node = ExpressionParser.Parse(operatorInfos, lexer);
+                Peg.Test(lexer);
+                // var node = ExpressionParser.Parse(operatorInfos, lexer);
 
-                Console.WriteLine("Output");
-                Console.WriteLine(node);
+                // Console.WriteLine("Output");
+                // Console.WriteLine(node);
             }
             catch (Exception ex)
             {
