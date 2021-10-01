@@ -5,6 +5,7 @@ using HeartScript.Nodes;
 #pragma warning disable CS8600
 #pragma warning disable CS8602
 #pragma warning disable CS8604
+#pragma warning disable IDE0018
 
 namespace HeartScript.Parsing
 {
@@ -38,11 +39,12 @@ namespace HeartScript.Parsing
         private static OperatorInfo ParseOperatorInfo(string input, int lineNumber)
         {
             var lexer = new Lexer(input);
+            Token current;
 
             uint? leftPrecedence;
-            if (lexer.Eat(s_digits))
-                leftPrecedence = uint.Parse(lexer.Current.Value);
-            else if (lexer.Eat(s_none))
+            if (lexer.TryEat(s_digits, out current))
+                leftPrecedence = uint.Parse(current.Value);
+            else if (lexer.TryEat(s_none, out current))
                 leftPrecedence = null;
             else
                 throw new OperatorInfoBuilderException(nameof(leftPrecedence), lineNumber, lexer.Offset);
@@ -56,15 +58,15 @@ namespace HeartScript.Parsing
                 throw new OperatorInfoBuilderException(nameof(keyword), lineNumber, lexer.Offset);
 
             uint rightPrecedence;
-            if (lexer.Eat(s_digits))
-                rightPrecedence = uint.Parse(lexer.Current.Value);
+            if (lexer.TryEat(s_digits, out current))
+                rightPrecedence = uint.Parse(current.Value);
             else
                 throw new Exception($"{nameof(rightPrecedence)} @ {lexer.Offset}");
 
             uint? rightOperands;
-            if (lexer.Eat(s_digits))
-                rightOperands = uint.Parse(lexer.Current.Value);
-            else if (lexer.Eat(s_any))
+            if (lexer.TryEat(s_digits, out current))
+                rightOperands = uint.Parse(current.Value);
+            else if (lexer.TryEat(s_any, out current))
                 rightOperands = null;
             else
                 throw new OperatorInfoBuilderException(nameof(rightOperands), lineNumber, lexer.Offset);
@@ -74,7 +76,7 @@ namespace HeartScript.Parsing
                 delimiter = rDelimiter;
             else if (TryEatPlainText(lexer, out var ptDelimiter))
                 delimiter = ptDelimiter;
-            else if (lexer.Eat(s_any))
+            else if (lexer.TryEat(s_any, out current))
                 delimiter = null;
             else
                 throw new OperatorInfoBuilderException(nameof(delimiter), lineNumber, lexer.Offset);
@@ -84,7 +86,7 @@ namespace HeartScript.Parsing
                 terminator = rTerminator;
             else if (TryEatPlainText(lexer, out var ptTerminator))
                 terminator = ptTerminator;
-            else if (lexer.Eat(s_any))
+            else if (lexer.TryEat(s_any, out current))
                 terminator = null;
             else
                 throw new OperatorInfoBuilderException(nameof(terminator), lineNumber, lexer.Offset);
@@ -101,11 +103,11 @@ namespace HeartScript.Parsing
 
         private static bool TryEatRegex(Lexer lexer, out LexerPattern? lexerPattern)
         {
-            bool success = lexer.Eat(s_regex);
+            bool success = lexer.TryEat(s_regex, out var current);
 
             if (success)
             {
-                string? pattern = lexer.Current.Value[1..^1].Replace("``", "`");
+                string? pattern = current.Value[1..^1].Replace("``", "`");
                 lexerPattern = new LexerPattern(pattern, true);
             }
             else
@@ -116,11 +118,11 @@ namespace HeartScript.Parsing
 
         private static bool TryEatPlainText(Lexer lexer, out LexerPattern? lexerPattern)
         {
-            bool success = lexer.Eat(s_plainText);
+            bool success = lexer.TryEat(s_plainText, out var current);
 
             if (success)
             {
-                string? pattern = lexer.Current.Value[1..^1].Replace("''", "'");
+                string? pattern = current.Value[1..^1].Replace("''", "'");
                 lexerPattern = new LexerPattern(pattern, false);
             }
             else

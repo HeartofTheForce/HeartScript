@@ -12,6 +12,7 @@ namespace HeartScript.Parsing
         private readonly Stack<NodeBuilder> _nodeBuilders;
 
         private INode? _operand;
+        private Token? _currentToken;
 
         private ExpressionParser(IEnumerable<OperatorInfo> operators, Lexer lexer)
         {
@@ -75,9 +76,9 @@ namespace HeartScript.Parsing
         {
             OperatorInfo op;
             if (_operand == null)
-                op = _operators.FirstOrDefault(x => (x.IsPrefix() || x.IsNullary()) && _lexer.Eat(x.Keyword));
+                op = _operators.FirstOrDefault(x => (x.IsPrefix() || x.IsNullary()) && _lexer.TryEat(x.Keyword, out _currentToken));
             else
-                op = _operators.FirstOrDefault(x => (x.IsInfix() || x.IsPostfix()) && _lexer.Eat(x.Keyword));
+                op = _operators.FirstOrDefault(x => (x.IsInfix() || x.IsPostfix()) && _lexer.TryEat(x.Keyword, out _currentToken));
 
             return op;
         }
@@ -85,7 +86,7 @@ namespace HeartScript.Parsing
         private void PushOperator(OperatorInfo op)
         {
             var nodeBuilder = op.CreateNodeBuilder();
-            _operand = nodeBuilder.FeedOperandLeft(_lexer, _operand);
+            _operand = nodeBuilder.FeedOperandLeft(_lexer, _currentToken!, _operand);
 
             if (_operand == null)
                 _nodeBuilders.Push(nodeBuilder);

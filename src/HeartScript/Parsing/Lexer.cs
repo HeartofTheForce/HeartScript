@@ -6,15 +6,13 @@ namespace HeartScript.Parsing
     {
         private static readonly LexerPattern s_nonSignificant = new LexerPattern("\\s*", true);
 
-        public Token Current { get; private set; }
-        public int Offset { get; private set; }
+        public int Offset { get; set; }
         public bool IsEOF => Offset == _input.Length;
 
         private readonly string _input;
 
         public Lexer(string input)
         {
-            Current = default!;
             Offset = 0;
 
             _input = input;
@@ -24,8 +22,10 @@ namespace HeartScript.Parsing
                 Offset += nonSignificantMatch.Length;
         }
 
-        public bool Eat(LexerPattern lexerPattern)
+        public bool TryEat(LexerPattern lexerPattern, out Token? value)
         {
+            value = null;
+
             var match = lexerPattern.Regex.Match(_input, Offset);
             if (match.Success)
             {
@@ -33,7 +33,7 @@ namespace HeartScript.Parsing
                     throw new Exception($"0 length match @ {match.Index}, {lexerPattern}");
 
                 var targetGroup = match.Groups[1];
-                Current = new Token(targetGroup.Value, targetGroup.Index);
+                value = new Token(targetGroup.Value, targetGroup.Index);
                 Offset += match.Length;
             }
 
