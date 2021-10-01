@@ -4,7 +4,7 @@ namespace HeartScript.Parsing
 {
     public class Lexer
     {
-        private static readonly LexerPattern s_nonSignificant = new LexerPattern("\\s*", true);
+        private static readonly LexerPattern s_nonSignificant = LexerPattern.FromRegex("\\s*");
 
         public int Offset { get; set; }
         public bool IsEOF => Offset == _input.Length;

@@ -11,11 +11,11 @@ namespace HeartScript.Parsing
 {
     public static class OperatorInfoBuilder
     {
-        private static readonly LexerPattern s_regex = new LexerPattern("`(?:``|[^`])*`", true);
-        private static readonly LexerPattern s_plainText = new LexerPattern("'(?:''|[^'])*'", true);
-        private static readonly LexerPattern s_digits = new LexerPattern("\\d+", true);
-        private static readonly LexerPattern s_none = new LexerPattern("none", false);
-        private static readonly LexerPattern s_any = new LexerPattern("any", false);
+        private static readonly LexerPattern s_regex = LexerPattern.FromRegex("`(?:``|[^`])*`");
+        private static readonly LexerPattern s_plainText = LexerPattern.FromRegex("'(?:''|[^'])*'");
+        private static readonly LexerPattern s_digits = LexerPattern.FromRegex("\\d+");
+        private static readonly LexerPattern s_none = LexerPattern.FromPlainText("none");
+        private static readonly LexerPattern s_any = LexerPattern.FromPlainText("any");
 
         public static IEnumerable<OperatorInfo> Parse(string filePath)
         {
@@ -108,7 +108,7 @@ namespace HeartScript.Parsing
             if (success)
             {
                 string? pattern = current.Value[1..^1].Replace("``", "`");
-                lexerPattern = new LexerPattern(pattern, true);
+                lexerPattern = LexerPattern.FromRegex(pattern);
             }
             else
                 lexerPattern = null;
@@ -123,7 +123,7 @@ namespace HeartScript.Parsing
             if (success)
             {
                 string? pattern = current.Value[1..^1].Replace("''", "'");
-                lexerPattern = new LexerPattern(pattern, false);
+                lexerPattern = LexerPattern.FromPlainText(pattern);
             }
             else
                 lexerPattern = null;

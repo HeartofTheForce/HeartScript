@@ -8,7 +8,7 @@ namespace HeartScript.Parsing
         public string Pattern { get; }
         public bool IsRegex { get; }
 
-        public LexerPattern(string pattern, bool isRegex)
+        private LexerPattern(string pattern, bool isRegex)
         {
             Pattern = pattern;
             IsRegex = isRegex;
@@ -20,6 +20,16 @@ namespace HeartScript.Parsing
                 temp = new Regex(Regex.Escape(pattern));
 
             Regex = new Regex($"\\G({temp})");
+        }
+
+        public static LexerPattern FromRegex(string pattern)
+        {
+            return new LexerPattern(pattern, true);
+        }
+
+        public static LexerPattern FromPlainText(string pattern)
+        {
+            return new LexerPattern(pattern, false);
         }
 
         public override string ToString()
