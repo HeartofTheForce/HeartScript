@@ -11,11 +11,22 @@ namespace HeartScript.Parsing
         {
             Patterns = new Dictionary<string, IPattern>();
         }
+
+        public PatternResult TryMatch(IPattern pattern, Lexer lexer)
+        {
+            int startIndex = lexer.Offset;
+
+            var result = pattern.Match(this, lexer);
+            if (result.ErrorMessage != null)
+                lexer.Offset = startIndex;
+
+            return result;
+        }
     }
 
     public interface IPattern
     {
-        PatternResult Parse(ParserContext ctx, Lexer lexer);
+        PatternResult Match(ParserContext ctx, Lexer lexer);
     }
 
     public class PatternResult

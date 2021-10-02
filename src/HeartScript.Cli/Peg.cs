@@ -46,7 +46,7 @@ namespace HeartScript.Cli
                             .Then(KeyPattern.Create("sequence"))));
 
             var builderPattern = KeyPattern.Create("choice");
-            var result = builderPattern.Parse(parserCtx, lexer);
+            var result = parserCtx.TryMatch(builderPattern, lexer);
 
             var builderCtx = OperatorInfoPegBuilder.CreateBuilder();
             var parserPattern = builderCtx.BuildKeyPattern(result.Value);
@@ -60,7 +60,7 @@ namespace HeartScript.Cli
             ctx.Patterns["expr"] = TerminalPattern.Create(LexerPattern.FromRegex("\\w+"));
 
             var pattern = BuildParser();
-            var result = pattern.Parse(ctx, lexer);
+            var result = ctx.TryMatch(pattern, lexer);
         }
     }
 }
