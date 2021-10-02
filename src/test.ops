@@ -1,53 +1,53 @@
 #if
-none 'if' 99 2 any any
+none 99 'if' expr
 
 #else
-99 'else' 100 1 any any
+99 100 'else'
 
 #RoundBracket
-none '(' 0 1 any ')'
+none none '(' expr ')'
 
 #Call
-0 '(' 0 any ',' ')'
+0 none '(' (expr (',' expr)*)? ')'
 
 #Ternary
-2 '?' 99 2 ':' any
+2 99 '?' expr ':'
 
 #Factorial
-2 '!' 0 0 any any
+2 none '!'
 
 #PrefixPlus
-none '+' 1 1 any any
+none 1 '+'
 
 #PrefixMinus
-none '-' 1 1 any any
+none 1 '-'
 
 #BitwiseNot
-none '~' 1 1 any any
+none 1 '~'
 
 #Multiply
-3 '*' 3 1 any any
+3 3 '*'
 
 #Divide
-3 '/' 3 1 any any
+3 3 '/'
 
 #BinaryPlus
-4 '+' 4 1 any any
+4 4 '+'
 
 #BinaryMinus
-4 '-' 4 1 any any
+4 4 '-'
 
 #BitwiseAnd
-4 '&' 4 1 any any
+4 4 '&'
 
 #BitwiseXor
-4 '^' 4 1 any any
+4 4 '^'
 
 #BitwiseOr
-4 '|' 4 1 any any
+4 4 '|'
 
 #Constant
-none `\d+(?:\.\d+)?` 0 0 any any
+none none `\d+(?:\.\d+)?`
 
 #Identifier
-none `[a-zA-Z]\w*` 0 0 any any
+none none `[a-zA-Z]\w*`

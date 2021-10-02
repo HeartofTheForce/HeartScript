@@ -76,7 +76,7 @@ namespace HeartScript.Nodes
             }
 
             if (HaveLeft || HaveRight)
-                return $"({Value}{children})";
+                return $"({Value[0]}{children})";
 
             else
                 return Value!;

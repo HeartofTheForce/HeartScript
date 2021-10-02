@@ -13,6 +13,23 @@ namespace HeartScript.Parsing
             _patterns = patterns;
         }
 
+        public static INode Parse(IEnumerable<OperatorPattern> patterns, ParserContext ctx)
+        {
+            var expressionPattern = new ExpressionPattern(patterns);
+
+            var parser = new Parser();
+            parser.Patterns["expr"] = expressionPattern;
+            var result = parser.TryMatch(expressionPattern, ctx);
+
+            if (result.Value == null)
+                throw new Exception(result.ErrorMessage);
+
+            if (!ctx.IsEOF)
+                throw new UnexpectedTokenException(ctx.Offset, "EOF");
+
+            return result.Value;
+        }
+
         public PatternResult Match(Parser parser, ParserContext ctx)
         {
             int startIndex = ctx.Offset;

@@ -9,7 +9,7 @@ namespace HeartScript.Cli
         {
             try
             {
-                var operatorPatterns = OperatorPatternBuilder.Parse("./src/peg.ops");
+                var operatorPatterns = OperatorPatternBuilder.Parse("./src/test.ops");
 
                 string infix = string.Join(' ', args);
 
@@ -17,17 +17,10 @@ namespace HeartScript.Cli
                 Console.WriteLine(infix);
 
                 var ctx = new ParserContext(infix);
-                var parser = new Parser();
+                var node = ExpressionPattern.Parse(operatorPatterns, ctx);
 
-                var expressionPattern = new ExpressionPattern(operatorPatterns);
-                parser.Patterns["expr"] = expressionPattern;
-                var result = parser.TryMatch(expressionPattern, ctx);
-
-                // var lexer = new Lexer(infix);
-                // var node = ExpressionParser.Parse(operatorInfos, lexer);
-
-                // Console.WriteLine("Output");
-                // Console.WriteLine(node);
+                Console.WriteLine("Output");
+                Console.WriteLine(node);
             }
             catch (Exception ex)
             {

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using HeartScript.Nodes;
 #pragma warning disable CS8600
 #pragma warning disable CS8602
 #pragma warning disable CS8604
@@ -35,7 +34,7 @@ namespace HeartScript.Parsing
 
         private static OperatorPattern ParseOperatorPattern(string input, int lineNumber)
         {
-            var parser = OperatorInfoPegBuilder.CreateParser();
+            var parser = OperatorPatternPegBuilder.CreateParser();
             var ctx = new ParserContext(input);
 
             var pattern = SequencePattern.Create()
@@ -69,7 +68,7 @@ namespace HeartScript.Parsing
                 rightPrecedence = null;
 
             var patternNode = (KeyNode)result.Value.Children[4];
-            var builderCtx = OperatorInfoPegBuilder.CreateBuilder();
+            var builderCtx = OperatorPatternPegBuilder.CreateBuilder();
             var operatorPattern = builderCtx.BuildKeyPattern(patternNode);
 
             return new OperatorPattern(operatorPattern, leftPrecedence, rightPrecedence);

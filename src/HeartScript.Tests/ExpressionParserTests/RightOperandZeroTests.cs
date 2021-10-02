@@ -2,16 +2,16 @@ using System.Collections.Generic;
 using HeartScript.Parsing;
 using NUnit.Framework;
 
-namespace HeartScript.Tests.ExpressionParserTests
+namespace HeartScript.Tests.ExpressionPatternTests
 {
     [TestFixture]
     public class RightOperandZeroTests
     {
-        private static readonly IEnumerable<OperatorInfo> s_testOperators;
+        private static readonly IEnumerable<OperatorPattern> s_testOperators;
 
         static RightOperandZeroTests()
         {
-            s_testOperators = OperatorInfoBuilder.Parse("./TestOperators/right-operand-zero.ops");
+            s_testOperators = OperatorPatternBuilder.Parse("./TestOperators/right-operand-zero.ops");
         }
 
         static readonly IExpressionTestCase[] s_testCases = new IExpressionTestCase[]

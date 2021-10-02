@@ -20,7 +20,7 @@ namespace HeartScript.Parsing
         }
     }
 
-    public static class OperatorInfoPegBuilder
+    public static class OperatorPatternPegBuilder
     {
         private static readonly LexerPattern s_regex = LexerPattern.FromRegex("`(?:``|[^`])*`");
         private static readonly LexerPattern s_plainText = LexerPattern.FromRegex("'(?:''|[^'])*'");

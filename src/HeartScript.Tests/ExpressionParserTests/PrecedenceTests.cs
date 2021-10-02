@@ -2,16 +2,16 @@ using System.Collections.Generic;
 using HeartScript.Parsing;
 using NUnit.Framework;
 
-namespace HeartScript.Tests.ExpressionParserTests
+namespace HeartScript.Tests.ExpressionPatternTests
 {
     [TestFixture]
     public class PrecedenceTests
     {
-        private static readonly IEnumerable<OperatorInfo> s_testOperators;
+        private static readonly IEnumerable<OperatorPattern> s_testOperators;
 
         static PrecedenceTests()
         {
-            s_testOperators = OperatorInfoBuilder.Parse("./TestOperators/precedence.ops");
+            s_testOperators = OperatorPatternBuilder.Parse("./TestOperators/precedence.ops");
         }
 
         static readonly ExpressionTestCase[] s_testCases = new ExpressionTestCase[]
@@ -149,9 +149,9 @@ namespace HeartScript.Tests.ExpressionParserTests
         [TestCaseSource(nameof(s_testCases))]
         public void TestCases(ExpressionTestCase testCase)
         {
-            var lexer = new Lexer(testCase.Infix);
+            var ctx = new ParserContext(testCase.Infix);
 
-            var node = ExpressionParser.Parse(s_testOperators, lexer);
+            var node = ExpressionPattern.Parse(s_testOperators, ctx);
             Assert.AreEqual(testCase.ExpectedOutput, node.ToString());
         }
     }

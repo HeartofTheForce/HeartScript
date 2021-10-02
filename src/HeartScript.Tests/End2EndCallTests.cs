@@ -5,11 +5,11 @@ namespace HeartScript.Tests
 {
     public static class Helper
     {
-        public static readonly IEnumerable<OperatorInfo> TestOperators;
+        public static readonly IEnumerable<OperatorPattern> TestOperators;
 
         static Helper()
         {
-            TestOperators = OperatorInfoBuilder.Parse("./test.ops");
+            TestOperators = OperatorPatternBuilder.Parse("./test.ops");
         }
     }
 }

@@ -2,11 +2,11 @@ using System.Collections.Generic;
 using HeartScript.Parsing;
 using NUnit.Framework;
 
-namespace HeartScript.Tests.ExpressionParserTests
+namespace HeartScript.Tests.ExpressionPatternTests
 {
     public interface IExpressionTestCase
     {
-        void Execute(IEnumerable<OperatorInfo> operators);
+        void Execute(IEnumerable<OperatorPattern> operators);
     }
 
     public class ExpressionTestCase : IExpressionTestCase
@@ -14,11 +14,11 @@ namespace HeartScript.Tests.ExpressionParserTests
         public string Infix { get; set; }
         public string ExpectedOutput { get; set; }
 
-        public void Execute(IEnumerable<OperatorInfo> operators)
+        public void Execute(IEnumerable<OperatorPattern> operators)
         {
-            var lexer = new Lexer(Infix);
+            var ctx = new ParserContext(Infix);
 
-            var node = ExpressionParser.Parse(operators, lexer);
+            var node = ExpressionPattern.Parse(operators, ctx);
             Assert.AreEqual(ExpectedOutput, node.ToString());
         }
 
@@ -33,10 +33,10 @@ namespace HeartScript.Tests.ExpressionParserTests
         public string Infix { get; set; }
         public int ExpectedCharIndex { get; set; }
 
-        public void Execute(IEnumerable<OperatorInfo> operators)
+        public void Execute(IEnumerable<OperatorPattern> operators)
         {
-            var lexer = new Lexer(Infix);
-            var ex = Assert.Throws<ExpressionTermException>(() => ExpressionParser.Parse(operators, lexer));
+            var ctx = new ParserContext(Infix);
+            var ex = Assert.Throws<ExpressionTermException>(() => ExpressionPattern.Parse(operators, ctx));
 
             Assert.AreEqual(ExpectedCharIndex, ex.CharIndex);
         }
@@ -53,10 +53,10 @@ namespace HeartScript.Tests.ExpressionParserTests
         public int ExpectedCharIndex { get; set; }
         public string ExpectedPattern { get; set; }
 
-        public void Execute(IEnumerable<OperatorInfo> operators)
+        public void Execute(IEnumerable<OperatorPattern> operators)
         {
-            var lexer = new Lexer(Infix);
-            var ex = Assert.Throws<UnexpectedTokenException>(() => ExpressionParser.Parse(operators, lexer));
+            var ctx = new ParserContext(Infix);
+            var ex = Assert.Throws<UnexpectedTokenException>(() => ExpressionPattern.Parse(operators, ctx));
 
             Assert.AreEqual(ExpectedCharIndex, ex.CharIndex);
             Assert.AreEqual(ExpectedPattern, ex.ExpectedPattern);
