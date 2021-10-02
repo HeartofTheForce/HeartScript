@@ -22,9 +22,9 @@ namespace HeartScript.Parsing
                 Offset += nonSignificantMatch.Length;
         }
 
-        public bool TryEat(LexerPattern lexerPattern, out Token? value)
+        public bool TryEat(LexerPattern lexerPattern, out Token value)
         {
-            value = null;
+            value = null!;
 
             var match = lexerPattern.Regex.Match(_input, Offset);
             if (match.Success)
