@@ -26,11 +26,18 @@ namespace HeartScript.Parsing
         private static readonly LexerPattern s_plainText = LexerPattern.FromRegex("'(?:''|[^'])*'");
         private static readonly LexerPattern s_nonSignificant = LexerPattern.FromRegex("\\s+");
 
-        private static IPattern TrimLeft(this IPattern pattern)
+        public static IPattern TrimLeft(this IPattern pattern)
         {
             return SequencePattern.Create()
                 .Then(QuantifierPattern.Optional(s_nonSignificant))
                 .Then(pattern);
+        }
+
+        public static IPattern TrimRight(this IPattern pattern)
+        {
+            return SequencePattern.Create()
+                .Then(pattern)
+                .Then(QuantifierPattern.Optional(s_nonSignificant));
         }
 
         public static Parser CreateParser()
@@ -41,13 +48,13 @@ namespace HeartScript.Parsing
 
             parser.Patterns["term"] = ChoicePattern.Create()
                     .Or(ChoicePattern.Create()
-                        .Or(s_regex.TrimLeft())
-                        .Or(s_plainText.TrimLeft()))
+                        .Or(s_regex.TrimRight())
+                        .Or(s_plainText.TrimRight()))
                     .Or(SequencePattern.Create()
-                        .Then(LexerPattern.FromPlainText("(").TrimLeft())
+                        .Then(LexerPattern.FromPlainText("(").TrimRight())
                         .Then(KeyPattern.Create("choice"))
-                        .Then(LexerPattern.FromPlainText(")").TrimLeft()))
-                    .Or(LexerPattern.FromRegex("\\w+").TrimLeft());
+                        .Then(LexerPattern.FromPlainText(")").TrimRight()))
+                    .Or(LexerPattern.FromRegex("\\w+").TrimRight());
 
             parser.Patterns["sequence"] = QuantifierPattern.MinOrMore(
                 1,
@@ -58,16 +65,16 @@ namespace HeartScript.Parsing
                 .Then(KeyPattern.Create("term"))
                 .Then(QuantifierPattern.Optional(
                     ChoicePattern.Create()
-                        .Or(LexerPattern.FromPlainText("?").TrimLeft())
-                        .Or(LexerPattern.FromPlainText("*").TrimLeft())
-                        .Or(LexerPattern.FromPlainText("+").TrimLeft())));
+                        .Or(LexerPattern.FromPlainText("?").TrimRight())
+                        .Or(LexerPattern.FromPlainText("*").TrimRight())
+                        .Or(LexerPattern.FromPlainText("+").TrimRight())));
 
             parser.Patterns["choice"] = SequencePattern.Create()
                 .Then(KeyPattern.Create("sequence"))
                 .Then(QuantifierPattern.MinOrMore(
                         0,
                         SequencePattern.Create()
-                            .Then(LexerPattern.FromPlainText("/").TrimLeft())
+                            .Then(LexerPattern.FromPlainText("/").TrimRight())
                             .Then(KeyPattern.Create("sequence"))));
 
             return parser;
@@ -143,19 +150,19 @@ namespace HeartScript.Parsing
                 case 0:
                     {
                         var choiceNode = (ChoiceNode)root.ChoiceValue;
-                        var terminalNode = choiceNode.ChoiceValue.Children[1];
+                        var terminalNode = choiceNode.ChoiceValue.Children[0];
 
                         switch (choiceNode.ChoiceIndex)
                         {
                             case 0:
                                 {
                                     string? pattern = terminalNode.Value[1..^1].Replace("``", "`");
-                                    return LexerPattern.FromRegex(pattern).TrimLeft();
+                                    return LexerPattern.FromRegex(pattern).TrimRight();
                                 }
                             case 1:
                                 {
                                     string? pattern = terminalNode.Value[1..^1].Replace("''", "'");
-                                    return LexerPattern.FromPlainText(pattern).TrimLeft();
+                                    return LexerPattern.FromPlainText(pattern).TrimRight();
                                 }
                             default: throw new Exception();
                         }
@@ -167,7 +174,7 @@ namespace HeartScript.Parsing
                     }
                 case 2:
                     {
-                        var terminalNode = root.ChoiceValue.Children[1];
+                        var terminalNode = root.ChoiceValue.Children[0];
                         return KeyPattern.Create(terminalNode.Value);
                     }
                 default: throw new Exception();

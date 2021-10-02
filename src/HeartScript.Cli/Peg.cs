@@ -23,11 +23,9 @@ namespace HeartScript.Cli
         {
             var ctx = new ParserContext(input);
 
-            var pattern = BuildPattern();
+            var pattern = BuildPattern().TrimLeft();
             var parser = new Parser(pattern);
-            parser.Patterns["expr"] = SequencePattern.Create()
-                .Then(QuantifierPattern.Optional(LexerPattern.FromRegex("\\s+")))
-                .Then(LexerPattern.FromRegex("\\w+"));
+            parser.Patterns["expr"] = LexerPattern.FromRegex("\\w+").TrimRight();
 
             var result = parser.TryMatch(ctx);
         }
