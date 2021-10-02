@@ -31,11 +31,11 @@ namespace HeartScript.Nodes
                 Children.Add(leftNode);
             }
 
-            var nodeStack = new Stack<INode>();
-            nodeStack.Push(midNode);
-            while (nodeStack.Count > 0)
+            var nodeQueue = new Queue<INode>();
+            nodeQueue.Enqueue(midNode);
+            while (nodeQueue.Count > 0)
             {
-                var current = nodeStack.Pop();
+                var current = nodeQueue.Dequeue();
                 if (current is ExpressionNode expressionNode)
                 {
                     Children.Add(expressionNode);
@@ -46,7 +46,7 @@ namespace HeartScript.Nodes
                 {
                     foreach (var child in current.Children)
                     {
-                        nodeStack.Push(child);
+                        nodeQueue.Enqueue(child);
                     }
                 }
             }
@@ -58,56 +58,26 @@ namespace HeartScript.Nodes
             }
 
             //TODO Refactor
-            Value = midNode.ToString();
+            Value = midNode.ToString().Trim();
         }
-
-        public ExpressionNode(string value, INode? leftNode, IEnumerable<INode> rightNodes)
-        {
-            Value = value;
-            Children = new List<INode>();
-
-            HaveLeft = leftNode != null;
-            HaveRight = rightNodes.Count() > 0;
-
-            if (HaveLeft || HaveRight)
-                Children = new List<INode>();
-
-            if (HaveLeft)
-                Children.Add(leftNode!);
-
-            if (HaveRight)
-                Children.AddRange(rightNodes);
-        }
-
-        private IEnumerable<INode> RightNodes()
-        {
-            if (Children == null)
-                return Enumerable.Empty<INode>();
-
-            int offset = HaveLeft ? 1 : 0;
-
-            return Children
-                .Skip(offset)
-                .Take(Children.Count - offset);
-        }
-
-        public static INode BuildNode(Token token, INode? leftNode, IReadOnlyList<INode> rightNodes) => new ExpressionNode(token.Value, leftNode, rightNodes);
 
         public override string ToString()
         {
-            string? left = HaveLeft ? $" {Children![0]}" : null;
-            string? right = RightNodes().Any() ? $" {string.Join(' ', RightNodes())}" : null;
+            string? children = string.Join(' ', Children);
+            if (children.Length > 0)
+                children = $" {children}";
 
             if (Value[0] == '(')
             {
-                if (left == null)
-                    return string.Join(' ', RightNodes());
+                if (!HaveLeft)
+                    return children;
                 else
-                    return $"(${left}{right})";
+                    return $"(${children})";
             }
 
-            if (left != null || right != null)
-                return $"({Value}{left}{right})";
+            if (HaveLeft || HaveRight)
+                return $"({Value}{children})";
+
             else
                 return Value!;
         }
