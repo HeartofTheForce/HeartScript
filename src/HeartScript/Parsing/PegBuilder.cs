@@ -4,26 +4,16 @@ using HeartScript.Nodes;
 
 namespace HeartScript.Parsing
 {
-    public class PegParserContext
-    {
-        public Dictionary<string, IPegPattern> Patterns { get; }
-
-        public PegParserContext()
-        {
-            Patterns = new Dictionary<string, IPegPattern>();
-        }
-    }
-
     public class PegBuilderContext
     {
-        public Dictionary<string, Func<PegBuilderContext, INode, IPegPattern>> Builders { get; }
+        public Dictionary<string, Func<PegBuilderContext, INode, IPattern>> Builders { get; }
 
         public PegBuilderContext()
         {
-            Builders = new Dictionary<string, Func<PegBuilderContext, INode, IPegPattern>>();
+            Builders = new Dictionary<string, Func<PegBuilderContext, INode, IPattern>>();
         }
 
-        public IPegPattern BuildKeyPattern(INode node)
+        public IPattern BuildKeyPattern(INode node)
         {
             var keyNode = (KeyNode)node;
             return Builders[keyNode.Key](this, keyNode.KeyValue);
@@ -44,7 +34,7 @@ namespace HeartScript.Parsing
             return output;
         }
 
-        static IPegPattern BuildChoice(PegBuilderContext ctx, INode node)
+        static IPattern BuildChoice(PegBuilderContext ctx, INode node)
         {
             var minOrMoreNode = node.Children[1];
 
@@ -64,7 +54,7 @@ namespace HeartScript.Parsing
             }
         }
 
-        static IPegPattern BuildSequence(PegBuilderContext ctx, INode node)
+        static IPattern BuildSequence(PegBuilderContext ctx, INode node)
         {
             var output = SequencePattern.Create();
             foreach (var child in node.Children)
@@ -75,7 +65,7 @@ namespace HeartScript.Parsing
             return output;
         }
 
-        static IPegPattern BuildQuantifier(PegBuilderContext ctx, INode node)
+        static IPattern BuildQuantifier(PegBuilderContext ctx, INode node)
         {
             var pattern = ctx.BuildKeyPattern(node.Children[0]);
             var optional = node.Children[1];
@@ -93,7 +83,7 @@ namespace HeartScript.Parsing
             };
         }
 
-        static IPegPattern BuildTerm(PegBuilderContext ctx, INode node)
+        static IPattern BuildTerm(PegBuilderContext ctx, INode node)
         {
             var root = (ChoiceNode)node;
 

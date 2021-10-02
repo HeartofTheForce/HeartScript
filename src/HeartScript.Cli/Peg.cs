@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using HeartScript.Nodes;
+﻿using System.IO;
 using HeartScript.Parsing;
 
 namespace HeartScript.Cli
@@ -11,12 +8,12 @@ namespace HeartScript.Cli
         private static readonly LexerPattern s_regex = LexerPattern.FromRegex("`(?:``|[^`])*`");
         private static readonly LexerPattern s_plainText = LexerPattern.FromRegex("'(?:''|[^'])*'");
 
-        static IPegPattern BuildParser()
+        static IPattern BuildParser()
         {
             string input = File.ReadAllText("src/peg.ops");
             var lexer = new Lexer(input);
 
-            var parserCtx = new PegParserContext();
+            var parserCtx = new ParserContext();
             parserCtx.Patterns["term"] = ChoicePattern.Create()
                     .Or(ChoicePattern.Create()
                         .Or(TerminalPattern.Create(s_regex))
@@ -59,7 +56,7 @@ namespace HeartScript.Cli
 
         public static void Test(Lexer lexer)
         {
-            var ctx = new PegParserContext();
+            var ctx = new ParserContext();
             ctx.Patterns["expr"] = TerminalPattern.Create(LexerPattern.FromRegex("\\w+"));
 
             var pattern = BuildParser();

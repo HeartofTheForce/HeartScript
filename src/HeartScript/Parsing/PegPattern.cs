@@ -4,37 +4,7 @@ using HeartScript.Nodes;
 
 namespace HeartScript.Parsing
 {
-    public class PegResult
-    {
-        public int CharIndex { get; private set; }
-        public INode? Value { get; private set; }
-        public string? ErrorMessage { get; private set; }
-
-        public static PegResult Success(int charIndex, INode value)
-        {
-            return new PegResult()
-            {
-                CharIndex = charIndex,
-                Value = value,
-            };
-        }
-
-        public static PegResult Error(int charIndex, string message)
-        {
-            return new PegResult()
-            {
-                CharIndex = charIndex,
-                ErrorMessage = message,
-            };
-        }
-    }
-
-    public interface IPegPattern
-    {
-        PegResult Parse(PegParserContext ctx, Lexer lexer);
-    }
-
-    public class TerminalPattern : IPegPattern
+    public class TerminalPattern : IPattern
     {
         private readonly LexerPattern _lexerPattern;
 
@@ -48,22 +18,22 @@ namespace HeartScript.Parsing
             return new TerminalPattern(lexerPattern);
         }
 
-        public PegResult Parse(PegParserContext ctx, Lexer lexer)
+        public PatternResult Parse(ParserContext ctx, Lexer lexer)
         {
             if (lexer.TryEat(_lexerPattern, out var current))
-                return PegResult.Success(current.CharIndex, new PegNode(current.Value));
+                return PatternResult.Success(current.CharIndex, new PegNode(current.Value));
 
-            return PegResult.Error(lexer.Offset, $"Expected match @ {lexer.Offset}, {_lexerPattern}");
+            return PatternResult.Error(lexer.Offset, $"Expected match @ {lexer.Offset}, {_lexerPattern}");
         }
     }
 
-    public class SequencePattern : IPegPattern
+    public class SequencePattern : IPattern
     {
-        private readonly List<IPegPattern> _patterns;
+        private readonly List<IPattern> _patterns;
 
         private SequencePattern()
         {
-            _patterns = new List<IPegPattern>();
+            _patterns = new List<IPattern>();
         }
 
         public static SequencePattern Create()
@@ -71,13 +41,13 @@ namespace HeartScript.Parsing
             return new SequencePattern();
         }
 
-        public SequencePattern Then(IPegPattern pattern)
+        public SequencePattern Then(IPattern pattern)
         {
             _patterns.Add(pattern);
             return this;
         }
 
-        public PegResult Parse(PegParserContext ctx, Lexer lexer)
+        public PatternResult Parse(ParserContext ctx, Lexer lexer)
         {
             int startIndex = lexer.Offset;
 
@@ -96,7 +66,7 @@ namespace HeartScript.Parsing
                     output.Add(result.Value);
             }
 
-            return PegResult.Success(startIndex, new PegNode(output));
+            return PatternResult.Success(startIndex, new PegNode(output));
         }
     }
 
@@ -111,13 +81,13 @@ namespace HeartScript.Parsing
         }
     }
 
-    public class ChoicePattern : IPegPattern
+    public class ChoicePattern : IPattern
     {
-        private readonly List<IPegPattern> _patterns;
+        private readonly List<IPattern> _patterns;
 
         private ChoicePattern()
         {
-            _patterns = new List<IPegPattern>();
+            _patterns = new List<IPattern>();
         }
 
         public static ChoicePattern Create()
@@ -125,23 +95,23 @@ namespace HeartScript.Parsing
             return new ChoicePattern();
         }
 
-        public ChoicePattern Or(IPegPattern pattern)
+        public ChoicePattern Or(IPattern pattern)
         {
             _patterns.Add(pattern);
             return this;
         }
 
-        public PegResult Parse(PegParserContext ctx, Lexer lexer)
+        public PatternResult Parse(ParserContext ctx, Lexer lexer)
         {
             int startIndex = lexer.Offset;
 
-            PegResult? furthestResult = null;
+            PatternResult? furthestResult = null;
             for (int i = 0; i < _patterns.Count; i++)
             {
                 var result = _patterns[i].Parse(ctx, lexer);
 
                 if (result.Value != null)
-                    return PegResult.Success(result.CharIndex, new ChoiceNode(i, result.Value));
+                    return PatternResult.Success(result.CharIndex, new ChoiceNode(i, result.Value));
 
                 if (furthestResult == null || result.CharIndex > furthestResult.CharIndex)
                     furthestResult = result;
@@ -154,13 +124,13 @@ namespace HeartScript.Parsing
         }
     }
 
-    public class QuantifierPattern : IPegPattern
+    public class QuantifierPattern : IPattern
     {
         private readonly int _min;
         private readonly int? _max;
-        private readonly IPegPattern _pattern;
+        private readonly IPattern _pattern;
 
-        private QuantifierPattern(int min, int? max, IPegPattern pattern)
+        private QuantifierPattern(int min, int? max, IPattern pattern)
         {
             if (max < min)
                 throw new ArgumentException($"{nameof(max)} < {nameof(min)}");
@@ -170,21 +140,21 @@ namespace HeartScript.Parsing
             _pattern = pattern;
         }
 
-        public static QuantifierPattern MinOrMore(int min, IPegPattern pattern)
+        public static QuantifierPattern MinOrMore(int min, IPattern pattern)
         {
             return new QuantifierPattern(min, null, pattern);
         }
 
-        public static QuantifierPattern Optional(IPegPattern pattern)
+        public static QuantifierPattern Optional(IPattern pattern)
         {
             return new QuantifierPattern(0, 1, pattern);
         }
 
-        public PegResult Parse(PegParserContext ctx, Lexer lexer)
+        public PatternResult Parse(ParserContext ctx, Lexer lexer)
         {
             int startIndex = lexer.Offset;
 
-            PegResult? result = null;
+            PatternResult? result = null;
             var output = new List<INode>();
             while (_max == null || output.Count < _max)
             {
@@ -198,7 +168,7 @@ namespace HeartScript.Parsing
             }
 
             if (output.Count >= _min)
-                return PegResult.Success(startIndex, new PegNode(output));
+                return PatternResult.Success(startIndex, new PegNode(output));
             else if (result != null)
                 return result;
             else
@@ -217,7 +187,7 @@ namespace HeartScript.Parsing
         }
     }
 
-    public class KeyPattern : IPegPattern
+    public class KeyPattern : IPattern
     {
         private readonly string _key;
 
@@ -231,14 +201,14 @@ namespace HeartScript.Parsing
             return new KeyPattern(key);
         }
 
-        public PegResult Parse(PegParserContext ctx, Lexer lexer)
+        public PatternResult Parse(ParserContext ctx, Lexer lexer)
         {
             var result = ctx.Patterns[_key].Parse(ctx, lexer);
             if (result.ErrorMessage != null)
                 return result;
 
             if (result.Value != null)
-                return PegResult.Success(result.CharIndex, new KeyNode(_key, result.Value));
+                return PatternResult.Success(result.CharIndex, new KeyNode(_key, result.Value));
 
             throw new Exception();
         }
