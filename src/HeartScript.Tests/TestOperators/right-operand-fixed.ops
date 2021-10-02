@@ -1,17 +1,17 @@
 #Pass FixedRightOperands Delimiter Terminator
-none '{' 0 3 ',' '}'
+none none '{' expr ',' expr ',' expr '}'
 
 #Pass FixedRightOperands AnyDelimiter Terminator
-none '[' 0 3 any ']'
+none none '[' expr expr expr ']'
 
 #Pass FixedRightOperands Delimiter AnyTerminator
-none '?' 0 3 ':' any
+none none '?' expr ':' expr ':' expr
 
 #Pass FixedRightOperands AnyDelimiter AnyTerminator
-none '|' 0 3 any any
+none none '|' expr expr expr
 
 #Pass FixedRightOperands SameDelimiter SameTerminator
-none '&' 0 3 '*' '*'
+none none '&' expr '*' expr '*' expr '*'
 
 #Identifier
-none `[a-zA-Z]\w*` 0 0 any any
+none none `[a-zA-Z]\w*`

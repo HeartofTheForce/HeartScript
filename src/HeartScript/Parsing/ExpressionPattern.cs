@@ -48,7 +48,10 @@ namespace HeartScript.Parsing
                             throw new Exception($"{nameof(NodeBuilder)} is incomplete");
                     }
 
-                    return PatternResult.Success(startIndex, operand);
+                    if (operand != null)
+                        return PatternResult.Success(startIndex, operand);
+                    else
+                        return PatternResult.Error(startIndex, "Expected expression");
                 }
 
                 while (nodeBuilders.TryPeek(out var left) && left.IsEvaluatedBefore(nodeBuilder))

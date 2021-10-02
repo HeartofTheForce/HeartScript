@@ -31,11 +31,11 @@ namespace HeartScript.Nodes
                 Children.Add(leftNode);
             }
 
-            var nodeQueue = new Queue<INode>();
-            nodeQueue.Enqueue(midNode);
-            while (nodeQueue.Count > 0)
+            var nodeStack = new Stack<INode>();
+            nodeStack.Push(midNode);
+            while (nodeStack.Count > 0)
             {
-                var current = nodeQueue.Dequeue();
+                var current = nodeStack.Pop();
                 if (current is ExpressionNode expressionNode)
                 {
                     Children.Add(expressionNode);
@@ -46,14 +46,13 @@ namespace HeartScript.Nodes
                     //TODO Refactor
                     if (Value == null)
                         Value = current.Value;
+
+                    continue;
                 }
 
-                if (current.Children != null)
+                for (int i = current.Children.Count - 1; i >= 0; i--)
                 {
-                    foreach (var child in current.Children)
-                    {
-                        nodeQueue.Enqueue(child);
-                    }
+                    nodeStack.Push(current.Children[i]);
                 }
             }
 
@@ -78,9 +77,8 @@ namespace HeartScript.Nodes
                     return $"(${children})";
             }
 
-            if (HaveLeft || HaveRight)
+            if (children.Length > 0)
                 return $"({Value}{children})";
-
             else
                 return Value!;
         }
