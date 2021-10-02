@@ -24,7 +24,7 @@ namespace HeartScript.Parsing
             return this;
         }
 
-        public PatternResult Match(Parser parser, ParserContext ctx)
+        public PatternResult Match(PatternParser parser, ParserContext ctx)
         {
             int startIndex = 0;
 
@@ -75,7 +75,7 @@ namespace HeartScript.Parsing
             return this;
         }
 
-        public PatternResult Match(Parser parser, ParserContext ctx)
+        public PatternResult Match(PatternParser parser, ParserContext ctx)
         {
             PatternResult? furthestResult = null;
             for (int i = 0; i < _patterns.Count; i++)
@@ -119,7 +119,7 @@ namespace HeartScript.Parsing
             return new QuantifierPattern(0, 1, pattern);
         }
 
-        public PatternResult Match(Parser parser, ParserContext ctx)
+        public PatternResult Match(PatternParser parser, ParserContext ctx)
         {
             int startIndex = ctx.Offset;
 
@@ -170,7 +170,7 @@ namespace HeartScript.Parsing
             return new KeyPattern(key);
         }
 
-        public PatternResult Match(Parser parser, ParserContext ctx)
+        public PatternResult Match(PatternParser parser, ParserContext ctx)
         {
             var result = parser.TryMatch(parser.Patterns[_key], ctx);
             if (result.ErrorMessage != null)

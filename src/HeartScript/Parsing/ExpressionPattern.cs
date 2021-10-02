@@ -17,7 +17,7 @@ namespace HeartScript.Parsing
         {
             var expressionPattern = new ExpressionPattern(patterns);
 
-            var parser = new Parser();
+            var parser = new PatternParser();
             parser.Patterns["expr"] = expressionPattern;
             var result = parser.TryMatch(expressionPattern, ctx);
 
@@ -30,7 +30,7 @@ namespace HeartScript.Parsing
             return result.Value;
         }
 
-        public PatternResult Match(Parser parser, ParserContext ctx)
+        public PatternResult Match(PatternParser parser, ParserContext ctx)
         {
             int startIndex = ctx.Offset;
 
@@ -66,7 +66,7 @@ namespace HeartScript.Parsing
             }
         }
 
-        private NodeBuilder? TryGetNodeBuilder(bool haveOperand, Parser parser, ParserContext ctx)
+        private NodeBuilder? TryGetNodeBuilder(bool haveOperand, PatternParser parser, ParserContext ctx)
         {
             OperatorPattern? op = null;
             INode? midNode = null;

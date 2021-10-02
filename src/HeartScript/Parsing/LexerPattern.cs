@@ -42,7 +42,7 @@ namespace HeartScript.Parsing
                 return Pattern;
         }
 
-        public PatternResult Match(Parser parser, ParserContext ctx)
+        public PatternResult Match(PatternParser parser, ParserContext ctx)
         {
             var match = Regex.Match(ctx.Input, ctx.Offset);
             if (match.Success)

@@ -3,11 +3,11 @@ using HeartScript.Nodes;
 
 namespace HeartScript.Parsing
 {
-    public class Parser
+    public class PatternParser
     {
         public Dictionary<string, IPattern> Patterns { get; }
 
-        public Parser()
+        public PatternParser()
         {
             Patterns = new Dictionary<string, IPattern>();
         }
@@ -39,7 +39,7 @@ namespace HeartScript.Parsing
 
     public interface IPattern
     {
-        PatternResult Match(Parser parser, ParserContext ctx);
+        PatternResult Match(PatternParser parser, ParserContext ctx);
     }
 
     public class PatternResult
