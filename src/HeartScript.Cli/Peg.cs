@@ -45,12 +45,12 @@ namespace HeartScript.Cli
             return new TerminalPattern(lexerPattern);
         }
 
-        public PegResult Parse(PegContext ctx)
+        public PegResult Parse(PegContext ctx, Lexer lexer)
         {
-            if (ctx.Lexer.TryEat(_lexerPattern, out var current))
+            if (lexer.TryEat(_lexerPattern, out var current))
                 return PegResult.Success(current.CharIndex, new PegNode(current.Value));
 
-            return PegResult.Error(ctx.Lexer.Offset, $"Expected match @ {ctx.Lexer.Offset}, {_lexerPattern}");
+            return PegResult.Error(lexer.Offset, $"Expected match @ {lexer.Offset}, {_lexerPattern}");
         }
     }
 
@@ -74,18 +74,18 @@ namespace HeartScript.Cli
             return this;
         }
 
-        public PegResult Parse(PegContext ctx)
+        public PegResult Parse(PegContext ctx, Lexer lexer)
         {
-            int startIndex = ctx.Lexer.Offset;
+            int startIndex = lexer.Offset;
 
             var output = new List<INode>();
             foreach (var pattern in _patterns)
             {
-                var result = pattern.Parse(ctx);
+                var result = pattern.Parse(ctx, lexer);
 
                 if (result.ErrorMessage != null)
                 {
-                    ctx.Lexer.Offset = startIndex;
+                    lexer.Offset = startIndex;
                     return result;
                 }
 
@@ -128,14 +128,14 @@ namespace HeartScript.Cli
             return this;
         }
 
-        public PegResult Parse(PegContext ctx)
+        public PegResult Parse(PegContext ctx, Lexer lexer)
         {
-            int startIndex = ctx.Lexer.Offset;
+            int startIndex = lexer.Offset;
 
             PegResult? furthestResult = null;
             for (int i = 0; i < _patterns.Count; i++)
             {
-                var result = _patterns[i].Parse(ctx);
+                var result = _patterns[i].Parse(ctx, lexer);
 
                 if (result.Value != null)
                     return PegResult.Success(result.CharIndex, new ChoiceNode(i, result.Value));
@@ -144,7 +144,7 @@ namespace HeartScript.Cli
                     furthestResult = result;
 
                 if (result.ErrorMessage != null)
-                    ctx.Lexer.Offset = startIndex;
+                    lexer.Offset = startIndex;
             }
 
             return furthestResult!;
@@ -177,15 +177,15 @@ namespace HeartScript.Cli
             return new QuantifierPattern(0, 1, pattern);
         }
 
-        public PegResult Parse(PegContext ctx)
+        public PegResult Parse(PegContext ctx, Lexer lexer)
         {
-            int startIndex = ctx.Lexer.Offset;
+            int startIndex = lexer.Offset;
 
             PegResult? result = null;
             var output = new List<INode>();
             while (_max == null || output.Count < _max)
             {
-                result = _pattern.Parse(ctx);
+                result = _pattern.Parse(ctx, lexer);
 
                 if (result.ErrorMessage != null)
                     break;
@@ -228,9 +228,9 @@ namespace HeartScript.Cli
             return new KeyPattern(key);
         }
 
-        public PegResult Parse(PegContext ctx)
+        public PegResult Parse(PegContext ctx, Lexer lexer)
         {
-            var result = ctx.Patterns[_key].Parse(ctx);
+            var result = ctx.Patterns[_key].Parse(ctx, lexer);
             if (result.ErrorMessage != null)
                 return result;
 
@@ -243,17 +243,15 @@ namespace HeartScript.Cli
 
     interface IPegPattern
     {
-        PegResult Parse(PegContext ctx);
+        PegResult Parse(PegContext ctx, Lexer lexer);
     }
 
     class PegContext
     {
-        public Lexer Lexer { get; }
         public Dictionary<string, IPegPattern> Patterns { get; }
 
-        public PegContext(Lexer lexer)
+        public PegContext()
         {
-            Lexer = lexer;
             Patterns = new Dictionary<string, IPegPattern>();
         }
     }
@@ -267,8 +265,8 @@ namespace HeartScript.Cli
         {
             string input = File.ReadAllText("src/peg.ops");
             var lexer = new Lexer(input);
-            var ctx = new PegContext(lexer);
 
+            var ctx = new PegContext();
             ctx.Patterns["term"] = ChoicePattern.Create()
                     .Or(ChoicePattern.Create()
                         .Or(TerminalPattern.Create(s_regex))
@@ -302,7 +300,7 @@ namespace HeartScript.Cli
 
             var builderPattern = KeyPattern.Create("choice");
 
-            var result = builderPattern.Parse(ctx);
+            var result = builderPattern.Parse(ctx, lexer);
             var parserPattern = BuildRoot(result);
 
             return parserPattern;
@@ -419,11 +417,11 @@ namespace HeartScript.Cli
 
         public static void Test(Lexer lexer)
         {
-            var ctx = new PegContext(lexer);
+            var ctx = new PegContext();
             ctx.Patterns["expr"] = TerminalPattern.Create(LexerPattern.FromRegex("\\w+"));
 
             var pattern = BuildParser();
-            var result = pattern.Parse(ctx);
+            var result = pattern.Parse(ctx, lexer);
         }
     }
 }
