@@ -6,37 +6,61 @@ namespace HeartScript.Nodes
 {
     public class ExpressionNode : INode
     {
-        public Token Token { get; }
+        public string? Value { get; }
+        public List<INode>? Children { get; }
 
-        public INode? LeftNode { get; }
-        public IEnumerable<INode> RightNodes { get; }
+        public bool HaveLeftNode { get; }
+        public bool HaveRightNodes { get; }
 
-        public ExpressionNode(Token token, INode? leftNode, IEnumerable<INode> rightNodes)
+        public ExpressionNode(string value, INode? leftNode, IEnumerable<INode> rightNodes)
         {
-            Token = token;
-            LeftNode = leftNode;
-            RightNodes = rightNodes;
+            Value = value;
+            Children = new List<INode>();
+
+            HaveLeftNode = leftNode != null;
+            HaveRightNodes = rightNodes.Count() > 0;
+
+            if (HaveLeftNode || HaveRightNodes)
+                Children = new List<INode>();
+
+            if (HaveLeftNode)
+                Children.Add(leftNode!);
+
+            if (HaveRightNodes)
+                Children.AddRange(rightNodes);
         }
 
-        public static INode BuildNode(Token token, INode? leftNode, IReadOnlyList<INode> rightNodes) => new ExpressionNode(token, leftNode, rightNodes);
+        private IEnumerable<INode> RightNodes()
+        {
+            if (Children == null)
+                return Enumerable.Empty<INode>();
+
+            int offset = HaveLeftNode ? 1 : 0;
+
+            return Children
+                .Skip(offset)
+                .Take(Children.Count - offset);
+        }
+
+        public static INode BuildNode(Token token, INode? leftNode, IReadOnlyList<INode> rightNodes) => new ExpressionNode(token.Value, leftNode, rightNodes);
 
         public override string ToString()
         {
-            string? left = LeftNode != null ? $" {LeftNode}" : null;
-            string? right = RightNodes.Any() ? $" {string.Join(' ', RightNodes)}" : null;
+            string? left = HaveLeftNode ? $" {Children![0]}" : null;
+            string? right = RightNodes().Any() ? $" {string.Join(' ', RightNodes())}" : null;
 
-            if (Token.Value == "(")
+            if (Value == "(")
             {
                 if (left == null)
-                    return string.Join(' ', RightNodes);
+                    return string.Join(' ', RightNodes());
                 else
                     return $"(${left}{right})";
             }
 
             if (left != null || right != null)
-                return $"({Token.Value}{left}{right})";
+                return $"({Value}{left}{right})";
             else
-                return Token.Value!;
+                return Value!;
         }
     }
 }

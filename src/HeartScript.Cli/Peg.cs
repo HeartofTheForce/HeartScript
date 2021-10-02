@@ -1,22 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
+using HeartScript.Nodes;
 using HeartScript.Parsing;
 
 namespace HeartScript.Cli
 {
-    interface IPegNode
-    {
-    }
-
     class PegResult
     {
         public int CharIndex { get; private set; }
-        public IPegNode? Value { get; private set; }
+        public INode? Value { get; private set; }
         public string? ErrorMessage { get; private set; }
 
-        public static PegResult Success(int charIndex, IPegNode value)
+        public static PegResult Success(int charIndex, INode value)
         {
             return new PegResult()
             {
@@ -32,16 +28,6 @@ namespace HeartScript.Cli
                 CharIndex = charIndex,
                 ErrorMessage = message,
             };
-        }
-    }
-
-    class TerminalNode : IPegNode
-    {
-        public string Value { get; }
-
-        public TerminalNode(string value)
-        {
-            Value = value;
         }
     }
 
@@ -62,21 +48,9 @@ namespace HeartScript.Cli
         public PegResult Parse(PegContext ctx)
         {
             if (ctx.Lexer.TryEat(_lexerPattern, out var current))
-            {
-                return PegResult.Success(current.CharIndex, new TerminalNode(current.Value));
-            }
+                return PegResult.Success(current.CharIndex, new PegNode(current.Value));
 
             return PegResult.Error(ctx.Lexer.Offset, $"Expected match @ {ctx.Lexer.Offset}, {_lexerPattern}");
-        }
-    }
-
-    class SequenceNode : IPegNode
-    {
-        public IPegNode[] Values { get; }
-
-        public SequenceNode(IEnumerable<IPegNode> values)
-        {
-            Values = values.ToArray();
         }
     }
 
@@ -104,7 +78,7 @@ namespace HeartScript.Cli
         {
             int startIndex = ctx.Lexer.Offset;
 
-            var output = new List<IPegNode>();
+            var output = new List<INode>();
             foreach (var pattern in _patterns)
             {
                 var result = pattern.Parse(ctx);
@@ -119,19 +93,18 @@ namespace HeartScript.Cli
                     output.Add(result.Value);
             }
 
-            return PegResult.Success(startIndex, new SequenceNode(output));
+            return PegResult.Success(startIndex, new PegNode(output));
         }
     }
 
-    class ChoiceNode : IPegNode
+    class ChoiceNode : PegNode
     {
         public int ChoiceIndex { get; }
-        public IPegNode Value { get; }
+        public INode ChoiceValue => Children[0];
 
-        public ChoiceNode(int choiceIndex, IPegNode value)
+        public ChoiceNode(int choiceIndex, INode choiceValue) : base(choiceValue)
         {
             ChoiceIndex = choiceIndex;
-            Value = value;
         }
     }
 
@@ -178,16 +151,6 @@ namespace HeartScript.Cli
         }
     }
 
-    class QuantifierNode : IPegNode
-    {
-        public IPegNode[] Values { get; }
-
-        public QuantifierNode(IEnumerable<IPegNode> values)
-        {
-            Values = values.ToArray();
-        }
-    }
-
     class QuantifierPattern : IPegPattern
     {
         private readonly int _min;
@@ -219,7 +182,7 @@ namespace HeartScript.Cli
             int startIndex = ctx.Lexer.Offset;
 
             PegResult? result = null;
-            var output = new List<IPegNode>();
+            var output = new List<INode>();
             while (_max == null || output.Count < _max)
             {
                 result = _pattern.Parse(ctx);
@@ -232,7 +195,7 @@ namespace HeartScript.Cli
             }
 
             if (output.Count >= _min)
-                return PegResult.Success(startIndex, new QuantifierNode(output));
+                return PegResult.Success(startIndex, new PegNode(output));
             else if (result != null)
                 return result;
             else
@@ -240,17 +203,15 @@ namespace HeartScript.Cli
         }
     }
 
-    class KeyNode : IPegNode
+    class KeyNode : PegNode
     {
         public string Key { get; }
-        public IPegNode Value { get; }
+        public INode KeyValue => Children[0];
 
-        public KeyNode(string key, IPegNode value)
+        public KeyNode(string key, INode keyValue) : base(keyValue)
         {
             Key = key;
-            Value = value;
         }
-
     }
 
     class KeyPattern : IPegPattern
@@ -352,65 +313,59 @@ namespace HeartScript.Cli
             return BuildKey(result.Value);
         }
 
-        static IPegPattern BuildKey(IPegNode node)
+        static IPegPattern BuildKey(INode node)
         {
             var keyNode = (KeyNode)node;
             return keyNode.Key switch
             {
-                "sequence" => BuildSequence(keyNode.Value),
-                "choice" => BuildChoice(keyNode.Value),
-                "term" => BuildTerm(keyNode.Value),
-                "quantifier" => BuildQuantifier(keyNode.Value),
+                "sequence" => BuildSequence(keyNode.KeyValue),
+                "choice" => BuildChoice(keyNode.KeyValue),
+                "term" => BuildTerm(keyNode.KeyValue),
+                "quantifier" => BuildQuantifier(keyNode.KeyValue),
                 _ => throw new Exception($"Unexpected Key, {keyNode.Key}"),
             };
         }
 
-        static IPegPattern BuildChoice(IPegNode node)
+        static IPegPattern BuildChoice(INode root)
         {
-            var root = (SequenceNode)node;
-            var minOrMoreNode = (QuantifierNode)root.Values[1];
+            var minOrMoreNode = root.Children[1];
 
-            if (minOrMoreNode.Values.Length == 0)
-                return BuildKey(root.Values[0]);
+            if (minOrMoreNode.Children.Count == 0)
+                return BuildKey(root.Children[0]);
             else
             {
                 var output = ChoicePattern.Create()
-                   .Or(BuildKey(root.Values[0]));
+                   .Or(BuildKey(root.Children[0]));
 
-                foreach (var value in minOrMoreNode.Values)
+                foreach (var child in minOrMoreNode.Children)
                 {
-                    var sequenceNode = (SequenceNode)value;
-                    output.Or(BuildKey(sequenceNode.Values[0]));
+                    output.Or(BuildKey(child.Children[0]));
                 }
 
                 return output;
             }
         }
 
-        static IPegPattern BuildSequence(IPegNode node)
+        static IPegPattern BuildSequence(INode root)
         {
-            var root = (QuantifierNode)node;
-
             var output = SequencePattern.Create();
-            foreach (var value in root.Values)
+            foreach (var child in root.Children)
             {
-                output.Then(BuildKey(value));
+                output.Then(BuildKey(child));
             }
 
             return output;
         }
 
-        static IPegPattern BuildQuantifier(IPegNode node)
+        static IPegPattern BuildQuantifier(INode root)
         {
-            var root = (SequenceNode)node;
+            var pattern = BuildKey(root.Children[0]);
+            var optional = root.Children[1];
 
-            var pattern = BuildKey(root.Values[0]);
-            var optional = (QuantifierNode)root.Values[1];
-
-            if (optional.Values.Length == 0)
+            if (optional.Children.Count == 0)
                 return pattern;
 
-            var choice = (ChoiceNode)optional.Values[0];
+            var choice = (ChoiceNode)optional.Children[0];
             return choice.ChoiceIndex switch
             {
                 0 => QuantifierPattern.Optional(pattern),
@@ -420,7 +375,7 @@ namespace HeartScript.Cli
             };
         }
 
-        static IPegPattern BuildTerm(IPegNode node)
+        static IPegPattern BuildTerm(INode node)
         {
             var root = (ChoiceNode)node;
 
@@ -428,8 +383,8 @@ namespace HeartScript.Cli
             {
                 case 0:
                     {
-                        var choiceNode = (ChoiceNode)root.Value;
-                        var terminalNode = (TerminalNode)choiceNode.Value;
+                        var choiceNode = (ChoiceNode)root.ChoiceValue;
+                        var terminalNode = choiceNode.ChoiceValue;
 
                         switch (choiceNode.ChoiceIndex)
                         {
@@ -450,12 +405,12 @@ namespace HeartScript.Cli
                     };
                 case 1:
                     {
-                        var sequenceNode = (SequenceNode)root.Value;
-                        return BuildKey(sequenceNode.Values[1]);
+                        var sequenceNode = root.ChoiceValue;
+                        return BuildKey(sequenceNode.Children[1]);
                     }
                 case 2:
                     {
-                        var terminalNode = (TerminalNode)root.Value;
+                        var terminalNode = root.ChoiceValue;
                         return KeyPattern.Create(terminalNode.Value);
                     }
                 default: throw new Exception();
