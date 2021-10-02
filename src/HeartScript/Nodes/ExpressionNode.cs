@@ -6,8 +6,8 @@ namespace HeartScript.Nodes
 {
     public class ExpressionNode : INode
     {
-        public string? Value { get; }
-        public List<INode>? Children { get; }
+        public string Value { get; }
+        public List<INode> Children { get; }
 
         public bool HaveLeftNode { get; }
         public bool HaveRightNodes { get; }

@@ -4,8 +4,8 @@ namespace HeartScript.Nodes
 {
     public class PegNode : INode
     {
-        public string? Value { get; }
-        public List<INode>? Children { get; }
+        public string Value { get; }
+        public List<INode> Children { get; }
 
         public PegNode(List<INode> children)
         {

@@ -4,7 +4,7 @@ namespace HeartScript.Nodes
 {
     public interface INode
     {
-        string? Value { get; }
-        List<INode>? Children { get; }
+        string Value { get; }
+        List<INode> Children { get; }
     }
 }
