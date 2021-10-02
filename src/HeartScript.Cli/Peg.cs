@@ -326,16 +326,16 @@ namespace HeartScript.Cli
             };
         }
 
-        static IPegPattern BuildChoice(INode root)
+        static IPegPattern BuildChoice(INode node)
         {
-            var minOrMoreNode = root.Children[1];
+            var minOrMoreNode = node.Children[1];
 
             if (minOrMoreNode.Children.Count == 0)
-                return BuildKey(root.Children[0]);
+                return BuildKey(node.Children[0]);
             else
             {
                 var output = ChoicePattern.Create()
-                   .Or(BuildKey(root.Children[0]));
+                   .Or(BuildKey(node.Children[0]));
 
                 foreach (var child in minOrMoreNode.Children)
                 {
@@ -346,10 +346,10 @@ namespace HeartScript.Cli
             }
         }
 
-        static IPegPattern BuildSequence(INode root)
+        static IPegPattern BuildSequence(INode node)
         {
             var output = SequencePattern.Create();
-            foreach (var child in root.Children)
+            foreach (var child in node.Children)
             {
                 output.Then(BuildKey(child));
             }
@@ -357,10 +357,10 @@ namespace HeartScript.Cli
             return output;
         }
 
-        static IPegPattern BuildQuantifier(INode root)
+        static IPegPattern BuildQuantifier(INode node)
         {
-            var pattern = BuildKey(root.Children[0]);
-            var optional = root.Children[1];
+            var pattern = BuildKey(node.Children[0]);
+            var optional = node.Children[1];
 
             if (optional.Children.Count == 0)
                 return pattern;
