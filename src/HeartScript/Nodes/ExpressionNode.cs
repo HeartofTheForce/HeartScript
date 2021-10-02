@@ -66,19 +66,18 @@ namespace HeartScript.Nodes
         public override string ToString()
         {
             string? children = string.Join(' ', Children);
-            if (children.Length > 0)
-                children = $" {children}";
 
-            if (Value[0] == '(')
+            string op = Value;
+            if (op == "(")
             {
                 if (!HaveLeft)
-                    return children.Trim();
+                    return children;
                 else
-                    return $"(${children})";
+                    op = "$";
             }
 
             if (children.Length > 0)
-                return $"({Value}{children})";
+                return $"({op} {children})";
             else
                 return Value!;
         }
