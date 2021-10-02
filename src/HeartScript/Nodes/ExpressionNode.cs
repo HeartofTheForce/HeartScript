@@ -41,6 +41,12 @@ namespace HeartScript.Nodes
                     Children.Add(expressionNode);
                     continue;
                 }
+                else if (current.Value != null)
+                {
+                    //TODO Refactor
+                    if (Value == null)
+                        Value = current.Value;
+                }
 
                 if (current.Children != null)
                 {
@@ -56,9 +62,6 @@ namespace HeartScript.Nodes
                 HaveRight = true;
                 Children.Add(rightNode);
             }
-
-            //TODO Refactor
-            Value = midNode.ToString().Trim();
         }
 
         public override string ToString()
@@ -70,13 +73,13 @@ namespace HeartScript.Nodes
             if (Value[0] == '(')
             {
                 if (!HaveLeft)
-                    return children;
+                    return children.Trim();
                 else
                     return $"(${children})";
             }
 
             if (HaveLeft || HaveRight)
-                return $"({Value[0]}{children})";
+                return $"({Value}{children})";
 
             else
                 return Value!;
