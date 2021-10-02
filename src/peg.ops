@@ -1,1 +1,53 @@
-expr '(' expr ((',' expr)+ ','?)? ')'
+#if
+none 99 'if' expr
+
+#else
+99 100 'else'
+
+#RoundBracket
+none none '(' expr ')'
+
+#Call
+0 none '(' (expr (',' expr)*)? ')'
+
+#Ternary
+2 99 '?' expr ':'
+
+#Factorial
+2 none '!'
+
+#PrefixPlus
+none 1 '+'
+
+#PrefixMinus
+none 1 '-'
+
+#BitwiseNot
+none 1 '~'
+
+#Multiply
+3 3 '*'
+
+#Divide
+3 3 '/'
+
+#BinaryPlus
+4 4 '+'
+
+#BinaryMinus
+4 4 '-'
+
+#BitwiseAnd
+4 4 '&'
+
+#BitwiseXor
+4 4 '^'
+
+#BitwiseOr
+4 4 '|'
+
+#Constant
+none none `\d+(?:\.\d+)?`
+
+#Identifier
+none none `[a-zA-Z]\w*`

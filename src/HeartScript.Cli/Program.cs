@@ -9,14 +9,20 @@ namespace HeartScript.Cli
         {
             try
             {
-                var operatorInfos = OperatorInfoBuilder.Parse("./src/test.ops");
+                var operatorPatterns = OperatorPatternBuilder.Parse("./src/peg.ops");
 
                 string infix = string.Join(' ', args);
 
                 Console.WriteLine("Input");
                 Console.WriteLine(infix);
 
-                Peg.Test(infix);
+                var ctx = new ParserContext(infix);
+                var parser = new Parser();
+
+                var expressionPattern = new ExpressionPattern(operatorPatterns);
+                parser.Patterns["expr"] = expressionPattern;
+                var result = parser.TryMatch(expressionPattern, ctx);
+
                 // var lexer = new Lexer(infix);
                 // var node = ExpressionParser.Parse(operatorInfos, lexer);
 

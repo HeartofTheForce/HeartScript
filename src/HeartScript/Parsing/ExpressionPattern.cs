@@ -7,55 +7,62 @@ namespace HeartScript.Parsing
     class ExpressionNodeBuilder
     {
         private readonly OperatorPattern _operatorPattern;
-        private INode? _left;
-        private INode? _right;
+        private readonly INode _midNode;
+        private INode? _leftNode;
+        private INode? _rightNode;
 
-        public ExpressionNodeBuilder(OperatorPattern operatorPattern)
+        public ExpressionNodeBuilder(OperatorPattern operatorPattern, INode midNode)
         {
             _operatorPattern = operatorPattern;
+            _midNode = midNode;
         }
 
-
-        public bool IsEvaluatedBefore(OperatorPattern right)
+        public bool IsEvaluatedBefore(ExpressionNodeBuilder right)
         {
             // if (_operatorPattern.RightPrecedence == null || right.LeftPrecedence == null)
             //     return _operatorPattern.RightPrecedence == null;
             if (_operatorPattern.RightPrecedence == null)
                 return true;
 
-            return _operatorPattern.RightPrecedence <= right.LeftPrecedence;
+            return _operatorPattern.RightPrecedence <= right._operatorPattern.LeftPrecedence;
         }
 
-        public INode? FeedOperandLeft(INode? left)
+        public INode? FeedOperandLeft(INode? leftNode)
         {
-            _left = left;
+            _leftNode = leftNode;
             return TryCompleteNode();
         }
 
-        public INode? FeedOperandRight(INode? right)
+        public INode? FeedOperandRight(INode? rightNode)
         {
-            _right = right;
+            _rightNode = rightNode;
             return TryCompleteNode();
         }
 
         private INode? TryCompleteNode()
         {
-            bool haveLeft = _left != null;
+            bool haveLeft = _leftNode != null;
             bool expectLeft = _operatorPattern.LeftPrecedence != null;
             if (haveLeft != expectLeft)
                 return null;
 
-            bool haveRight = _right != null;
+            bool haveRight = _rightNode != null;
             bool expectRight = _operatorPattern.RightPrecedence != null;
             if (haveRight != expectRight)
                 return null;
 
-            return _operatorPattern.BuildNode(_left, _right);
+            return new ExpressionNode(_leftNode, _midNode, _rightNode);
         }
     }
+
     public class ExpressionPattern : IPattern
     {
         private readonly IEnumerable<OperatorPattern> _patterns;
+
+        public ExpressionPattern(IEnumerable<OperatorPattern> patterns)
+        {
+            _patterns = patterns;
+        }
 
         public PatternResult Match(Parser parser, ParserContext ctx)
         {
@@ -66,8 +73,8 @@ namespace HeartScript.Parsing
 
             while (true)
             {
-                var op = TryGetOperator(operand == null, parser, ctx);
-                if (op == null)
+                var nodeBuilder = TryGetNodeBuilder(operand != null, parser, ctx);
+                if (nodeBuilder == null)
                 {
                     while (nodeBuilders.Count > 0)
                     {
@@ -78,22 +85,22 @@ namespace HeartScript.Parsing
                     return PatternResult.Success(startIndex, operand);
                 }
 
-                while (nodeBuilders.TryPeek(out var left) && left.IsEvaluatedBefore(op))
+                while (nodeBuilders.TryPeek(out var left) && left.IsEvaluatedBefore(nodeBuilder))
                 {
                     if (!TryReduce(ref operand, nodeBuilders))
                         throw new Exception($"{nameof(NodeBuilder)} is incomplete");
                 }
 
-                var nodeBuilder = new ExpressionNodeBuilder(op);
                 operand = nodeBuilder.FeedOperandLeft(operand);
                 if (operand == null)
                     nodeBuilders.Push(nodeBuilder);
             }
         }
 
-        private OperatorPattern? TryGetOperator(bool haveOperand, Parser parser, ParserContext ctx)
+        private ExpressionNodeBuilder? TryGetNodeBuilder(bool haveOperand, Parser parser, ParserContext ctx)
         {
-            OperatorPattern op = null;
+            OperatorPattern? op = null;
+            INode? midNode = null;
             foreach (var x in _patterns)
             {
                 bool valid;
@@ -109,11 +116,15 @@ namespace HeartScript.Parsing
                 if (result.Value != null)
                 {
                     op = x;
+                    midNode = result.Value;
                     break;
                 }
             }
 
-            return op;
+            if (op == null || midNode == null)
+                return null;
+
+            return new ExpressionNodeBuilder(op, midNode);
         }
 
         private bool TryReduce(ref INode? operand, Stack<ExpressionNodeBuilder> nodeBuilders)

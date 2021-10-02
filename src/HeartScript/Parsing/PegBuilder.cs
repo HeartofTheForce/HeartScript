@@ -42,9 +42,7 @@ namespace HeartScript.Parsing
 
         public static Parser CreateParser()
         {
-            var parser = new Parser(SequencePattern.Create()
-                   .Then(QuantifierPattern.Optional(s_nonSignificant))
-                   .Then(KeyPattern.Create("choice")));
+            var parser = new Parser();
 
             parser.Patterns["term"] = ChoicePattern.Create()
                     .Or(ChoicePattern.Create()

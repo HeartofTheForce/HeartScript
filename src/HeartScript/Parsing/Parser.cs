@@ -5,18 +5,11 @@ namespace HeartScript.Parsing
 {
     public class Parser
     {
-        public IPattern RootPattern { get; }
         public Dictionary<string, IPattern> Patterns { get; }
 
-        public Parser(IPattern rootPattern)
+        public Parser()
         {
-            RootPattern = rootPattern;
             Patterns = new Dictionary<string, IPattern>();
-        }
-
-        public PatternResult TryMatch(ParserContext ctx)
-        {
-            return TryMatch(RootPattern, ctx);
         }
 
         public PatternResult TryMatch(IPattern pattern, ParserContext ctx)

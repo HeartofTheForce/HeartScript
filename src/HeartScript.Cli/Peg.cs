@@ -3,31 +3,31 @@ using HeartScript.Parsing;
 
 namespace HeartScript.Cli
 {
-    static class Peg
-    {
-        static IPattern BuildPattern()
-        {
-            var parser = OperatorInfoPegBuilder.CreateParser();
+    // static class Peg
+    // {
+    //     static IPattern BuildPattern()
+    //     {
+    //         var parser = OperatorInfoPegBuilder.CreateParser();
 
-            string input = File.ReadAllText("src/peg.ops");
-            var ctx = new ParserContext(input);
-            var result = parser.TryMatch(ctx);
+    //         string input = File.ReadAllText("src/peg.ops");
+    //         var ctx = new ParserContext(input);
+    //         var result = parser.TryMatch(ctx);
 
-            var builderCtx = OperatorInfoPegBuilder.CreateBuilder();
-            var parserPattern = builderCtx.BuildKeyPattern(result.Value.Children[1]);
+    //         var builderCtx = OperatorInfoPegBuilder.CreateBuilder();
+    //         var parserPattern = builderCtx.BuildKeyPattern(result.Value.Children[1]);
 
-            return parserPattern;
-        }
+    //         return parserPattern;
+    //     }
 
-        public static void Test(string input)
-        {
-            var ctx = new ParserContext(input);
+    //     public static void Test(string input)
+    //     {
+    //         var ctx = new ParserContext(input);
 
-            var pattern = BuildPattern().TrimLeft();
-            var parser = new Parser(pattern);
-            parser.Patterns["expr"] = LexerPattern.FromRegex("\\w+").TrimRight();
+    //         var pattern = BuildPattern().TrimLeft();
+    //         var parser = new Parser(pattern);
+    //         parser.Patterns["expr"] = LexerPattern.FromRegex("\\w+").TrimRight();
 
-            var result = parser.TryMatch(ctx);
-        }
-    }
+    //         var result = parser.TryMatch(ctx);
+    //     }
+    // }
 }

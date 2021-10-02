@@ -9,24 +9,73 @@ namespace HeartScript.Nodes
         public string Value { get; }
         public List<INode> Children { get; }
 
-        public bool HaveLeftNode { get; }
-        public bool HaveRightNodes { get; }
+        public bool HaveLeft { get; }
+        public bool HaveRight { get; }
+
+        public ExpressionNode(string value)
+        {
+            Value = value;
+            Children = null;
+            HaveLeft = false;
+            HaveRight = false;
+        }
+
+        public ExpressionNode(INode? leftNode, INode midNode, INode? rightNode)
+        {
+            Value = null;
+            Children = new List<INode>();
+
+            if (leftNode != null)
+            {
+                HaveLeft = true;
+                Children.Add(leftNode);
+            }
+
+            var nodeStack = new Stack<INode>();
+            nodeStack.Push(midNode);
+            while (nodeStack.Count > 0)
+            {
+                var current = nodeStack.Pop();
+                if (current is ExpressionNode expressionNode)
+                {
+                    Children.Add(expressionNode);
+                    continue;
+                }
+
+                if (current.Children != null)
+                {
+                    foreach (var child in current.Children)
+                    {
+                        nodeStack.Push(child);
+                    }
+                }
+            }
+
+            if (rightNode != null)
+            {
+                HaveRight = true;
+                Children.Add(rightNode);
+            }
+
+            //TODO Refactor
+            Value = midNode.ToString();
+        }
 
         public ExpressionNode(string value, INode? leftNode, IEnumerable<INode> rightNodes)
         {
             Value = value;
             Children = new List<INode>();
 
-            HaveLeftNode = leftNode != null;
-            HaveRightNodes = rightNodes.Count() > 0;
+            HaveLeft = leftNode != null;
+            HaveRight = rightNodes.Count() > 0;
 
-            if (HaveLeftNode || HaveRightNodes)
+            if (HaveLeft || HaveRight)
                 Children = new List<INode>();
 
-            if (HaveLeftNode)
+            if (HaveLeft)
                 Children.Add(leftNode!);
 
-            if (HaveRightNodes)
+            if (HaveRight)
                 Children.AddRange(rightNodes);
         }
 
@@ -35,7 +84,7 @@ namespace HeartScript.Nodes
             if (Children == null)
                 return Enumerable.Empty<INode>();
 
-            int offset = HaveLeftNode ? 1 : 0;
+            int offset = HaveLeft ? 1 : 0;
 
             return Children
                 .Skip(offset)
@@ -46,10 +95,10 @@ namespace HeartScript.Nodes
 
         public override string ToString()
         {
-            string? left = HaveLeftNode ? $" {Children![0]}" : null;
+            string? left = HaveLeft ? $" {Children![0]}" : null;
             string? right = RightNodes().Any() ? $" {string.Join(' ', RightNodes())}" : null;
 
-            if (Value == "(")
+            if (Value[0] == '(')
             {
                 if (left == null)
                     return string.Join(' ', RightNodes());
