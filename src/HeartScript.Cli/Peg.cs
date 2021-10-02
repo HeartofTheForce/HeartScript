@@ -178,49 +178,65 @@ namespace HeartScript.Cli
         }
     }
 
-    class MinOrMoreNode : IPegNode
+    class QuantifierNode : IPegNode
     {
         public IPegNode[] Values { get; }
 
-        public MinOrMoreNode(IEnumerable<IPegNode> values)
+        public QuantifierNode(IEnumerable<IPegNode> values)
         {
             Values = values.ToArray();
         }
     }
 
-    class MinOrMorePattern : IPegPattern
+    class QuantifierPattern : IPegPattern
     {
         private readonly int _min;
+        private readonly int? _max;
         private readonly IPegPattern _pattern;
 
-        private MinOrMorePattern(int min, IPegPattern pattern)
+        private QuantifierPattern(int min, int? max, IPegPattern pattern)
         {
+            if (max < min)
+                throw new ArgumentException($"{nameof(max)} < {nameof(min)}");
+
             _min = min;
+            _max = max;
             _pattern = pattern;
         }
 
-        public static MinOrMorePattern Create(int min, IPegPattern pattern)
+        public static QuantifierPattern MinOrMore(int min, IPegPattern pattern)
         {
-            return new MinOrMorePattern(min, pattern);
+            return new QuantifierPattern(min, null, pattern);
+        }
+
+        public static QuantifierPattern Optional(IPegPattern pattern)
+        {
+            return new QuantifierPattern(0, 1, pattern);
         }
 
         public PegResult Parse(PegContext ctx)
         {
             int startIndex = ctx.Lexer.Offset;
-            var output = new List<IPegNode>();
 
-            PegResult result;
-            do
+            PegResult? result = null;
+            var output = new List<IPegNode>();
+            while (_max == null || output.Count < _max)
             {
                 result = _pattern.Parse(ctx);
+
+                if (result.ErrorMessage != null)
+                    break;
+
                 if (result.Value != null)
                     output.Add(result.Value);
-            } while (result.ErrorMessage == null);
+            }
 
             if (output.Count >= _min)
-                return PegResult.Success(startIndex, new MinOrMoreNode(output));
-            else
+                return PegResult.Success(startIndex, new QuantifierNode(output));
+            else if (result != null)
                 return result;
+            else
+                throw new Exception();
         }
     }
 
@@ -302,20 +318,22 @@ namespace HeartScript.Cli
                         .Then(TerminalPattern.Create(LexerPattern.FromPlainText(")"))))
                     .Or(TerminalPattern.Create(LexerPattern.FromRegex("\\w+")));
 
-            ctx.Patterns["sequence"] = MinOrMorePattern.Create(
+            ctx.Patterns["sequence"] = QuantifierPattern.MinOrMore(
                 1,
-                ChoicePattern.Create()
-                    .Or(KeyPattern.Create("zero-or-more"))
-                    .Or(KeyPattern.Create("term"))
+                KeyPattern.Create("quantifier")
             );
 
-            ctx.Patterns["zero-or-more"] = SequencePattern.Create()
+            ctx.Patterns["quantifier"] = SequencePattern.Create()
                 .Then(KeyPattern.Create("term"))
-                .Then(TerminalPattern.Create(LexerPattern.FromPlainText("*")));
+                .Then(QuantifierPattern.Optional(
+                    ChoicePattern.Create()
+                        .Or(TerminalPattern.Create(LexerPattern.FromPlainText("?")))
+                        .Or(TerminalPattern.Create(LexerPattern.FromPlainText("*")))
+                        .Or(TerminalPattern.Create(LexerPattern.FromPlainText("+")))));
 
             ctx.Patterns["choice"] = SequencePattern.Create()
                 .Then(KeyPattern.Create("sequence"))
-                .Then(MinOrMorePattern.Create(
+                .Then(QuantifierPattern.MinOrMore(
                         0,
                         SequencePattern.Create()
                             .Then(TerminalPattern.Create(LexerPattern.FromPlainText("/")))
@@ -342,7 +360,7 @@ namespace HeartScript.Cli
                 "sequence" => BuildSequence(keyNode.Value),
                 "choice" => BuildChoice(keyNode.Value),
                 "term" => BuildTerm(keyNode.Value),
-                "zero-or-more" => BuildZeroOrMore(keyNode.Value),
+                "quantifier" => BuildQuantifier(keyNode.Value),
                 _ => throw new Exception($"Unexpected Key, {keyNode.Key}"),
             };
         }
@@ -350,7 +368,7 @@ namespace HeartScript.Cli
         static IPegPattern BuildChoice(IPegNode node)
         {
             var root = (SequenceNode)node;
-            var minOrMoreNode = (MinOrMoreNode)root.Values[1];
+            var minOrMoreNode = (QuantifierNode)root.Values[1];
 
             if (minOrMoreNode.Values.Length == 0)
                 return BuildKey(root.Values[0]);
@@ -371,24 +389,35 @@ namespace HeartScript.Cli
 
         static IPegPattern BuildSequence(IPegNode node)
         {
-            var root = (MinOrMoreNode)node;
+            var root = (QuantifierNode)node;
 
             var output = SequencePattern.Create();
             foreach (var value in root.Values)
             {
-                var choice = (ChoiceNode)value;
-                output.Then(BuildKey(choice.Value));
+                output.Then(BuildKey(value));
             }
 
             return output;
         }
 
-        static IPegPattern BuildZeroOrMore(IPegNode node)
+        static IPegPattern BuildQuantifier(IPegNode node)
         {
             var root = (SequenceNode)node;
 
             var pattern = BuildKey(root.Values[0]);
-            return MinOrMorePattern.Create(0, pattern);
+            var optional = (QuantifierNode)root.Values[1];
+
+            if (optional.Values.Length == 0)
+                return pattern;
+
+            var choice = (ChoiceNode)optional.Values[0];
+            return choice.ChoiceIndex switch
+            {
+                0 => QuantifierPattern.Optional(pattern),
+                1 => QuantifierPattern.MinOrMore(0, pattern),
+                2 => QuantifierPattern.MinOrMore(1, pattern),
+                _ => throw new Exception(),
+            };
         }
 
         static IPegPattern BuildTerm(IPegNode node)
