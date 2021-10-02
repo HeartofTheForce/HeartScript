@@ -4,29 +4,6 @@ using HeartScript.Nodes;
 
 namespace HeartScript.Parsing
 {
-    public class TerminalPattern : IPattern
-    {
-        private readonly LexerPattern _lexerPattern;
-
-        private TerminalPattern(LexerPattern lexerPattern)
-        {
-            _lexerPattern = lexerPattern;
-        }
-
-        public static TerminalPattern Create(LexerPattern lexerPattern)
-        {
-            return new TerminalPattern(lexerPattern);
-        }
-
-        public PatternResult Match(ParserContext ctx, Lexer lexer)
-        {
-            if (lexer.TryEat(_lexerPattern, out var current))
-                return PatternResult.Success(current.CharIndex, new PegNode(current.Value));
-
-            return PatternResult.Error(lexer.Offset, $"Expected match @ {lexer.Offset}, {_lexerPattern}");
-        }
-    }
-
     public class SequencePattern : IPattern
     {
         private readonly List<IPattern> _patterns;
@@ -47,14 +24,14 @@ namespace HeartScript.Parsing
             return this;
         }
 
-        public PatternResult Match(ParserContext ctx, Lexer lexer)
+        public PatternResult Match(Parser parser, ParserContext ctx)
         {
             int startIndex = 0;
 
             var output = new List<INode>();
             foreach (var pattern in _patterns)
             {
-                var result = ctx.TryMatch(pattern, lexer);
+                var result = parser.TryMatch(pattern, ctx);
 
                 if (result.ErrorMessage != null)
                     return result;
@@ -98,12 +75,12 @@ namespace HeartScript.Parsing
             return this;
         }
 
-        public PatternResult Match(ParserContext ctx, Lexer lexer)
+        public PatternResult Match(Parser parser, ParserContext ctx)
         {
             PatternResult? furthestResult = null;
             for (int i = 0; i < _patterns.Count; i++)
             {
-                var result = ctx.TryMatch(_patterns[i], lexer);
+                var result = parser.TryMatch(_patterns[i], ctx);
 
                 if (result.Value != null)
                     return PatternResult.Success(result.CharIndex, new ChoiceNode(i, result.Value));
@@ -142,15 +119,15 @@ namespace HeartScript.Parsing
             return new QuantifierPattern(0, 1, pattern);
         }
 
-        public PatternResult Match(ParserContext ctx, Lexer lexer)
+        public PatternResult Match(Parser parser, ParserContext ctx)
         {
-            int startIndex = lexer.Offset;
+            int startIndex = ctx.Offset;
 
             PatternResult? result = null;
             var output = new List<INode>();
             while (_max == null || output.Count < _max)
             {
-                result = ctx.TryMatch(_pattern, lexer);
+                result = parser.TryMatch(_pattern, ctx);
 
                 if (result.ErrorMessage != null)
                     break;
@@ -193,9 +170,9 @@ namespace HeartScript.Parsing
             return new KeyPattern(key);
         }
 
-        public PatternResult Match(ParserContext ctx, Lexer lexer)
+        public PatternResult Match(Parser parser, ParserContext ctx)
         {
-            var result = ctx.TryMatch(ctx.Patterns[_key], lexer);
+            var result = parser.TryMatch(parser.Patterns[_key], ctx);
             if (result.ErrorMessage != null)
                 return result;
 

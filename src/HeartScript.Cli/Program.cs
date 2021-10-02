@@ -16,8 +16,8 @@ namespace HeartScript.Cli
                 Console.WriteLine("Input");
                 Console.WriteLine(infix);
 
-                var lexer = new Lexer(infix);
-                Peg.Test(lexer);
+                Peg.Test(infix);
+                // var lexer = new Lexer(infix);
                 // var node = ExpressionParser.Parse(operatorInfos, lexer);
 
                 // Console.WriteLine("Output");

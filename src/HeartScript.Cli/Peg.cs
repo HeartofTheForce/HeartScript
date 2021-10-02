@@ -11,42 +11,42 @@ namespace HeartScript.Cli
         static IPattern BuildParser()
         {
             string input = File.ReadAllText("src/peg.ops");
-            var lexer = new Lexer(input);
+            var ctx = new ParserContext(input);
 
-            var parserCtx = new ParserContext();
-            parserCtx.Patterns["term"] = ChoicePattern.Create()
+            var parser = new Parser();
+            parser.Patterns["term"] = ChoicePattern.Create()
                     .Or(ChoicePattern.Create()
-                        .Or(TerminalPattern.Create(s_regex))
-                        .Or(TerminalPattern.Create(s_plainText)))
+                        .Or(s_regex)
+                        .Or(s_plainText))
                     .Or(SequencePattern.Create()
-                        .Then(TerminalPattern.Create(LexerPattern.FromPlainText("(")))
+                        .Then(LexerPattern.FromPlainText("("))
                         .Then(KeyPattern.Create("choice"))
-                        .Then(TerminalPattern.Create(LexerPattern.FromPlainText(")"))))
-                    .Or(TerminalPattern.Create(LexerPattern.FromRegex("\\w+")));
+                        .Then(LexerPattern.FromPlainText(")")))
+                    .Or(LexerPattern.FromRegex("\\w+"));
 
-            parserCtx.Patterns["sequence"] = QuantifierPattern.MinOrMore(
+            parser.Patterns["sequence"] = QuantifierPattern.MinOrMore(
                 1,
                 KeyPattern.Create("quantifier")
             );
 
-            parserCtx.Patterns["quantifier"] = SequencePattern.Create()
+            parser.Patterns["quantifier"] = SequencePattern.Create()
                 .Then(KeyPattern.Create("term"))
                 .Then(QuantifierPattern.Optional(
                     ChoicePattern.Create()
-                        .Or(TerminalPattern.Create(LexerPattern.FromPlainText("?")))
-                        .Or(TerminalPattern.Create(LexerPattern.FromPlainText("*")))
-                        .Or(TerminalPattern.Create(LexerPattern.FromPlainText("+")))));
+                        .Or(LexerPattern.FromPlainText("?"))
+                        .Or(LexerPattern.FromPlainText("*"))
+                        .Or(LexerPattern.FromPlainText("+"))));
 
-            parserCtx.Patterns["choice"] = SequencePattern.Create()
+            parser.Patterns["choice"] = SequencePattern.Create()
                 .Then(KeyPattern.Create("sequence"))
                 .Then(QuantifierPattern.MinOrMore(
                         0,
                         SequencePattern.Create()
-                            .Then(TerminalPattern.Create(LexerPattern.FromPlainText("/")))
+                            .Then(LexerPattern.FromPlainText("/"))
                             .Then(KeyPattern.Create("sequence"))));
 
             var builderPattern = KeyPattern.Create("choice");
-            var result = parserCtx.TryMatch(builderPattern, lexer);
+            var result = parser.TryMatch(builderPattern, ctx);
 
             var builderCtx = OperatorInfoPegBuilder.CreateBuilder();
             var parserPattern = builderCtx.BuildKeyPattern(result.Value);
@@ -54,13 +54,15 @@ namespace HeartScript.Cli
             return parserPattern;
         }
 
-        public static void Test(Lexer lexer)
+        public static void Test(string input)
         {
-            var ctx = new ParserContext();
-            ctx.Patterns["expr"] = TerminalPattern.Create(LexerPattern.FromRegex("\\w+"));
+            var ctx = new ParserContext(input);
+
+            var parser = new Parser();
+            parser.Patterns["expr"] = LexerPattern.FromRegex("\\w+");
 
             var pattern = BuildParser();
-            var result = ctx.TryMatch(pattern, lexer);
+            var result = parser.TryMatch(pattern, ctx);
         }
     }
 }

@@ -3,30 +3,43 @@ using HeartScript.Nodes;
 
 namespace HeartScript.Parsing
 {
-    public class ParserContext
+    public class Parser
     {
         public Dictionary<string, IPattern> Patterns { get; }
 
-        public ParserContext()
+        public Parser()
         {
             Patterns = new Dictionary<string, IPattern>();
         }
 
-        public PatternResult TryMatch(IPattern pattern, Lexer lexer)
+        public PatternResult TryMatch(IPattern pattern, ParserContext ctx)
         {
-            int startIndex = lexer.Offset;
+            int startIndex = ctx.Offset;
 
-            var result = pattern.Match(this, lexer);
+            var result = pattern.Match(this, ctx);
             if (result.ErrorMessage != null)
-                lexer.Offset = startIndex;
+                ctx.Offset = startIndex;
 
             return result;
         }
     }
 
+    public class ParserContext
+    {
+        public string Input { get; }
+        public int Offset { get; set; }
+        public bool IsEOF => Offset == Input.Length;
+
+        public ParserContext(string input)
+        {
+            Input = input;
+            Offset = 0;
+        }
+    }
+
     public interface IPattern
     {
-        PatternResult Match(ParserContext ctx, Lexer lexer);
+        PatternResult Match(Parser parser, ParserContext ctx);
     }
 
     public class PatternResult

@@ -1,8 +1,10 @@
-﻿using System.Text.RegularExpressions;
+﻿using System;
+using System.Text.RegularExpressions;
+using HeartScript.Nodes;
 
 namespace HeartScript.Parsing
 {
-    public class LexerPattern
+    public class LexerPattern : IPattern
     {
         public Regex Regex { get; }
         public string Pattern { get; }
@@ -38,6 +40,30 @@ namespace HeartScript.Parsing
                 return $"Regex: {Pattern}";
             else
                 return Pattern;
+        }
+
+        private static readonly Regex s_nonSignificant = new Regex("\\s*");
+
+        public PatternResult Match(Parser parser, ParserContext ctx)
+        {
+            var nonSignificantMatch = s_nonSignificant.Match(ctx.Input, ctx.Offset);
+            if (nonSignificantMatch.Success)
+                ctx.Offset += nonSignificantMatch.Length;
+
+            var match = Regex.Match(ctx.Input, ctx.Offset);
+            if (match.Success)
+            {
+                if (match.Length == 0)
+                    throw new Exception($"0 length match @ {match.Index}, {this}");
+
+                var targetGroup = match.Groups[1];
+                var token = new Token(targetGroup.Value, targetGroup.Index);
+                ctx.Offset += match.Length;
+
+                return PatternResult.Success(token.CharIndex, new PegNode(token.Value));
+            }
+
+            return PatternResult.Error(ctx.Offset, $"Expected match @ {ctx.Offset}, {this}");
         }
     }
 }

@@ -99,14 +99,12 @@ namespace HeartScript.Parsing
                             case 0:
                                 {
                                     string? pattern = terminalNode.Value[1..^1].Replace("``", "`");
-                                    var lexerPattern = LexerPattern.FromRegex(pattern);
-                                    return TerminalPattern.Create(lexerPattern);
+                                    return LexerPattern.FromRegex(pattern);
                                 }
                             case 1:
                                 {
                                     string? pattern = terminalNode.Value[1..^1].Replace("''", "'");
-                                    var lexerPattern = LexerPattern.FromPlainText(pattern);
-                                    return TerminalPattern.Create(lexerPattern);
+                                    return LexerPattern.FromPlainText(pattern);
                                 }
                             default: throw new Exception();
                         }
