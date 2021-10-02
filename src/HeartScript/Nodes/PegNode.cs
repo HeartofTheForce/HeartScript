@@ -31,7 +31,7 @@ namespace HeartScript.Nodes
                 return Value;
 
             if (Children != null)
-                return string.Join(' ', Children);
+                return string.Join("", Children);
 
             throw new System.Exception();
         }

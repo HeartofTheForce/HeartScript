@@ -26,7 +26,7 @@ namespace HeartScript.Cli
             catch (Exception ex)
             {
                 Console.WriteLine("Error");
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.StackTrace);
             }
         }
     }

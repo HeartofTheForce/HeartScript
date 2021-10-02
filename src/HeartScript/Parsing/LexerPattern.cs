@@ -42,14 +42,8 @@ namespace HeartScript.Parsing
                 return Pattern;
         }
 
-        private static readonly Regex s_nonSignificant = new Regex("\\s*");
-
         public PatternResult Match(Parser parser, ParserContext ctx)
         {
-            var nonSignificantMatch = s_nonSignificant.Match(ctx.Input, ctx.Offset);
-            if (nonSignificantMatch.Success)
-                ctx.Offset += nonSignificantMatch.Length;
-
             var match = Regex.Match(ctx.Input, ctx.Offset);
             if (match.Success)
             {

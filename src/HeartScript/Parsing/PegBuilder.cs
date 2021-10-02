@@ -22,6 +22,57 @@ namespace HeartScript.Parsing
 
     public static class OperatorInfoPegBuilder
     {
+        private static readonly LexerPattern s_regex = LexerPattern.FromRegex("`(?:``|[^`])*`");
+        private static readonly LexerPattern s_plainText = LexerPattern.FromRegex("'(?:''|[^'])*'");
+        private static readonly LexerPattern s_nonSignificant = LexerPattern.FromRegex("\\s+");
+
+        private static IPattern TrimLeft(this IPattern pattern)
+        {
+            return SequencePattern.Create()
+                .Then(QuantifierPattern.Optional(s_nonSignificant))
+                .Then(pattern);
+        }
+
+        public static Parser CreateParser()
+        {
+            var parser = new Parser(SequencePattern.Create()
+                   .Then(QuantifierPattern.Optional(s_nonSignificant))
+                   .Then(KeyPattern.Create("choice")));
+
+            parser.Patterns["term"] = ChoicePattern.Create()
+                    .Or(ChoicePattern.Create()
+                        .Or(s_regex.TrimLeft())
+                        .Or(s_plainText.TrimLeft()))
+                    .Or(SequencePattern.Create()
+                        .Then(LexerPattern.FromPlainText("(").TrimLeft())
+                        .Then(KeyPattern.Create("choice"))
+                        .Then(LexerPattern.FromPlainText(")").TrimLeft()))
+                    .Or(LexerPattern.FromRegex("\\w+").TrimLeft());
+
+            parser.Patterns["sequence"] = QuantifierPattern.MinOrMore(
+                1,
+                KeyPattern.Create("quantifier")
+            );
+
+            parser.Patterns["quantifier"] = SequencePattern.Create()
+                .Then(KeyPattern.Create("term"))
+                .Then(QuantifierPattern.Optional(
+                    ChoicePattern.Create()
+                        .Or(LexerPattern.FromPlainText("?").TrimLeft())
+                        .Or(LexerPattern.FromPlainText("*").TrimLeft())
+                        .Or(LexerPattern.FromPlainText("+").TrimLeft())));
+
+            parser.Patterns["choice"] = SequencePattern.Create()
+                .Then(KeyPattern.Create("sequence"))
+                .Then(QuantifierPattern.MinOrMore(
+                        0,
+                        SequencePattern.Create()
+                            .Then(LexerPattern.FromPlainText("/").TrimLeft())
+                            .Then(KeyPattern.Create("sequence"))));
+
+            return parser;
+        }
+
         public static PegBuilderContext CreateBuilder()
         {
             var output = new PegBuilderContext();
@@ -92,19 +143,19 @@ namespace HeartScript.Parsing
                 case 0:
                     {
                         var choiceNode = (ChoiceNode)root.ChoiceValue;
-                        var terminalNode = choiceNode.ChoiceValue;
+                        var terminalNode = choiceNode.ChoiceValue.Children[1];
 
                         switch (choiceNode.ChoiceIndex)
                         {
                             case 0:
                                 {
                                     string? pattern = terminalNode.Value[1..^1].Replace("``", "`");
-                                    return LexerPattern.FromRegex(pattern);
+                                    return LexerPattern.FromRegex(pattern).TrimLeft();
                                 }
                             case 1:
                                 {
                                     string? pattern = terminalNode.Value[1..^1].Replace("''", "'");
-                                    return LexerPattern.FromPlainText(pattern);
+                                    return LexerPattern.FromPlainText(pattern).TrimLeft();
                                 }
                             default: throw new Exception();
                         }
@@ -116,7 +167,7 @@ namespace HeartScript.Parsing
                     }
                 case 2:
                     {
-                        var terminalNode = root.ChoiceValue;
+                        var terminalNode = root.ChoiceValue.Children[1];
                         return KeyPattern.Create(terminalNode.Value);
                     }
                 default: throw new Exception();
