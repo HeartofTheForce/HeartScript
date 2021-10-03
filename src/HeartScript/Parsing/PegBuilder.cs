@@ -4,23 +4,22 @@ using HeartScript.Nodes;
 
 namespace HeartScript.Parsing
 {
-    public class PegBuilderContext
+    public class PegBuilder
     {
-        public Dictionary<string, Func<PegBuilderContext, INode, IPattern>> Builders { get; }
+        public Dictionary<string, Func<PegBuilder, INode, IPattern>> Builders { get; }
 
-        public PegBuilderContext()
+        public PegBuilder()
         {
-            Builders = new Dictionary<string, Func<PegBuilderContext, INode, IPattern>>();
+            Builders = new Dictionary<string, Func<PegBuilder, INode, IPattern>>();
         }
 
-        public IPattern BuildKeyPattern(INode node)
+        public IPattern BuildKeyPattern(KeyNode keyNode)
         {
-            var keyNode = (KeyNode)node;
             return Builders[keyNode.Key](this, keyNode.Node);
         }
     }
 
-    public static class PegBuilder
+    public static class PegBuilderHelper
     {
         private static readonly LexerPattern s_regex = LexerPattern.FromRegex("`(?:``|[^`])*`");
         private static readonly LexerPattern s_plainText = LexerPattern.FromRegex("'(?:''|[^'])*'");
@@ -78,9 +77,9 @@ namespace HeartScript.Parsing
             return parser;
         }
 
-        public static PegBuilderContext CreateBuilder()
+        public static PegBuilder CreateBuilder()
         {
-            var output = new PegBuilderContext();
+            var output = new PegBuilder();
 
             output.Builders["sequence"] = BuildSequence;
             output.Builders["choice"] = BuildChoice;
@@ -90,40 +89,40 @@ namespace HeartScript.Parsing
             return output;
         }
 
-        static IPattern BuildChoice(PegBuilderContext ctx, INode node)
+        static IPattern BuildChoice(PegBuilder ctx, INode node)
         {
             var minOrMoreNode = node.Children[1];
 
             if (minOrMoreNode.Children.Count == 0)
-                return ctx.BuildKeyPattern(node.Children[0]);
+                return ctx.BuildKeyPattern((KeyNode)node.Children[0]);
             else
             {
                 var output = ChoicePattern.Create()
-                   .Or(ctx.BuildKeyPattern(node.Children[0]));
+                   .Or(ctx.BuildKeyPattern((KeyNode)node.Children[0]));
 
                 foreach (var child in minOrMoreNode.Children)
                 {
-                    output.Or(ctx.BuildKeyPattern(child.Children[0]));
+                    output.Or(ctx.BuildKeyPattern((KeyNode)child.Children[0]));
                 }
 
                 return output;
             }
         }
 
-        static IPattern BuildSequence(PegBuilderContext ctx, INode node)
+        static IPattern BuildSequence(PegBuilder ctx, INode node)
         {
             var output = SequencePattern.Create();
             foreach (var child in node.Children)
             {
-                output.Then(ctx.BuildKeyPattern(child));
+                output.Then(ctx.BuildKeyPattern((KeyNode)child));
             }
 
             return output;
         }
 
-        static IPattern BuildQuantifier(PegBuilderContext ctx, INode node)
+        static IPattern BuildQuantifier(PegBuilder ctx, INode node)
         {
-            var pattern = ctx.BuildKeyPattern(node.Children[0]);
+            var pattern = ctx.BuildKeyPattern((KeyNode)node.Children[0]);
             var optional = node.Children[1];
 
             if (optional.Children.Count == 0)
@@ -139,7 +138,7 @@ namespace HeartScript.Parsing
             };
         }
 
-        static IPattern BuildTerm(PegBuilderContext ctx, INode node)
+        static IPattern BuildTerm(PegBuilder ctx, INode node)
         {
             var root = (ChoiceNode)node;
 
@@ -168,7 +167,7 @@ namespace HeartScript.Parsing
                 case 1:
                     {
                         var sequenceNode = root.Node;
-                        return ctx.BuildKeyPattern(sequenceNode.Children[1]);
+                        return ctx.BuildKeyPattern((KeyNode)sequenceNode.Children[1]);
                     }
                 case 2:
                     {
