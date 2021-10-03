@@ -1,60 +1,26 @@
-using System;
-using System.Collections.Generic;
-using HeartScript.Nodes;
-
 namespace HeartScript.Parsing
 {
-    public delegate INode BuildNode(Token token, INode? leftNode, IReadOnlyList<INode> rightNodes);
-
     public class OperatorInfo
     {
-        public LexerPattern Keyword { get; }
+        public IPattern Pattern { get; }
 
         public uint? LeftPrecedence { get; }
-        public uint RightPrecedence { get; }
-        public uint? RightOperands { get; }
-
-        public LexerPattern? Delimiter { get; }
-        public LexerPattern? Terminator { get; }
-
-        public BuildNode BuildNode { get; }
+        public uint? RightPrecedence { get; }
 
         public OperatorInfo(
-            LexerPattern keyword,
+            IPattern pattern,
             uint? leftPrecedence,
-            uint rightPrecedence,
-            uint? rightOperands,
-            LexerPattern? delimiter,
-            LexerPattern? terminator,
-            BuildNode buildNode)
+            uint? rightPrecedence)
         {
-            // Unused delimiter
-            // if (rightOperands == 0 && delimiter != null)
-            //     throw new ArgumentException(nameof(delimiter));
-
-            if (terminator != null && rightPrecedence != 0)
-                throw new ArgumentException(nameof(rightPrecedence));
-
-            Keyword = keyword;
+            Pattern = pattern;
 
             LeftPrecedence = leftPrecedence;
             RightPrecedence = rightPrecedence;
-            RightOperands = rightOperands;
-
-            Delimiter = delimiter;
-            Terminator = terminator;
-
-            BuildNode = buildNode;
         }
 
-        public NodeBuilder CreateNodeBuilder() => new NodeBuilder(this);
-
-        public bool IsNullary() => LeftPrecedence == null && RightOperands == 0;
-        public bool IsPrefix() => LeftPrecedence == null && RightOperands != 0;
-        public bool IsPostfix() => LeftPrecedence != null && RightOperands == 0;
-        public bool IsInfix() => LeftPrecedence != null && RightOperands != 0;
-
-        public bool ExpectDelimiter(int rightCount) => RightOperands == null || rightCount < RightOperands;
-        public bool ExpectTerminator(int rightCount) => RightOperands == null || rightCount == RightOperands;
+        public bool IsNullary() => LeftPrecedence == null && RightPrecedence == null;
+        public bool IsPrefix() => LeftPrecedence == null && RightPrecedence != null;
+        public bool IsPostfix() => LeftPrecedence != null && RightPrecedence == null;
+        public bool IsInfix() => LeftPrecedence != null && RightPrecedence != null;
     }
 }

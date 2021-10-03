@@ -1,9 +1,11 @@
-using HeartScript.Parsing;
+using System.Collections.Generic;
 
 namespace HeartScript.Nodes
 {
     public interface INode
     {
-        Token Token { get; }
+        string Value { get; }
+        List<INode> Children { get; }
+        int CharIndex { get; }
     }
 }

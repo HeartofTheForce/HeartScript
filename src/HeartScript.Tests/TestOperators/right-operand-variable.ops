@@ -1,17 +1,17 @@
 #Pass VariableRightOperands Delimiter Terminator
-none '{' 0 any ',' '}'
+none none '{' (expr (',' expr)*)? '}'
 
 #Pass VariableRightOperands AnyDelimiter Terminator
-none '[' 0 any any ']'
+none none '[' expr* ']'
 
 #Pass VariableRightOperands Delimiter AnyTerminator
-none '?' 0 any ':' any
+none none '?' ((expr ':')* expr)?
 
-#Fail VariableRightOperands AnyDelimiter AnyTerminator
-none '|' 0 any any any
+#Pass VariableRightOperands AnyDelimiter AnyTerminator
+none none '|' expr*
 
-#Fail VariableRightOperands SameDelimiter SameTerminator
-none '&' 0 any '*' '*'
+#Pass VariableRightOperands SameDelimiter SameTerminator
+none none '&' (expr ('*' expr)*)? '*'
 
 #Identifier
-none `[a-zA-Z]\w*` 0 0 any any
+none none `[a-zA-Z]\w*`

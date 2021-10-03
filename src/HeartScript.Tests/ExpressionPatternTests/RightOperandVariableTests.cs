@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using HeartScript.Parsing;
 using NUnit.Framework;
 
-namespace HeartScript.Tests.ExpressionParserTests
+namespace HeartScript.Tests.ExpressionPatternTests
 {
     [TestFixture]
     public class RightOperandVariableTests
@@ -65,11 +65,10 @@ namespace HeartScript.Tests.ExpressionParserTests
                 ExpectedOutput = "(? x)",
             },
             //|
-            new UnexpectedTokenTestCase()
+            new ExpressionTestCase()
             {
                 Infix = "| x y z",
-                ExpectedCharIndex = 4,
-                ExpectedPattern = "EOF",
+                ExpectedOutput = "(| x y z)",
             },
             new ExpressionTestCase()
             {
@@ -82,11 +81,10 @@ namespace HeartScript.Tests.ExpressionParserTests
                 ExpectedOutput = "(| x)",
             },
             //&*
-            new UnexpectedTokenTestCase()
+            new ExpressionTestCase()
             {
                 Infix = "& x * y * z *",
-                ExpectedCharIndex = 6,
-                ExpectedPattern = "EOF",
+                ExpectedOutput = "(& x y z)",
             },
             new ExpressionTestCase()
             {

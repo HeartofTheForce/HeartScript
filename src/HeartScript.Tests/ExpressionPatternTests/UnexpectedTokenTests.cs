@@ -1,7 +1,7 @@
 using HeartScript.Parsing;
 using NUnit.Framework;
 
-namespace HeartScript.Tests.ExpressionParserTests
+namespace HeartScript.Tests.ExpressionPatternTests
 {
     [TestFixture]
     public class UnexpectedTokenTests
@@ -84,6 +84,13 @@ namespace HeartScript.Tests.ExpressionParserTests
                 Infix = "a ? b",
                 ExpectedCharIndex = 5,
                 ExpectedPattern = ":",
+            },
+            //Empty Open Delimiter
+            new UnexpectedTokenTestCase()
+            {
+                Infix = "max( , 2, 3)",
+                ExpectedCharIndex = 5,
+                ExpectedPattern = ")",
             },
             //Too Many Operands
             new UnexpectedTokenTestCase()

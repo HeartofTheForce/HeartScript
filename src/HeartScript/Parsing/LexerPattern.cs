@@ -1,14 +1,16 @@
-﻿using System.Text.RegularExpressions;
+﻿using System;
+using System.Text.RegularExpressions;
+using HeartScript.Nodes;
 
 namespace HeartScript.Parsing
 {
-    public class LexerPattern
+    public class LexerPattern : IPattern
     {
         public Regex Regex { get; }
         public string Pattern { get; }
         public bool IsRegex { get; }
 
-        public LexerPattern(string pattern, bool isRegex)
+        private LexerPattern(string pattern, bool isRegex)
         {
             Pattern = pattern;
             IsRegex = isRegex;
@@ -22,12 +24,43 @@ namespace HeartScript.Parsing
             Regex = new Regex($"\\G({temp})");
         }
 
+        public static LexerPattern FromRegex(string pattern)
+        {
+            return new LexerPattern(pattern, true);
+        }
+
+        public static LexerPattern FromPlainText(string pattern)
+        {
+            return new LexerPattern(pattern, false);
+        }
+
         public override string ToString()
         {
             if (IsRegex)
                 return $"Regex: {Pattern}";
             else
                 return Pattern;
+        }
+
+        public INode? Match(PatternParser parser, ParserContext ctx)
+        {
+            var match = Regex.Match(ctx.Input, ctx.Offset);
+            if (match.Success)
+            {
+                if (match.Length == 0)
+                    throw new Exception($"0 length match @ {match.Index}, {this}");
+
+                var targetGroup = match.Groups[1];
+                var token = new Token(targetGroup.Value, targetGroup.Index);
+                ctx.Offset += match.Length;
+
+                return new PegNode(token.CharIndex, token.Value);
+            }
+
+            if (ctx.Exception == null || ctx.Exception.CharIndex <= ctx.Offset)
+                ctx.Exception = new UnexpectedTokenException(ctx.Offset, this);
+
+            return null;
         }
     }
 }

@@ -1,42 +1,80 @@
 using System.Collections.Generic;
-using System.Linq;
-using HeartScript.Parsing;
 
 namespace HeartScript.Nodes
 {
     public class ExpressionNode : INode
     {
-        public Token Token { get; }
+        public string Value { get; }
+        public List<INode> Children { get; }
+        public int CharIndex { get; set; }
 
-        public INode? LeftNode { get; }
-        public IEnumerable<INode> RightNodes { get; }
+        public bool HaveLeft { get; }
+        public bool HaveRight { get; }
 
-        public ExpressionNode(Token token, INode? leftNode, IEnumerable<INode> rightNodes)
+        public ExpressionNode(INode? leftNode, INode midNode, INode? rightNode)
         {
-            Token = token;
-            LeftNode = leftNode;
-            RightNodes = rightNodes;
-        }
+            Value = null;
+            Children = new List<INode>();
 
-        public static INode BuildNode(Token token, INode? leftNode, IReadOnlyList<INode> rightNodes) => new ExpressionNode(token, leftNode, rightNodes);
+            if (leftNode != null)
+            {
+                HaveLeft = true;
+                Children.Add(leftNode);
+            }
+
+            var nodeStack = new Stack<INode>();
+            nodeStack.Push(midNode);
+            while (nodeStack.Count > 0)
+            {
+                var current = nodeStack.Pop();
+                if (current is ExpressionNode expressionNode)
+                {
+                    Children.Add(expressionNode);
+                    continue;
+                }
+                else if (current.Value != null)
+                {
+                    if (Value == null)
+                        Value = current.Value;
+
+                    continue;
+                }
+
+                for (int i = current.Children.Count - 1; i >= 0; i--)
+                {
+                    nodeStack.Push(current.Children[i]);
+                }
+            }
+
+            if (rightNode != null)
+            {
+                HaveRight = true;
+                Children.Add(rightNode);
+            }
+
+            if (Children.Count > 0)
+                CharIndex = Children[0].CharIndex;
+            else
+                CharIndex = midNode.CharIndex;
+        }
 
         public override string ToString()
         {
-            string? left = LeftNode != null ? $" {LeftNode}" : null;
-            string? right = RightNodes.Any() ? $" {string.Join(' ', RightNodes)}" : null;
+            string? children = string.Join(' ', Children);
 
-            if (Token.Value == "(")
+            string op = Value;
+            if (op == "(")
             {
-                if (left == null)
-                    return string.Join(' ', RightNodes);
+                if (!HaveLeft)
+                    return children;
                 else
-                    return $"(${left}{right})";
+                    op = "$";
             }
 
-            if (left != null || right != null)
-                return $"({Token.Value}{left}{right})";
+            if (children.Length > 0)
+                return $"({op} {children})";
             else
-                return Token.Value!;
+                return Value!;
         }
     }
 }

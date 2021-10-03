@@ -9,23 +9,25 @@ namespace HeartScript.Cli
         {
             try
             {
-                var operatorInfos = OperatorInfoBuilder.Parse("./src/test.ops");
+                var operators = OperatorInfoBuilder.Parse("./src/test.ops");
 
                 string infix = string.Join(' ', args);
 
                 Console.WriteLine("Input");
                 Console.WriteLine(infix);
 
-                var lexer = new Lexer(infix);
-                var node = ExpressionParser.Parse(operatorInfos, lexer);
+                var ctx = new ParserContext(infix);
+                var node = ExpressionPattern.Parse(operators, ctx);
+
+                if (node == null && ctx.Exception != null)
+                    throw ctx.Exception;
 
                 Console.WriteLine("Output");
                 Console.WriteLine(node);
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error");
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex);
             }
         }
     }

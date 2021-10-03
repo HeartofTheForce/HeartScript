@@ -1,7 +1,7 @@
 using HeartScript.Parsing;
 using NUnit.Framework;
 
-namespace HeartScript.Tests.ExpressionParserTests
+namespace HeartScript.Tests.ExpressionPatternTests
 {
     [TestFixture]
     public class ExpressionTermTests
@@ -19,12 +19,6 @@ namespace HeartScript.Tests.ExpressionParserTests
             {
                 Infix = "max(1, ,3)",
                 ExpectedCharIndex = 7,
-            },
-            //Empty Open Delimiter
-            new ExpressionTermTestCase()
-            {
-                Infix = "max( , 2, 3)",
-                ExpectedCharIndex = 5,
             },
             //Empty Delimiter EndOfString
             new ExpressionTermTestCase()

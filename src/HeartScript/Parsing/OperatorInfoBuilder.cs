@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using HeartScript.Nodes;
 #pragma warning disable CS8600
 #pragma warning disable CS8602
 #pragma warning disable CS8604
@@ -11,11 +10,8 @@ namespace HeartScript.Parsing
 {
     public static class OperatorInfoBuilder
     {
-        private static readonly LexerPattern s_regex = new LexerPattern("`(?:``|[^`])*`", true);
-        private static readonly LexerPattern s_plainText = new LexerPattern("'(?:''|[^'])*'", true);
-        private static readonly LexerPattern s_digits = new LexerPattern("\\d+", true);
-        private static readonly LexerPattern s_none = new LexerPattern("none", false);
-        private static readonly LexerPattern s_any = new LexerPattern("any", false);
+        private static readonly LexerPattern s_digits = LexerPattern.FromRegex("\\d+");
+        private static readonly LexerPattern s_none = LexerPattern.FromPlainText("none");
 
         public static IEnumerable<OperatorInfo> Parse(string filePath)
         {
@@ -38,104 +34,44 @@ namespace HeartScript.Parsing
 
         private static OperatorInfo ParseOperatorInfo(string input, int lineNumber)
         {
-            var lexer = new Lexer(input);
-            Token current;
+            var ctx = new ParserContext(input);
+            var parser = PegBuilderHelper.CreateParser();
+            var builder = PegBuilderHelper.CreateBuilder();
 
+            var pattern = SequencePattern.Create()
+                .Then(ChoicePattern.Create()
+                    .Or(s_digits)
+                    .Or(s_none))
+                .Then(LexerPattern.FromPlainText(" "))
+                .Then(ChoicePattern.Create()
+                    .Or(s_digits)
+                    .Or(s_none))
+                .Then(LexerPattern.FromPlainText(" "))
+                .Then(KeyPattern.Create("choice"));
+
+            var result = parser.TryMatch(pattern, ctx);
+
+            if (result == null)
+                throw new Exception($"{ctx.Exception}, {lineNumber}");
+
+            var leftNode = (ChoiceNode)result.Children[0];
             uint? leftPrecedence;
-            if (lexer.TryEat(s_digits, out current))
-                leftPrecedence = uint.Parse(current.Value);
-            else if (lexer.TryEat(s_none, out current))
+            if (uint.TryParse(leftNode.Node.Value, out uint leftValue))
+                leftPrecedence = leftValue;
+            else
                 leftPrecedence = null;
+
+            var rightNode = (ChoiceNode)result.Children[2];
+            uint? rightPrecedence;
+            if (uint.TryParse(rightNode.Node.Value, out uint rightValue))
+                rightPrecedence = rightValue;
             else
-                throw new OperatorInfoBuilderException(nameof(leftPrecedence), lineNumber, lexer.Offset);
+                rightPrecedence = null;
 
-            LexerPattern keyword;
-            if (TryEatRegex(lexer, out var rKeyword))
-                keyword = rKeyword;
-            else if (TryEatPlainText(lexer, out var ptKeyword))
-                keyword = ptKeyword;
-            else
-                throw new OperatorInfoBuilderException(nameof(keyword), lineNumber, lexer.Offset);
+            var patternNode = (KeyNode)result.Children[4];
+            var operatorInfo = builder.BuildKeyPattern(patternNode);
 
-            uint rightPrecedence;
-            if (lexer.TryEat(s_digits, out current))
-                rightPrecedence = uint.Parse(current.Value);
-            else
-                throw new Exception($"{nameof(rightPrecedence)} @ {lexer.Offset}");
-
-            uint? rightOperands;
-            if (lexer.TryEat(s_digits, out current))
-                rightOperands = uint.Parse(current.Value);
-            else if (lexer.TryEat(s_any, out current))
-                rightOperands = null;
-            else
-                throw new OperatorInfoBuilderException(nameof(rightOperands), lineNumber, lexer.Offset);
-
-            LexerPattern? delimiter;
-            if (TryEatRegex(lexer, out var rDelimiter))
-                delimiter = rDelimiter;
-            else if (TryEatPlainText(lexer, out var ptDelimiter))
-                delimiter = ptDelimiter;
-            else if (lexer.TryEat(s_any, out current))
-                delimiter = null;
-            else
-                throw new OperatorInfoBuilderException(nameof(delimiter), lineNumber, lexer.Offset);
-
-            LexerPattern? terminator;
-            if (TryEatRegex(lexer, out var rTerminator))
-                terminator = rTerminator;
-            else if (TryEatPlainText(lexer, out var ptTerminator))
-                terminator = ptTerminator;
-            else if (lexer.TryEat(s_any, out current))
-                terminator = null;
-            else
-                throw new OperatorInfoBuilderException(nameof(terminator), lineNumber, lexer.Offset);
-
-            return new OperatorInfo(
-                keyword,
-                leftPrecedence,
-                rightPrecedence,
-                rightOperands,
-                delimiter,
-                terminator,
-                ExpressionNode.BuildNode);
-        }
-
-        private static bool TryEatRegex(Lexer lexer, out LexerPattern? lexerPattern)
-        {
-            bool success = lexer.TryEat(s_regex, out var current);
-
-            if (success)
-            {
-                string? pattern = current.Value[1..^1].Replace("``", "`");
-                lexerPattern = new LexerPattern(pattern, true);
-            }
-            else
-                lexerPattern = null;
-
-            return success;
-        }
-
-        private static bool TryEatPlainText(Lexer lexer, out LexerPattern? lexerPattern)
-        {
-            bool success = lexer.TryEat(s_plainText, out var current);
-
-            if (success)
-            {
-                string? pattern = current.Value[1..^1].Replace("''", "'");
-                lexerPattern = new LexerPattern(pattern, false);
-            }
-            else
-                lexerPattern = null;
-
-            return success;
-        }
-
-        private class OperatorInfoBuilderException : Exception
-        {
-            public OperatorInfoBuilderException(string fieldName, int lineNumber, int charIndex) : base($"{fieldName} expected @ {lineNumber}, {charIndex}")
-            {
-            }
+            return new OperatorInfo(operatorInfo, leftPrecedence, rightPrecedence);
         }
     }
 }
