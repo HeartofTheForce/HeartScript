@@ -20,12 +20,6 @@ namespace HeartScript.Tests.ExpressionPatternTests
                 Infix = "max(1, ,3)",
                 ExpectedCharIndex = 7,
             },
-            //Empty Open Delimiter
-            new ExpressionTermTestCase()
-            {
-                Infix = "max( , 2, 3)",
-                ExpectedCharIndex = 5,
-            },
             //Empty Delimiter EndOfString
             new ExpressionTermTestCase()
             {

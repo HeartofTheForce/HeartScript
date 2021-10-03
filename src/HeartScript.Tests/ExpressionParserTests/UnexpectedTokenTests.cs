@@ -85,6 +85,13 @@ namespace HeartScript.Tests.ExpressionPatternTests
                 ExpectedCharIndex = 5,
                 ExpectedPattern = ":",
             },
+            //Empty Open Delimiter
+            new UnexpectedTokenTestCase()
+            {
+                Infix = "max( , 2, 3)",
+                ExpectedCharIndex = 5,
+                ExpectedPattern = ")",
+            },
             //Too Many Operands
             new UnexpectedTokenTestCase()
             {
