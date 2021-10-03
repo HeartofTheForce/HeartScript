@@ -34,7 +34,6 @@ namespace HeartScript.Nodes
                 }
                 else if (current.Value != null)
                 {
-                    //TODO Refactor
                     if (Value == null)
                         Value = current.Value;
 
