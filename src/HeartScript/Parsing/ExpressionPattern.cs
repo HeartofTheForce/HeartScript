@@ -39,13 +39,18 @@ namespace HeartScript.Parsing
 
             while (true)
             {
-                var nodeBuilder = TryGetNodeBuilder(operand != null, parser, ctx);
+                var nodeBuilder = TryGetNodeBuilder(operand != null, parser, ctx, out var furthestException);
                 if (nodeBuilder == null)
                 {
+                    if (furthestException != null && ctx.Offset < furthestException.CharIndex)
+                        return PatternResult.Error(furthestException);
+
                     while (nodeBuilders.Count > 0)
                     {
-                        if (!TryReduce(ref operand, nodeBuilders))
-                            throw new Exception($"{nameof(NodeBuilder)} is incomplete");
+                        if (operand == null)
+                            return PatternResult.Error(new ExpressionTermException(ctx.Offset));
+
+                        operand = nodeBuilders.Pop().FeedOperandRight(operand);
                     }
 
                     if (operand != null)
@@ -56,8 +61,10 @@ namespace HeartScript.Parsing
 
                 while (nodeBuilders.TryPeek(out var left) && left.IsEvaluatedBefore(nodeBuilder))
                 {
-                    if (!TryReduce(ref operand, nodeBuilders))
-                        throw new Exception($"{nameof(NodeBuilder)} is incomplete");
+                    if (operand == null)
+                        return PatternResult.Error(new ExpressionTermException(ctx.Offset));
+
+                    operand = nodeBuilders.Pop().FeedOperandRight(operand);
                 }
 
                 operand = nodeBuilder.FeedOperandLeft(operand);
@@ -66,8 +73,10 @@ namespace HeartScript.Parsing
             }
         }
 
-        private NodeBuilder? TryGetNodeBuilder(bool haveOperand, PatternParser parser, ParserContext ctx)
+        private NodeBuilder? TryGetNodeBuilder(bool haveOperand, PatternParser parser, ParserContext ctx, out PatternException? furthestException)
         {
+            furthestException = null;
+
             OperatorInfo? op = null;
             INode? midNode = null;
             foreach (var x in _patterns)
@@ -88,26 +97,18 @@ namespace HeartScript.Parsing
                     midNode = result.Node;
                     break;
                 }
+
+                if (result.Exception != null)
+                {
+                    if (furthestException == null || result.Exception.CharIndex > furthestException.CharIndex)
+                        furthestException = result.Exception;
+                }
             }
 
             if (op == null || midNode == null)
                 return null;
 
             return new NodeBuilder(op, midNode);
-        }
-
-        private bool TryReduce(ref INode? operand, Stack<NodeBuilder> nodeBuilders)
-        {
-            var nodeBuilder = nodeBuilders.Pop();
-            operand = nodeBuilder.FeedOperandRight(operand);
-
-            if (operand == null)
-            {
-                nodeBuilders.Push(nodeBuilder);
-                return false;
-            }
-
-            return true;
         }
     }
 
@@ -140,10 +141,10 @@ namespace HeartScript.Parsing
             return TryCompleteNode();
         }
 
-        public INode? FeedOperandRight(INode? rightNode)
+        public INode FeedOperandRight(INode rightNode)
         {
             _rightNode = rightNode;
-            return TryCompleteNode();
+            return TryCompleteNode() ?? throw new Exception($"{nameof(NodeBuilder)} is incomplete");
         }
 
         private INode? TryCompleteNode()

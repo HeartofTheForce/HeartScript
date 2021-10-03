@@ -85,8 +85,11 @@ namespace HeartScript.Parsing
                 if (result.Node != null)
                     return PatternResult.Success(new ChoiceNode(i, result.Node));
 
-                if (furthestResult == null || result.Exception.CharIndex > furthestResult.Exception.CharIndex)
-                    furthestResult = result;
+                if (result.Exception != null)
+                {
+                    if (furthestResult?.Exception == null || result.Exception.CharIndex > furthestResult.Exception.CharIndex)
+                        furthestResult = result;
+                }
             }
 
             return furthestResult!;
