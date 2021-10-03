@@ -54,10 +54,10 @@ namespace HeartScript.Parsing
                 var token = new Token(targetGroup.Value, targetGroup.Index);
                 ctx.Offset += match.Length;
 
-                return PatternResult.Success(token.CharIndex, new PegNode(token.Value));
+                return PatternResult.Success(new PegNode(token.CharIndex, token.Value));
             }
 
-            return PatternResult.Error(ctx.Offset, $"Expected match @ {ctx.Offset}, {this}");
+            return PatternResult.Error(new UnexpectedTokenException(ctx.Offset, this));
         }
     }
 }

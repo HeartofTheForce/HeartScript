@@ -21,13 +21,13 @@ namespace HeartScript.Parsing
             parser.Patterns["expr"] = expressionPattern;
             var result = parser.TryMatch(expressionPattern, ctx);
 
-            if (result.Value == null)
-                throw new Exception(result.ErrorMessage);
+            if (result.Exception != null)
+                throw result.Exception;
 
             if (!ctx.IsEOF)
                 throw new UnexpectedTokenException(ctx.Offset, "EOF");
 
-            return result.Value;
+            return result.Node;
         }
 
         public PatternResult Match(PatternParser parser, ParserContext ctx)
@@ -49,9 +49,9 @@ namespace HeartScript.Parsing
                     }
 
                     if (operand != null)
-                        return PatternResult.Success(startIndex, operand);
+                        return PatternResult.Success(operand);
                     else
-                        return PatternResult.Error(startIndex, "Expected expression");
+                        return PatternResult.Error(new ExpressionTermException(startIndex));
                 }
 
                 while (nodeBuilders.TryPeek(out var left) && left.IsEvaluatedBefore(nodeBuilder))
@@ -82,10 +82,10 @@ namespace HeartScript.Parsing
                     continue;
 
                 var result = parser.TryMatch(x.Pattern, ctx);
-                if (result.Value != null)
+                if (result.Node != null)
                 {
                     op = x;
-                    midNode = result.Value;
+                    midNode = result.Node;
                     break;
                 }
             }

@@ -6,23 +6,27 @@ namespace HeartScript.Nodes
     {
         public string Value { get; }
         public List<INode> Children { get; }
+        public int CharIndex { get; set; }
 
-        public PegNode(List<INode> children)
+        public PegNode(int charIndex, List<INode> children)
         {
             Value = null;
             Children = children;
+            CharIndex = charIndex;
         }
 
         public PegNode(INode child)
         {
             Value = null;
             Children = new List<INode> { child };
+            CharIndex = Children[0].CharIndex;
         }
 
-        public PegNode(string value)
+        public PegNode(int charIndex, string value)
         {
             Value = value;
             Children = null;
+            CharIndex = charIndex;
         }
 
         public override string ToString()

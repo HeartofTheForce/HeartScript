@@ -50,24 +50,24 @@ namespace HeartScript.Parsing
 
             var result = parser.TryMatch(pattern, ctx);
 
-            if (result.ErrorMessage != null)
-                throw new Exception($"{result.ErrorMessage}, {lineNumber}");
+            if (result.Exception != null)
+                throw new Exception($"{result.Exception}, {lineNumber}");
 
-            var leftNode = (ChoiceNode)result.Value.Children[0];
+            var leftNode = (ChoiceNode)result.Node.Children[0];
             uint? leftPrecedence;
-            if (uint.TryParse(leftNode.ChoiceValue.Value, out uint leftValue))
+            if (uint.TryParse(leftNode.Node.Value, out uint leftValue))
                 leftPrecedence = leftValue;
             else
                 leftPrecedence = null;
 
-            var rightNode = (ChoiceNode)result.Value.Children[2];
+            var rightNode = (ChoiceNode)result.Node.Children[2];
             uint? rightPrecedence;
-            if (uint.TryParse(rightNode.ChoiceValue.Value, out uint rightValue))
+            if (uint.TryParse(rightNode.Node.Value, out uint rightValue))
                 rightPrecedence = rightValue;
             else
                 rightPrecedence = null;
 
-            var patternNode = (KeyNode)result.Value.Children[4];
+            var patternNode = (KeyNode)result.Node.Children[4];
             var builderCtx = PegBuilder.CreateBuilder();
             var operatorInfo = builderCtx.BuildKeyPattern(patternNode);
 

@@ -6,5 +6,6 @@ namespace HeartScript.Nodes
     {
         string Value { get; }
         List<INode> Children { get; }
+        int CharIndex { get; }
     }
 }

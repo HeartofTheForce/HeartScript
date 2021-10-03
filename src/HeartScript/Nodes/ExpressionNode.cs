@@ -1,6 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
-using HeartScript.Parsing;
 
 namespace HeartScript.Nodes
 {
@@ -8,17 +6,10 @@ namespace HeartScript.Nodes
     {
         public string Value { get; }
         public List<INode> Children { get; }
+        public int CharIndex { get; set; }
 
         public bool HaveLeft { get; }
         public bool HaveRight { get; }
-
-        public ExpressionNode(string value)
-        {
-            Value = value;
-            Children = null;
-            HaveLeft = false;
-            HaveRight = false;
-        }
 
         public ExpressionNode(INode? leftNode, INode midNode, INode? rightNode)
         {
@@ -61,6 +52,11 @@ namespace HeartScript.Nodes
                 HaveRight = true;
                 Children.Add(rightNode);
             }
+
+            if (Children.Count > 0)
+                CharIndex = Children[0].CharIndex;
+            else
+                CharIndex = midNode.CharIndex;
         }
 
         public override string ToString()

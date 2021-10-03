@@ -16,7 +16,7 @@ namespace HeartScript.Parsing
         public IPattern BuildKeyPattern(INode node)
         {
             var keyNode = (KeyNode)node;
-            return Builders[keyNode.Key](this, keyNode.KeyValue);
+            return Builders[keyNode.Key](this, keyNode.Node);
         }
     }
 
@@ -147,8 +147,8 @@ namespace HeartScript.Parsing
             {
                 case 0:
                     {
-                        var choiceNode = (ChoiceNode)root.ChoiceValue;
-                        var terminalNode = choiceNode.ChoiceValue.Children[0];
+                        var choiceNode = (ChoiceNode)root.Node;
+                        var terminalNode = choiceNode.Node.Children[0];
 
                         switch (choiceNode.ChoiceIndex)
                         {
@@ -167,12 +167,12 @@ namespace HeartScript.Parsing
                     };
                 case 1:
                     {
-                        var sequenceNode = root.ChoiceValue;
+                        var sequenceNode = root.Node;
                         return ctx.BuildKeyPattern(sequenceNode.Children[1]);
                     }
                 case 2:
                     {
-                        var terminalNode = root.ChoiceValue.Children[0];
+                        var terminalNode = root.Node.Children[0];
                         return KeyPattern.Create(terminalNode.Value);
                     }
                 default: throw new Exception();

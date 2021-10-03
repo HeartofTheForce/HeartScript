@@ -33,23 +33,23 @@ namespace HeartScript.Parsing
             {
                 var result = parser.TryMatch(pattern, ctx);
 
-                if (result.ErrorMessage != null)
+                if (result.Exception != null)
                     return result;
 
-                if (result.Value != null)
-                    output.Add(result.Value);
+                if (result.Node != null)
+                    output.Add(result.Node);
             }
 
-            return PatternResult.Success(startIndex, new PegNode(output));
+            return PatternResult.Success(new PegNode(startIndex, output));
         }
     }
 
     public class ChoiceNode : PegNode
     {
         public int ChoiceIndex { get; }
-        public INode ChoiceValue => Children[0];
+        public INode Node => Children[0];
 
-        public ChoiceNode(int choiceIndex, INode choiceValue) : base(choiceValue)
+        public ChoiceNode(int choiceIndex, INode node) : base(node)
         {
             ChoiceIndex = choiceIndex;
         }
@@ -82,10 +82,10 @@ namespace HeartScript.Parsing
             {
                 var result = parser.TryMatch(_patterns[i], ctx);
 
-                if (result.Value != null)
-                    return PatternResult.Success(result.CharIndex, new ChoiceNode(i, result.Value));
+                if (result.Node != null)
+                    return PatternResult.Success(new ChoiceNode(i, result.Node));
 
-                if (furthestResult == null || result.CharIndex > furthestResult.CharIndex)
+                if (furthestResult == null || result.Exception.CharIndex > furthestResult.Exception.CharIndex)
                     furthestResult = result;
             }
 
@@ -129,15 +129,15 @@ namespace HeartScript.Parsing
             {
                 result = parser.TryMatch(_pattern, ctx);
 
-                if (result.ErrorMessage != null)
+                if (result.Exception != null)
                     break;
 
-                if (result.Value != null)
-                    output.Add(result.Value);
+                if (result.Node != null)
+                    output.Add(result.Node);
             }
 
             if (output.Count >= _min)
-                return PatternResult.Success(startIndex, new PegNode(output));
+                return PatternResult.Success(new PegNode(startIndex, output));
             else if (result != null)
                 return result;
             else
@@ -148,9 +148,9 @@ namespace HeartScript.Parsing
     public class KeyNode : PegNode
     {
         public string Key { get; }
-        public INode KeyValue => Children[0];
+        public INode Node => Children[0];
 
-        public KeyNode(string key, INode keyValue) : base(keyValue)
+        public KeyNode(string key, INode node) : base(node)
         {
             Key = key;
         }
@@ -173,11 +173,11 @@ namespace HeartScript.Parsing
         public PatternResult Match(PatternParser parser, ParserContext ctx)
         {
             var result = parser.TryMatch(parser.Patterns[_key], ctx);
-            if (result.ErrorMessage != null)
+            if (result.Exception != null)
                 return result;
 
-            if (result.Value != null)
-                return PatternResult.Success(result.CharIndex, new KeyNode(_key, result.Value));
+            if (result.Node != null)
+                return PatternResult.Success(new KeyNode(_key, result.Node));
 
             throw new Exception();
         }

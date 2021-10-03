@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using HeartScript.Nodes;
 
@@ -17,7 +18,7 @@ namespace HeartScript.Parsing
             int startIndex = ctx.Offset;
 
             var result = pattern.Match(this, ctx);
-            if (result.ErrorMessage != null)
+            if (result.Exception != null)
                 ctx.Offset = startIndex;
 
             return result;
@@ -44,26 +45,33 @@ namespace HeartScript.Parsing
 
     public class PatternResult
     {
-        public int CharIndex { get; private set; }
-        public INode? Value { get; private set; }
-        public string? ErrorMessage { get; private set; }
+        public INode? Node { get; private set; }
+        public PatternException? Exception { get; private set; }
 
-        public static PatternResult Success(int charIndex, INode value)
+        public static PatternResult Success(INode node)
         {
             return new PatternResult()
             {
-                CharIndex = charIndex,
-                Value = value,
+                Node = node,
             };
         }
 
-        public static PatternResult Error(int charIndex, string message)
+        public static PatternResult Error(PatternException exception)
         {
             return new PatternResult()
             {
-                CharIndex = charIndex,
-                ErrorMessage = message,
+                Exception = exception,
             };
+        }
+    }
+
+    public abstract class PatternException : Exception
+    {
+        public int CharIndex { get; }
+
+        public PatternException(int charIndex, string message) : base(message)
+        {
+            CharIndex = charIndex;
         }
     }
 }
