@@ -19,13 +19,15 @@ namespace HeartScript.Cli
                 var ctx = new ParserContext(infix);
                 var node = ExpressionPattern.Parse(operators, ctx);
 
+                if (node == null && ctx.Exception != null)
+                    throw ctx.Exception;
+
                 Console.WriteLine("Output");
                 Console.WriteLine(node);
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error");
-                Console.WriteLine(ex.StackTrace);
+                Console.WriteLine(ex);
             }
         }
     }
