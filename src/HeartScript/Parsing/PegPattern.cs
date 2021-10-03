@@ -29,7 +29,6 @@ namespace HeartScript.Parsing
             int startIndex = 0;
 
             var output = new List<INode>();
-            PatternResult? furthestResult = null;
             foreach (var pattern in _patterns)
             {
                 var result = parser.TryMatch(pattern, ctx);
@@ -37,18 +36,7 @@ namespace HeartScript.Parsing
                 if (result.Node != null)
                     output.Add(result.Node);
                 else
-                {
-                    if (furthestResult?.Exception != null && furthestResult.Exception.CharIndex > result.Exception?.CharIndex)
-                        return furthestResult;
-
                     return result;
-                }
-
-                if (result.Exception != null)
-                {
-                    if (furthestResult?.Exception == null || result.Exception.CharIndex > furthestResult.Exception.CharIndex)
-                        furthestResult = result;
-                }
             }
 
             return PatternResult.Success(new PegNode(startIndex, output));
@@ -103,7 +91,7 @@ namespace HeartScript.Parsing
                 }
             }
 
-            return furthestResult!;
+            return furthestResult;
         }
     }
 
