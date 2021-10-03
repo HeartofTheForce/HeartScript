@@ -1,15 +1,13 @@
-using HeartScript.Nodes;
-
 namespace HeartScript.Parsing
 {
-    public class OperatorPattern
+    public class OperatorInfo
     {
         public IPattern Pattern { get; }
 
         public uint? LeftPrecedence { get; }
         public uint? RightPrecedence { get; }
 
-        public OperatorPattern(
+        public OperatorInfo(
             IPattern pattern,
             uint? leftPrecedence,
             uint? rightPrecedence)

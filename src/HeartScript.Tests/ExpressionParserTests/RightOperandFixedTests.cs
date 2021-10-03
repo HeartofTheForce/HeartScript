@@ -7,11 +7,11 @@ namespace HeartScript.Tests.ExpressionPatternTests
     [TestFixture]
     public class RightOperandFixedTests
     {
-        private static readonly IEnumerable<OperatorPattern> s_testOperators;
+        private static readonly IEnumerable<OperatorInfo> s_testOperators;
 
         static RightOperandFixedTests()
         {
-            s_testOperators = OperatorPatternBuilder.Parse("./TestOperators/right-operand-fixed.ops");
+            s_testOperators = OperatorInfoBuilder.Parse("./TestOperators/right-operand-fixed.ops");
         }
 
         static readonly IExpressionTestCase[] s_testCases = new IExpressionTestCase[]

@@ -9,7 +9,7 @@ namespace HeartScript.Cli
         {
             try
             {
-                var operatorPatterns = OperatorPatternBuilder.Parse("./src/test.ops");
+                var operators = OperatorInfoBuilder.Parse("./src/test.ops");
 
                 string infix = string.Join(' ', args);
 
@@ -17,7 +17,7 @@ namespace HeartScript.Cli
                 Console.WriteLine(infix);
 
                 var ctx = new ParserContext(infix);
-                var node = ExpressionPattern.Parse(operatorPatterns, ctx);
+                var node = ExpressionPattern.Parse(operators, ctx);
 
                 Console.WriteLine("Output");
                 Console.WriteLine(node);

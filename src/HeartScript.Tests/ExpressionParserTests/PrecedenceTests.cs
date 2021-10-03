@@ -7,11 +7,11 @@ namespace HeartScript.Tests.ExpressionPatternTests
     [TestFixture]
     public class PrecedenceTests
     {
-        private static readonly IEnumerable<OperatorPattern> s_testOperators;
+        private static readonly IEnumerable<OperatorInfo> s_testOperators;
 
         static PrecedenceTests()
         {
-            s_testOperators = OperatorPatternBuilder.Parse("./TestOperators/precedence.ops");
+            s_testOperators = OperatorInfoBuilder.Parse("./TestOperators/precedence.ops");
         }
 
         static readonly ExpressionTestCase[] s_testCases = new ExpressionTestCase[]

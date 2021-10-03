@@ -8,16 +8,16 @@ using System.IO;
 
 namespace HeartScript.Parsing
 {
-    public static class OperatorPatternBuilder
+    public static class OperatorInfoBuilder
     {
         private static readonly LexerPattern s_digits = LexerPattern.FromRegex("\\d+");
         private static readonly LexerPattern s_none = LexerPattern.FromPlainText("none");
 
-        public static IEnumerable<OperatorPattern> Parse(string filePath)
+        public static IEnumerable<OperatorInfo> Parse(string filePath)
         {
             string[] lines = File.ReadAllLines(filePath);
 
-            var output = new List<OperatorPattern>();
+            var output = new List<OperatorInfo>();
 
             for (int i = 0; i < lines.Length; i++)
             {
@@ -25,16 +25,16 @@ namespace HeartScript.Parsing
                 if (string.IsNullOrWhiteSpace(line) || line.StartsWith('#'))
                     continue;
 
-                var operatorPattern = ParseOperatorPattern(line, i);
-                output.Add(operatorPattern);
+                var operatorInfo = ParseOperatorInfo(line, i);
+                output.Add(operatorInfo);
             }
 
             return output;
         }
 
-        private static OperatorPattern ParseOperatorPattern(string input, int lineNumber)
+        private static OperatorInfo ParseOperatorInfo(string input, int lineNumber)
         {
-            var parser = OperatorPatternPegBuilder.CreateParser();
+            var parser = OperatorInfoPegBuilder.CreateParser();
             var ctx = new ParserContext(input);
 
             var pattern = SequencePattern.Create()
@@ -68,10 +68,10 @@ namespace HeartScript.Parsing
                 rightPrecedence = null;
 
             var patternNode = (KeyNode)result.Value.Children[4];
-            var builderCtx = OperatorPatternPegBuilder.CreateBuilder();
-            var operatorPattern = builderCtx.BuildKeyPattern(patternNode);
+            var builderCtx = OperatorInfoPegBuilder.CreateBuilder();
+            var operatorInfo = builderCtx.BuildKeyPattern(patternNode);
 
-            return new OperatorPattern(operatorPattern, leftPrecedence, rightPrecedence);
+            return new OperatorInfo(operatorInfo, leftPrecedence, rightPrecedence);
         }
     }
 }

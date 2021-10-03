@@ -6,14 +6,14 @@ namespace HeartScript.Parsing
 {
     public class ExpressionPattern : IPattern
     {
-        private readonly IEnumerable<OperatorPattern> _patterns;
+        private readonly IEnumerable<OperatorInfo> _patterns;
 
-        public ExpressionPattern(IEnumerable<OperatorPattern> patterns)
+        public ExpressionPattern(IEnumerable<OperatorInfo> patterns)
         {
             _patterns = patterns;
         }
 
-        public static INode Parse(IEnumerable<OperatorPattern> patterns, ParserContext ctx)
+        public static INode Parse(IEnumerable<OperatorInfo> patterns, ParserContext ctx)
         {
             var expressionPattern = new ExpressionPattern(patterns);
 
@@ -68,7 +68,7 @@ namespace HeartScript.Parsing
 
         private NodeBuilder? TryGetNodeBuilder(bool haveOperand, PatternParser parser, ParserContext ctx)
         {
-            OperatorPattern? op = null;
+            OperatorInfo? op = null;
             INode? midNode = null;
             foreach (var x in _patterns)
             {
@@ -113,25 +113,25 @@ namespace HeartScript.Parsing
 
     public class NodeBuilder
     {
-        private readonly OperatorPattern _operatorPattern;
+        private readonly OperatorInfo _operatorInfo;
         private readonly INode _midNode;
         private INode? _leftNode;
         private INode? _rightNode;
 
-        public NodeBuilder(OperatorPattern operatorPattern, INode midNode)
+        public NodeBuilder(OperatorInfo operatorInfo, INode midNode)
         {
-            _operatorPattern = operatorPattern;
+            _operatorInfo = operatorInfo;
             _midNode = midNode;
         }
 
         public bool IsEvaluatedBefore(NodeBuilder right)
         {
-            // if (_operatorPattern.RightPrecedence == null || right.LeftPrecedence == null)
-            //     return _operatorPattern.RightPrecedence == null;
-            if (_operatorPattern.RightPrecedence == null)
+            // if (_operatorInfo.RightPrecedence == null || right.LeftPrecedence == null)
+            //     return _operatorInfo.RightPrecedence == null;
+            if (_operatorInfo.RightPrecedence == null)
                 return true;
 
-            return _operatorPattern.RightPrecedence <= right._operatorPattern.LeftPrecedence;
+            return _operatorInfo.RightPrecedence <= right._operatorInfo.LeftPrecedence;
         }
 
         public INode? FeedOperandLeft(INode? leftNode)
@@ -149,12 +149,12 @@ namespace HeartScript.Parsing
         private INode? TryCompleteNode()
         {
             bool haveLeft = _leftNode != null;
-            bool expectLeft = _operatorPattern.LeftPrecedence != null;
+            bool expectLeft = _operatorInfo.LeftPrecedence != null;
             if (haveLeft != expectLeft)
                 return null;
 
             bool haveRight = _rightNode != null;
-            bool expectRight = _operatorPattern.RightPrecedence != null;
+            bool expectRight = _operatorInfo.RightPrecedence != null;
             if (haveRight != expectRight)
                 return null;
 
