@@ -150,7 +150,7 @@ namespace HeartScript.Parsing
             }
 
             if (output.Count >= _min)
-                return PatternResult.Success(new PegNode(startIndex, output), result?.Exception);
+                return PatternResult.Success(new PegNode(startIndex, output));
             else if (result != null)
                 return result;
 

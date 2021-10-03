@@ -56,15 +56,6 @@ namespace HeartScript.Parsing
             };
         }
 
-        public static PatternResult Success(INode node, PatternException? exception)
-        {
-            return new PatternResult()
-            {
-                Node = node,
-                Exception = exception,
-            };
-        }
-
         public static PatternResult Error(PatternException exception)
         {
             return new PatternResult()
