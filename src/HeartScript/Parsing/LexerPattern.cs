@@ -42,7 +42,7 @@ namespace HeartScript.Parsing
                 return Pattern;
         }
 
-        public PatternResult Match(PatternParser parser, ParserContext ctx)
+        public INode? Match(PatternParser parser, ParserContext ctx)
         {
             var match = Regex.Match(ctx.Input, ctx.Offset);
             if (match.Success)
@@ -54,10 +54,13 @@ namespace HeartScript.Parsing
                 var token = new Token(targetGroup.Value, targetGroup.Index);
                 ctx.Offset += match.Length;
 
-                return PatternResult.Success(new PegNode(token.CharIndex, token.Value));
+                return new PegNode(token.CharIndex, token.Value);
             }
 
-            return PatternResult.Error(new UnexpectedTokenException(ctx.Offset, this));
+            if (ctx.Exception == null || ctx.Exception.CharIndex <= ctx.Offset)
+                ctx.Exception = new UnexpectedTokenException(ctx.Offset, this);
+
+            return null;
         }
     }
 }

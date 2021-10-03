@@ -21,16 +21,16 @@ namespace HeartScript.Parsing
             parser.Patterns["expr"] = expressionPattern;
             var result = parser.TryMatch(expressionPattern, ctx);
 
-            if (result.Exception != null)
-                throw result.Exception;
+            if (result == null)
+                throw ctx.Exception;
 
             if (!ctx.IsEOF)
                 throw new UnexpectedTokenException(ctx.Offset, "EOF");
 
-            return result.Node;
+            return result;
         }
 
-        public PatternResult Match(PatternParser parser, ParserContext ctx)
+        public INode? Match(PatternParser parser, ParserContext ctx)
         {
             int startIndex = ctx.Offset;
 
@@ -39,30 +39,38 @@ namespace HeartScript.Parsing
 
             while (true)
             {
-                var nodeBuilder = TryGetNodeBuilder(operand != null, parser, ctx, out var furthestException);
+                var nodeBuilder = TryGetNodeBuilder(operand != null, parser, ctx);
                 if (nodeBuilder == null)
                 {
-                    if (furthestException != null && ctx.Offset < furthestException.CharIndex)
-                        return PatternResult.Error(furthestException);
+                    if (ctx.Exception != null && ctx.Offset < ctx.Exception.CharIndex)
+                        return null;
 
                     while (nodeBuilders.Count > 0)
                     {
                         if (operand == null)
-                            return PatternResult.Error(new ExpressionTermException(ctx.Offset));
+                        {
+                            ctx.Exception = new ExpressionTermException(ctx.Offset);
+                            return null;
+                        }
 
                         operand = nodeBuilders.Pop().FeedOperandRight(operand);
                     }
 
                     if (operand != null)
-                        return PatternResult.Success(operand);
-                    else
-                        return PatternResult.Error(new ExpressionTermException(startIndex));
+                        return operand;
+
+                    ctx.Exception = new ExpressionTermException(startIndex);
+                    return null;
+
                 }
 
                 while (nodeBuilders.TryPeek(out var left) && left.IsEvaluatedBefore(nodeBuilder))
                 {
                     if (operand == null)
-                        return PatternResult.Error(new ExpressionTermException(ctx.Offset));
+                    {
+                        ctx.Exception = new ExpressionTermException(ctx.Offset);
+                        return null;
+                    }
 
                     operand = nodeBuilders.Pop().FeedOperandRight(operand);
                 }
@@ -73,12 +81,8 @@ namespace HeartScript.Parsing
             }
         }
 
-        private NodeBuilder? TryGetNodeBuilder(bool haveOperand, PatternParser parser, ParserContext ctx, out PatternException? furthestException)
+        private NodeBuilder? TryGetNodeBuilder(bool haveOperand, PatternParser parser, ParserContext ctx)
         {
-            furthestException = null;
-
-            OperatorInfo? op = null;
-            INode? midNode = null;
             foreach (var x in _patterns)
             {
                 bool valid;
@@ -91,24 +95,12 @@ namespace HeartScript.Parsing
                     continue;
 
                 var result = parser.TryMatch(x.Pattern, ctx);
-                if (result.Node != null)
-                {
-                    op = x;
-                    midNode = result.Node;
-                    break;
-                }
-
-                if (result.Exception != null)
-                {
-                    if (furthestException == null || result.Exception.CharIndex > furthestException.CharIndex)
-                        furthestException = result.Exception;
-                }
+                if (result != null)
+                    return new NodeBuilder(x, result);
             }
 
-            if (op == null || midNode == null)
-                return null;
+            return null;
 
-            return new NodeBuilder(op, midNode);
         }
     }
 

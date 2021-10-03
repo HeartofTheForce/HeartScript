@@ -13,12 +13,12 @@ namespace HeartScript.Parsing
             Patterns = new Dictionary<string, IPattern>();
         }
 
-        public PatternResult TryMatch(IPattern pattern, ParserContext ctx)
+        public INode? TryMatch(IPattern pattern, ParserContext ctx)
         {
             int startIndex = ctx.Offset;
 
             var result = pattern.Match(this, ctx);
-            if (result.Node == null)
+            if (result == null)
                 ctx.Offset = startIndex;
 
             return result;
@@ -29,40 +29,20 @@ namespace HeartScript.Parsing
     {
         public string Input { get; }
         public int Offset { get; set; }
+        public PatternException? Exception { get; set; }
         public bool IsEOF => Offset == Input.Length;
 
         public ParserContext(string input)
         {
             Input = input;
             Offset = 0;
+            Exception = null;
         }
     }
 
     public interface IPattern
     {
-        PatternResult Match(PatternParser parser, ParserContext ctx);
-    }
-
-    public class PatternResult
-    {
-        public INode? Node { get; private set; }
-        public PatternException? Exception { get; private set; }
-
-        public static PatternResult Success(INode node)
-        {
-            return new PatternResult()
-            {
-                Node = node,
-            };
-        }
-
-        public static PatternResult Error(PatternException exception)
-        {
-            return new PatternResult()
-            {
-                Exception = exception,
-            };
-        }
+        INode? Match(PatternParser parser, ParserContext ctx);
     }
 
     public abstract class PatternException : Exception

@@ -24,7 +24,7 @@ namespace HeartScript.Parsing
             return this;
         }
 
-        public PatternResult Match(PatternParser parser, ParserContext ctx)
+        public INode? Match(PatternParser parser, ParserContext ctx)
         {
             int startIndex = 0;
 
@@ -33,13 +33,13 @@ namespace HeartScript.Parsing
             {
                 var result = parser.TryMatch(pattern, ctx);
 
-                if (result.Node != null)
-                    output.Add(result.Node);
+                if (result != null)
+                    output.Add(result);
                 else
-                    return result;
+                    return null;
             }
 
-            return PatternResult.Success(new PegNode(startIndex, output));
+            return new PegNode(startIndex, output);
         }
     }
 
@@ -74,24 +74,17 @@ namespace HeartScript.Parsing
             return this;
         }
 
-        public PatternResult Match(PatternParser parser, ParserContext ctx)
+        public INode? Match(PatternParser parser, ParserContext ctx)
         {
-            PatternResult? furthestResult = null;
             for (int i = 0; i < _patterns.Count; i++)
             {
                 var result = parser.TryMatch(_patterns[i], ctx);
 
-                if (result.Node != null)
-                    return PatternResult.Success(new ChoiceNode(i, result.Node));
-
-                if (result.Exception != null)
-                {
-                    if (furthestResult?.Exception == null || result.Exception.CharIndex > furthestResult.Exception.CharIndex)
-                        furthestResult = result;
-                }
+                if (result != null)
+                    return new ChoiceNode(i, result);
             }
 
-            return furthestResult;
+            return null;
         }
     }
 
@@ -121,28 +114,25 @@ namespace HeartScript.Parsing
             return new QuantifierPattern(0, 1, pattern);
         }
 
-        public PatternResult Match(PatternParser parser, ParserContext ctx)
+        public INode? Match(PatternParser parser, ParserContext ctx)
         {
             int startIndex = ctx.Offset;
 
-            PatternResult? result = null;
             var output = new List<INode>();
             while (_max == null || output.Count < _max)
             {
-                result = parser.TryMatch(_pattern, ctx);
+                var result = parser.TryMatch(_pattern, ctx);
 
-                if (result.Node != null)
-                    output.Add(result.Node);
+                if (result != null)
+                    output.Add(result);
                 else
                     break;
             }
 
             if (output.Count >= _min)
-                return PatternResult.Success(new PegNode(startIndex, output));
-            else if (result != null)
-                return result;
-
-            throw new Exception();
+                return new PegNode(startIndex, output);
+            else
+                return null;
         }
     }
 
@@ -171,16 +161,14 @@ namespace HeartScript.Parsing
             return new KeyPattern(key);
         }
 
-        public PatternResult Match(PatternParser parser, ParserContext ctx)
+        public INode? Match(PatternParser parser, ParserContext ctx)
         {
             var result = parser.TryMatch(parser.Patterns[_key], ctx);
 
-            if (result.Node != null)
-                return PatternResult.Success(new KeyNode(_key, result.Node));
+            if (result != null)
+                return new KeyNode(_key, result);
             else
-                return result;
-
-            throw new Exception();
+                return null;
         }
     }
 }
