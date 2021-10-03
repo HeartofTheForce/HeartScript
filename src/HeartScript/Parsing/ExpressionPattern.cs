@@ -100,7 +100,6 @@ namespace HeartScript.Parsing
             }
 
             return null;
-
         }
     }
 
