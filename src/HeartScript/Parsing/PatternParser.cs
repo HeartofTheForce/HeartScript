@@ -18,7 +18,7 @@ namespace HeartScript.Parsing
             int startIndex = ctx.Offset;
 
             var result = pattern.Match(this, ctx);
-            if (result.Exception != null)
+            if (result.Node == null)
                 ctx.Offset = startIndex;
 
             return result;
@@ -53,6 +53,15 @@ namespace HeartScript.Parsing
             return new PatternResult()
             {
                 Node = node,
+            };
+        }
+
+        public static PatternResult Success(INode node, PatternException? exception)
+        {
+            return new PatternResult()
+            {
+                Node = node,
+                Exception = exception,
             };
         }
 

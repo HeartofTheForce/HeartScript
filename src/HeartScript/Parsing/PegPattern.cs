@@ -29,15 +29,26 @@ namespace HeartScript.Parsing
             int startIndex = 0;
 
             var output = new List<INode>();
+            PatternResult? furthestResult = null;
             foreach (var pattern in _patterns)
             {
                 var result = parser.TryMatch(pattern, ctx);
 
-                if (result.Exception != null)
-                    return result;
-
                 if (result.Node != null)
                     output.Add(result.Node);
+                else
+                {
+                    if (furthestResult?.Exception != null && furthestResult.Exception.CharIndex > result.Exception?.CharIndex)
+                        return furthestResult;
+
+                    return result;
+                }
+
+                if (result.Exception != null)
+                {
+                    if (furthestResult?.Exception == null || result.Exception.CharIndex > furthestResult.Exception.CharIndex)
+                        furthestResult = result;
+                }
             }
 
             return PatternResult.Success(new PegNode(startIndex, output));
@@ -132,19 +143,18 @@ namespace HeartScript.Parsing
             {
                 result = parser.TryMatch(_pattern, ctx);
 
-                if (result.Exception != null)
-                    break;
-
                 if (result.Node != null)
                     output.Add(result.Node);
+                else
+                    break;
             }
 
             if (output.Count >= _min)
-                return PatternResult.Success(new PegNode(startIndex, output));
+                return PatternResult.Success(new PegNode(startIndex, output), result?.Exception);
             else if (result != null)
                 return result;
-            else
-                throw new Exception();
+
+            throw new Exception();
         }
     }
 
@@ -176,11 +186,11 @@ namespace HeartScript.Parsing
         public PatternResult Match(PatternParser parser, ParserContext ctx)
         {
             var result = parser.TryMatch(parser.Patterns[_key], ctx);
-            if (result.Exception != null)
-                return result;
 
             if (result.Node != null)
                 return PatternResult.Success(new KeyNode(_key, result.Node));
+            else
+                return result;
 
             throw new Exception();
         }
