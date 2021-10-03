@@ -15,11 +15,11 @@ namespace HeartScript.Parsing
 
         public INode? TryMatch(IPattern pattern, ParserContext ctx)
         {
-            int startIndex = ctx.Offset;
+            int localOffset = ctx.Offset;
 
             var result = pattern.Match(this, ctx);
             if (result == null)
-                ctx.Offset = startIndex;
+                ctx.Offset = localOffset;
 
             return result;
         }

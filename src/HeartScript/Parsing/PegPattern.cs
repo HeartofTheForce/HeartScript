@@ -26,7 +26,7 @@ namespace HeartScript.Parsing
 
         public INode? Match(PatternParser parser, ParserContext ctx)
         {
-            int startIndex = 0;
+            int localOffset = ctx.Offset;
 
             var output = new List<INode>();
             foreach (var pattern in _patterns)
@@ -39,7 +39,7 @@ namespace HeartScript.Parsing
                     return null;
             }
 
-            return new PegNode(startIndex, output);
+            return new PegNode(localOffset, output);
         }
     }
 
@@ -116,7 +116,7 @@ namespace HeartScript.Parsing
 
         public INode? Match(PatternParser parser, ParserContext ctx)
         {
-            int startIndex = ctx.Offset;
+            int localOffset = ctx.Offset;
 
             var output = new List<INode>();
             while (_max == null || output.Count < _max)
@@ -130,7 +130,7 @@ namespace HeartScript.Parsing
             }
 
             if (output.Count >= _min)
-                return new PegNode(startIndex, output);
+                return new PegNode(localOffset, output);
             else
                 return null;
         }

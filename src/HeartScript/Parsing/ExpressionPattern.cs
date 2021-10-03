@@ -32,7 +32,7 @@ namespace HeartScript.Parsing
 
         public INode? Match(PatternParser parser, ParserContext ctx)
         {
-            int startIndex = ctx.Offset;
+            int localOffset = ctx.Offset;
 
             var nodeBuilders = new Stack<NodeBuilder>();
             INode? operand = null;
@@ -59,7 +59,7 @@ namespace HeartScript.Parsing
                     if (operand != null)
                         return operand;
 
-                    ctx.Exception = new ExpressionTermException(startIndex);
+                    ctx.Exception = new ExpressionTermException(localOffset);
                     return null;
 
                 }
