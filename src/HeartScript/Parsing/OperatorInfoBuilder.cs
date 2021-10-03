@@ -34,7 +34,7 @@ namespace HeartScript.Parsing
 
         private static OperatorInfo ParseOperatorInfo(string input, int lineNumber)
         {
-            var parser = OperatorInfoPegBuilder.CreateParser();
+            var parser = PegBuilder.CreateParser();
             var ctx = new ParserContext(input);
 
             var pattern = SequencePattern.Create()
@@ -68,7 +68,7 @@ namespace HeartScript.Parsing
                 rightPrecedence = null;
 
             var patternNode = (KeyNode)result.Value.Children[4];
-            var builderCtx = OperatorInfoPegBuilder.CreateBuilder();
+            var builderCtx = PegBuilder.CreateBuilder();
             var operatorInfo = builderCtx.BuildKeyPattern(patternNode);
 
             return new OperatorInfo(operatorInfo, leftPrecedence, rightPrecedence);
