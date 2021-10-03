@@ -127,8 +127,6 @@ namespace HeartScript.Parsing
 
         public bool IsEvaluatedBefore(NodeBuilder right)
         {
-            // if (_operatorInfo.RightPrecedence == null || right.LeftPrecedence == null)
-            //     return _operatorInfo.RightPrecedence == null;
             if (_operatorInfo.RightPrecedence == null)
                 return true;
 
