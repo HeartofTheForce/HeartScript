@@ -6,16 +6,16 @@ namespace HeartScript.Expressions
 {
     public class ExpressionPattern : IPattern
     {
-        private readonly IEnumerable<OperatorInfo> _patterns;
+        private readonly IEnumerable<OperatorInfo> _operators;
 
-        public ExpressionPattern(IEnumerable<OperatorInfo> patterns)
+        public ExpressionPattern(IEnumerable<OperatorInfo> operators)
         {
-            _patterns = patterns;
+            _operators = operators;
         }
 
-        public static INode Parse(IEnumerable<OperatorInfo> patterns, ParserContext ctx)
+        public static INode Parse(IEnumerable<OperatorInfo> operators, ParserContext ctx)
         {
-            var expressionPattern = new ExpressionPattern(patterns);
+            var expressionPattern = new ExpressionPattern(operators);
 
             var parser = new PatternParser();
             parser.Patterns["expr"] = expressionPattern;
@@ -87,20 +87,20 @@ namespace HeartScript.Expressions
 
         private ExpressionNodeBuilder? TryGetNodeBuilder(bool wantOperand, PatternParser parser, ParserContext ctx)
         {
-            foreach (var x in _patterns)
+            foreach (var op in _operators)
             {
                 bool valid;
                 if (wantOperand)
-                    valid = x.IsPrefix() || x.IsNullary();
+                    valid = op.IsPrefix() || op.IsNullary();
                 else
-                    valid = x.IsInfix() || x.IsPostfix();
+                    valid = op.IsInfix() || op.IsPostfix();
 
                 if (!valid)
                     continue;
 
-                var result = parser.TryMatch(x.Pattern, ctx);
+                var result = parser.TryMatch(op.Pattern, ctx);
                 if (result != null)
-                    return new ExpressionNodeBuilder(x, result);
+                    return new ExpressionNodeBuilder(op, result);
             }
 
             return null;
