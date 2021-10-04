@@ -78,50 +78,50 @@ namespace HeartScript.Peg
             return BuildKeyPattern(output, keyNode);
         }
 
-        static IPattern BuildKeyPattern(PatternBuilder patternBuilder, KeyNode keyNode)
+        static IPattern BuildKeyPattern(PatternBuilder builder, KeyNode keyNode)
         {
-            return patternBuilder.BuildPattern(keyNode.Key, keyNode.Node);
+            return builder.BuildPattern(keyNode.Key, keyNode.Node);
         }
 
-        static IPattern BuildPeg(PatternBuilder ctx, INode node)
+        static IPattern BuildPeg(PatternBuilder builder, INode node)
         {
-            return BuildKeyPattern(ctx, (KeyNode)node.Children[1]);
+            return BuildKeyPattern(builder, (KeyNode)node.Children[1]);
         }
 
-        static IPattern BuildChoice(PatternBuilder ctx, INode node)
+        static IPattern BuildChoice(PatternBuilder builder, INode node)
         {
             var minOrMoreNode = node.Children[1];
 
             if (minOrMoreNode.Children.Count == 0)
-                return BuildKeyPattern(ctx, (KeyNode)node.Children[0]);
+                return BuildKeyPattern(builder, (KeyNode)node.Children[0]);
             else
             {
                 var output = ChoicePattern.Create()
-                   .Or(BuildKeyPattern(ctx, (KeyNode)node.Children[0]));
+                   .Or(BuildKeyPattern(builder, (KeyNode)node.Children[0]));
 
                 foreach (var child in minOrMoreNode.Children)
                 {
-                    output.Or(BuildKeyPattern(ctx, (KeyNode)child.Children[0]));
+                    output.Or(BuildKeyPattern(builder, (KeyNode)child.Children[0]));
                 }
 
                 return output;
             }
         }
 
-        static IPattern BuildSequence(PatternBuilder ctx, INode node)
+        static IPattern BuildSequence(PatternBuilder builder, INode node)
         {
             var output = SequencePattern.Create();
             foreach (var child in node.Children)
             {
-                output.Then(BuildKeyPattern(ctx, (KeyNode)child));
+                output.Then(BuildKeyPattern(builder, (KeyNode)child));
             }
 
             return output;
         }
 
-        static IPattern BuildQuantifier(PatternBuilder ctx, INode node)
+        static IPattern BuildQuantifier(PatternBuilder builder, INode node)
         {
-            var pattern = BuildKeyPattern(ctx, (KeyNode)node.Children[0]);
+            var pattern = BuildKeyPattern(builder, (KeyNode)node.Children[0]);
             var optional = node.Children[1];
 
             if (optional.Children.Count == 0)
@@ -137,7 +137,7 @@ namespace HeartScript.Peg
             };
         }
 
-        static IPattern BuildTerm(PatternBuilder ctx, INode node)
+        static IPattern BuildTerm(PatternBuilder builder, INode node)
         {
             var root = (ChoiceNode)node;
 
@@ -166,7 +166,7 @@ namespace HeartScript.Peg
                 case 1:
                     {
                         var sequenceNode = root.Node;
-                        return BuildKeyPattern(ctx, (KeyNode)sequenceNode.Children[1]);
+                        return BuildKeyPattern(builder, (KeyNode)sequenceNode.Children[1]);
                     }
                 case 2:
                     {

@@ -14,23 +14,28 @@ namespace HeartScript.Tests.ExpressionPatternTests
             s_testOperators = OperatorInfoBuilder.Parse("./TestOperators/precedence.ops");
         }
 
+        // 8 valid non-nullary operator arrangements, 3^2 - 1(PostPre is invalid)
+        // 3 cases per arrangement
+        // left_0 right_0
+        // left_1 right_0
+        // right_0 left_1
         static readonly ExpressionTestCase[] s_testCases = new ExpressionTestCase[]
         {
-            //PrePost
+            //PrePre
             new ExpressionTestCase()
             {
-                Infix = "pre_a0 x 0post_b",
-                ExpectedOutput = "(0post_b (pre_a0 x))",
+                Infix = "pre_a0 pre_b0 x",
+                ExpectedOutput = "(pre_a0 (pre_b0 x))",
             },
             new ExpressionTestCase()
             {
-                Infix = "pre_a1 x 0post_b",
-                ExpectedOutput = "(pre_a1 (0post_b x))",
+                Infix = "pre_a1 pre_b0 x",
+                ExpectedOutput = "(pre_a1 (pre_b0 x))",
             },
             new ExpressionTestCase()
             {
-                Infix = "pre_a0 x 1post_b",
-                ExpectedOutput = "(1post_b (pre_a0 x))",
+                Infix = "pre_a0 pre_b1 x",
+                ExpectedOutput = "(pre_a0 (pre_b1 x))",
             },
             //PreIn
             new ExpressionTestCase()
@@ -48,21 +53,37 @@ namespace HeartScript.Tests.ExpressionPatternTests
                 Infix = "pre_a0 x 1in_b1 y",
                 ExpectedOutput = "(1in_b1 (pre_a0 x) y)",
             },
-            //InPost
+            //PrePost
             new ExpressionTestCase()
             {
-                Infix = "x 0in_a0 y 0post_b",
-                ExpectedOutput = "(0post_b (0in_a0 x y))",
+                Infix = "pre_a0 x 0post_b",
+                ExpectedOutput = "(0post_b (pre_a0 x))",
             },
             new ExpressionTestCase()
             {
-                Infix = "x 1in_a1 y 0post_b",
-                ExpectedOutput = "(1in_a1 x (0post_b y))",
+                Infix = "pre_a1 x 0post_b",
+                ExpectedOutput = "(pre_a1 (0post_b x))",
             },
             new ExpressionTestCase()
             {
-                Infix = "x 0in_a0 y 1post_b",
-                ExpectedOutput = "(1post_b (0in_a0 x y))",
+                Infix = "pre_a0 x 1post_b",
+                ExpectedOutput = "(1post_b (pre_a0 x))",
+            },
+            //InPre
+            new ExpressionTestCase()
+            {
+                Infix = "x 0in_a0 pre_b0 y",
+                ExpectedOutput = "(0in_a0 x (pre_b0 y))",
+            },
+            new ExpressionTestCase()
+            {
+                Infix = "x 1in_a1 pre_b0 y",
+                ExpectedOutput = "(1in_a1 x (pre_b0 y))",
+            },
+            new ExpressionTestCase()
+            {
+                Infix = "x 0in_a0 pre_b1 y",
+                ExpectedOutput = "(0in_a0 x (pre_b1 y))",
             },
             //InIn
             new ExpressionTestCase()
@@ -80,37 +101,21 @@ namespace HeartScript.Tests.ExpressionPatternTests
                 Infix = "x 0in_a0 y 1in_b1 z",
                 ExpectedOutput = "(1in_b1 (0in_a0 x y) z)",
             },
-            //PrePre
+            //InPost
             new ExpressionTestCase()
             {
-                Infix = "pre_a0 pre_b0 x",
-                ExpectedOutput = "(pre_a0 (pre_b0 x))",
+                Infix = "x 0in_a0 y 0post_b",
+                ExpectedOutput = "(0post_b (0in_a0 x y))",
             },
             new ExpressionTestCase()
             {
-                Infix = "pre_a1 pre_b0 x",
-                ExpectedOutput = "(pre_a1 (pre_b0 x))",
+                Infix = "x 1in_a1 y 0post_b",
+                ExpectedOutput = "(1in_a1 x (0post_b y))",
             },
             new ExpressionTestCase()
             {
-                Infix = "pre_a0 pre_b1 x",
-                ExpectedOutput = "(pre_a0 (pre_b1 x))",
-            },
-            //PostPost
-            new ExpressionTestCase()
-            {
-                Infix = "x 0post_a 0post_b",
-                ExpectedOutput = "(0post_b (0post_a x))",
-            },
-            new ExpressionTestCase()
-            {
-                Infix = "x 1post_a 0post_b",
-                ExpectedOutput = "(0post_b (1post_a x))",
-            },
-            new ExpressionTestCase()
-            {
-                Infix = "x 0post_a 1post_b",
-                ExpectedOutput = "(1post_b (0post_a x))",
+                Infix = "x 0in_a0 y 1post_b",
+                ExpectedOutput = "(1post_b (0in_a0 x y))",
             },
             //PostIn
             new ExpressionTestCase()
@@ -128,21 +133,21 @@ namespace HeartScript.Tests.ExpressionPatternTests
                 Infix = "x 0post_a 1in_b1 y",
                 ExpectedOutput = "(1in_b1 (0post_a x) y)",
             },
-            //InPre
+            //PostPost
             new ExpressionTestCase()
             {
-                Infix = "x 0in_a0 pre_b0 y",
-                ExpectedOutput = "(0in_a0 x (pre_b0 y))",
+                Infix = "x 0post_a 0post_b",
+                ExpectedOutput = "(0post_b (0post_a x))",
             },
             new ExpressionTestCase()
             {
-                Infix = "x 1in_a1 pre_b0 y",
-                ExpectedOutput = "(1in_a1 x (pre_b0 y))",
+                Infix = "x 1post_a 0post_b",
+                ExpectedOutput = "(0post_b (1post_a x))",
             },
             new ExpressionTestCase()
             {
-                Infix = "x 0in_a0 pre_b1 y",
-                ExpectedOutput = "(0in_a0 x (pre_b1 y))",
+                Infix = "x 0post_a 1post_b",
+                ExpectedOutput = "(1post_b (0post_a x))",
             },
         };
 

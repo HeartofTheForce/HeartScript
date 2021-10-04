@@ -35,7 +35,8 @@ namespace HeartScript.Expressions
                     Children.Add(expressionNode);
                     continue;
                 }
-                else if (current.Value != null)
+
+                if (current.Value != null)
                 {
                     if (Value == null)
                         Value = current.Value;
