@@ -1,10 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-#pragma warning disable CS8600
-#pragma warning disable CS8602
-#pragma warning disable CS8604
-#pragma warning disable IDE0018
 
 namespace HeartScript.Parsing
 {

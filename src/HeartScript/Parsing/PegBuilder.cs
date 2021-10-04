@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using HeartScript.Nodes;
+#pragma warning disable IDE0066
 
 namespace HeartScript.Parsing
 {
@@ -129,12 +130,12 @@ namespace HeartScript.Parsing
                 return pattern;
 
             var choice = (ChoiceNode)optional.Children[0];
-            return choice.ChoiceIndex switch
+            switch (choice.ChoiceIndex)
             {
-                0 => QuantifierPattern.Optional(pattern),
-                1 => QuantifierPattern.MinOrMore(0, pattern),
-                2 => QuantifierPattern.MinOrMore(1, pattern),
-                _ => throw new Exception(),
+                case 0: return QuantifierPattern.Optional(pattern);
+                case 1: return QuantifierPattern.MinOrMore(0, pattern);
+                case 2: return QuantifierPattern.MinOrMore(1, pattern);
+                default: throw new Exception();
             };
         }
 
