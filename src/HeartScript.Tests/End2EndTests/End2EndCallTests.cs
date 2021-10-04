@@ -91,10 +91,7 @@ namespace HeartScript.Tests.End2EndTests
         [TestCaseSource(nameof(s_testCases))]
         public void TestCases(End2EndTestCase testCase)
         {
-            var ctx = new ParserContext(testCase.Infix);
-
-            var node = ExpressionPattern.Parse(Helper.TestOperators, ctx);
-            Assert.AreEqual(testCase.ExpectedNodeString, node.ToString());
+            testCase.Execute(Helper.TestOperators);
         }
     }
 }
