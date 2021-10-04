@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using HeartScript.Parsing;
+#pragma warning disable CS8618
+#pragma warning disable CS8625
 
 namespace HeartScript.Expressions
 {
