@@ -1,9 +1,3 @@
-#if
-none 99 'if' expr
-
-#else
-99 100 'else'
-
 #RoundBracket
 none none '(' expr ')'
 

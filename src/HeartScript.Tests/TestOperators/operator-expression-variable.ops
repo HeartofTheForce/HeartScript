@@ -1,0 +1,17 @@
+#Pass VariableExpressions Delimiter Terminator
+none none '{' (expr (',' expr)*)? '}'
+
+#Pass VariableExpressions NoDelimiter Terminator
+none none '[' expr* ']'
+
+#Pass VariableExpressions Delimiter NoTerminator
+none none '?' ((expr ':')* expr)?
+
+#Pass VariableExpressions NoDelimiter NoTerminator
+none none '|' expr*
+
+#Pass VariableExpressions SameDelimiter SameTerminator
+none none '&' (expr ('*' expr)*)? '*'
+
+#Identifier
+none none `[a-zA-Z]\w*`

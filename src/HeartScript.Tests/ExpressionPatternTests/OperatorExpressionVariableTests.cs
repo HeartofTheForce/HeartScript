@@ -5,13 +5,13 @@ using NUnit.Framework;
 namespace HeartScript.Tests.ExpressionPatternTests
 {
     [TestFixture]
-    public class RightOperandZeroTests
+    public class OperatorExpressionVariableTests
     {
         private static readonly IEnumerable<OperatorInfo> s_testOperators;
 
-        static RightOperandZeroTests()
+        static OperatorExpressionVariableTests()
         {
-            s_testOperators = OperatorInfoBuilder.Parse("./TestOperators/right-operand-zero.ops");
+            s_testOperators = OperatorInfoBuilder.Parse("./TestOperators/operator-expression-variable.ops");
         }
 
         static readonly IExpressionTestCase[] s_testCases = new IExpressionTestCase[]
@@ -19,62 +19,82 @@ namespace HeartScript.Tests.ExpressionPatternTests
             //{}
             new ExpressionTestCase()
             {
+                Infix = "{x, y, z}",
+                ExpectedOutput = "({ x y z)",
+            },
+            new ExpressionTestCase()
+            {
                 Infix = "{}",
                 ExpectedOutput = "{",
             },
-            new UnexpectedTokenTestCase()
+            new ExpressionTestCase()
             {
                 Infix = "{x}",
-                ExpectedCharIndex = 1,
-                ExpectedPattern = "}",
+                ExpectedOutput = "({ x)",
             },
             //[]
+            new ExpressionTestCase()
+            {
+                Infix = "[x y z]",
+                ExpectedOutput = "([ x y z)",
+            },
             new ExpressionTestCase()
             {
                 Infix = "[]",
                 ExpectedOutput = "[",
             },
-            new UnexpectedTokenTestCase()
+            new ExpressionTestCase()
             {
                 Infix = "[x]",
-                ExpectedCharIndex = 1,
-                ExpectedPattern = "]",
+                ExpectedOutput = "([ x)",
             },
             //?:
+            new ExpressionTestCase()
+            {
+                Infix = "? x : y : z",
+                ExpectedOutput = "(? x y z)",
+            },
             new ExpressionTestCase()
             {
                 Infix = "?",
                 ExpectedOutput = "?",
             },
-            new UnexpectedTokenTestCase()
+            new ExpressionTestCase()
             {
                 Infix = "? x",
-                ExpectedCharIndex = 2,
-                ExpectedPattern = "EOF",
+                ExpectedOutput = "(? x)",
             },
             //|
+            new ExpressionTestCase()
+            {
+                Infix = "| x y z",
+                ExpectedOutput = "(| x y z)",
+            },
             new ExpressionTestCase()
             {
                 Infix = "|",
                 ExpectedOutput = "|",
             },
-            new UnexpectedTokenTestCase()
+            new ExpressionTestCase()
             {
                 Infix = "| x",
-                ExpectedCharIndex = 2,
-                ExpectedPattern = "EOF",
+                ExpectedOutput = "(| x)",
             },
             //&*
+            new ExpressionTestCase()
+            {
+                Infix = "& x * y * z *",
+                ExpectedOutput = "(& x y z)",
+            },
             new ExpressionTestCase()
             {
                 Infix = "& *",
                 ExpectedOutput = "&",
             },
-            new UnexpectedTokenTestCase()
+            new ExpressionTestCase()
             {
                 Infix = "& x *",
-                ExpectedCharIndex = 2,
-                ExpectedPattern = "*",
+                ExpectedOutput = "(& x)",
             },
         };
 

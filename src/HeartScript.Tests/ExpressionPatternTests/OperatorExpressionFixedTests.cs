@@ -5,13 +5,13 @@ using NUnit.Framework;
 namespace HeartScript.Tests.ExpressionPatternTests
 {
     [TestFixture]
-    public class RightOperandVariableTests
+    public class OperatorExpressionFixedTests
     {
         private static readonly IEnumerable<OperatorInfo> s_testOperators;
 
-        static RightOperandVariableTests()
+        static OperatorExpressionFixedTests()
         {
-            s_testOperators = OperatorInfoBuilder.Parse("./TestOperators/right-operand-variable.ops");
+            s_testOperators = OperatorInfoBuilder.Parse("./TestOperators/operator-expression-fixed.ops");
         }
 
         static readonly IExpressionTestCase[] s_testCases = new IExpressionTestCase[]
@@ -22,15 +22,16 @@ namespace HeartScript.Tests.ExpressionPatternTests
                 Infix = "{x, y, z}",
                 ExpectedOutput = "({ x y z)",
             },
-            new ExpressionTestCase()
+            new ExpressionTermTestCase()
             {
                 Infix = "{}",
-                ExpectedOutput = "{",
+                ExpectedCharIndex = 1,
             },
-            new ExpressionTestCase()
+            new UnexpectedTokenTestCase()
             {
-                Infix = "{x}",
-                ExpectedOutput = "({ x)",
+                Infix = "{x, y, z, w}",
+                ExpectedCharIndex = 8,
+                ExpectedPattern = "}",
             },
             //[]
             new ExpressionTestCase()
@@ -38,15 +39,16 @@ namespace HeartScript.Tests.ExpressionPatternTests
                 Infix = "[x y z]",
                 ExpectedOutput = "([ x y z)",
             },
-            new ExpressionTestCase()
+            new ExpressionTermTestCase()
             {
                 Infix = "[]",
-                ExpectedOutput = "[",
+                ExpectedCharIndex = 1,
             },
-            new ExpressionTestCase()
+            new UnexpectedTokenTestCase()
             {
-                Infix = "[x]",
-                ExpectedOutput = "([ x)",
+                Infix = "[x y z w]",
+                ExpectedCharIndex = 7,
+                ExpectedPattern = "]",
             },
             //?:
             new ExpressionTestCase()
@@ -54,15 +56,16 @@ namespace HeartScript.Tests.ExpressionPatternTests
                 Infix = "? x : y : z",
                 ExpectedOutput = "(? x y z)",
             },
-            new ExpressionTestCase()
+            new ExpressionTermTestCase()
             {
                 Infix = "?",
-                ExpectedOutput = "?",
+                ExpectedCharIndex = 1,
             },
-            new ExpressionTestCase()
+            new UnexpectedTokenTestCase()
             {
-                Infix = "? x",
-                ExpectedOutput = "(? x)",
+                Infix = "? x : y : z : w",
+                ExpectedCharIndex = 12,
+                ExpectedPattern = "EOF",
             },
             //|
             new ExpressionTestCase()
@@ -70,15 +73,16 @@ namespace HeartScript.Tests.ExpressionPatternTests
                 Infix = "| x y z",
                 ExpectedOutput = "(| x y z)",
             },
-            new ExpressionTestCase()
+            new ExpressionTermTestCase()
             {
                 Infix = "|",
-                ExpectedOutput = "|",
+                ExpectedCharIndex = 1,
             },
-            new ExpressionTestCase()
+            new UnexpectedTokenTestCase()
             {
-                Infix = "| x",
-                ExpectedOutput = "(| x)",
+                Infix = "| x y z w",
+                ExpectedCharIndex = 8,
+                ExpectedPattern = "EOF",
             },
             //&*
             new ExpressionTestCase()
@@ -86,15 +90,16 @@ namespace HeartScript.Tests.ExpressionPatternTests
                 Infix = "& x * y * z *",
                 ExpectedOutput = "(& x y z)",
             },
-            new ExpressionTestCase()
+            new ExpressionTermTestCase()
             {
                 Infix = "& *",
-                ExpectedOutput = "&",
+                ExpectedCharIndex = 2,
             },
-            new ExpressionTestCase()
+            new UnexpectedTokenTestCase()
             {
-                Infix = "& x *",
-                ExpectedOutput = "(& x)",
+                Infix = "& x * y * z * w *",
+                ExpectedCharIndex = 14,
+                ExpectedPattern = "EOF",
             },
         };
 
