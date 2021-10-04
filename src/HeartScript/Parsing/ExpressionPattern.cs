@@ -22,7 +22,12 @@ namespace HeartScript.Parsing
             var result = parser.TryMatch(expressionPattern, ctx);
 
             if (result == null)
-                throw ctx.Exception;
+            {
+                if (ctx.Exception != null)
+                    throw ctx.Exception;
+                else
+                    throw new ArgumentException(nameof(ctx.Exception));
+            }
 
             if (!ctx.IsEOF)
                 throw new UnexpectedTokenException(ctx.Offset, "EOF");
@@ -39,8 +44,8 @@ namespace HeartScript.Parsing
 
             while (true)
             {
-                var nodeBuilder = TryGetNodeBuilder(operand != null, parser, ctx);
-                if (nodeBuilder == null)
+                var right = TryGetNodeBuilder(operand == null, parser, ctx);
+                if (right == null)
                 {
                     if (ctx.Exception != null && ctx.Offset < ctx.Exception.CharIndex)
                         return null;
@@ -61,10 +66,9 @@ namespace HeartScript.Parsing
 
                     ctx.Exception = new ExpressionTermException(localOffset);
                     return null;
-
                 }
 
-                while (nodeBuilders.TryPeek(out var left) && left.IsEvaluatedBefore(nodeBuilder))
+                while (nodeBuilders.TryPeek(out var left) && left.IsEvaluatedBefore(right))
                 {
                     if (operand == null)
                     {
@@ -75,21 +79,21 @@ namespace HeartScript.Parsing
                     operand = nodeBuilders.Pop().FeedOperandRight(operand);
                 }
 
-                operand = nodeBuilder.FeedOperandLeft(operand);
+                operand = right.FeedOperandLeft(operand);
                 if (operand == null)
-                    nodeBuilders.Push(nodeBuilder);
+                    nodeBuilders.Push(right);
             }
         }
 
-        private NodeBuilder? TryGetNodeBuilder(bool haveOperand, PatternParser parser, ParserContext ctx)
+        private NodeBuilder? TryGetNodeBuilder(bool wantOperand, PatternParser parser, ParserContext ctx)
         {
             foreach (var x in _patterns)
             {
                 bool valid;
-                if (haveOperand)
-                    valid = x.IsInfix() || x.IsPostfix();
-                else
+                if (wantOperand)
                     valid = x.IsPrefix() || x.IsNullary();
+                else
+                    valid = x.IsInfix() || x.IsPostfix();
 
                 if (!valid)
                     continue;
@@ -118,10 +122,7 @@ namespace HeartScript.Parsing
 
         public bool IsEvaluatedBefore(NodeBuilder right)
         {
-            if (_operatorInfo.RightPrecedence == null)
-                return true;
-
-            return _operatorInfo.RightPrecedence <= right._operatorInfo.LeftPrecedence;
+            return OperatorInfo.IsEvaluatedBefore(_operatorInfo, right._operatorInfo);
         }
 
         public INode? FeedOperandLeft(INode? leftNode)

@@ -4,11 +4,11 @@ namespace HeartScript.Parsing
 {
     public class Token
     {
-        public string? Value { get; }
+        public string Value { get; }
         public int CharIndex { get; }
 
         public Token(
-            string? value,
+            string value,
             int charIndex)
         {
             Value = value;

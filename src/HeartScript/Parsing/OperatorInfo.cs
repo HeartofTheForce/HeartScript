@@ -22,5 +22,13 @@ namespace HeartScript.Parsing
         public bool IsPrefix() => LeftPrecedence == null && RightPrecedence != null;
         public bool IsPostfix() => LeftPrecedence != null && RightPrecedence == null;
         public bool IsInfix() => LeftPrecedence != null && RightPrecedence != null;
+
+        public static bool IsEvaluatedBefore(OperatorInfo left, OperatorInfo right)
+        {
+            if (left.RightPrecedence == null || right.LeftPrecedence == null)
+                return left.RightPrecedence == null;
+
+            return left.RightPrecedence <= right.LeftPrecedence;
+        }
     }
 }
