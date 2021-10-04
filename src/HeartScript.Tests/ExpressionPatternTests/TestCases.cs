@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using HeartScript.Expressions;
 using HeartScript.Parsing;
 using NUnit.Framework;
+#pragma warning disable CS8618
+#pragma warning disable CS8625
 
 namespace HeartScript.Tests.ExpressionPatternTests
 {
@@ -29,7 +31,7 @@ namespace HeartScript.Tests.ExpressionPatternTests
         }
     }
 
-    public struct ExpressionTermTestCase : IExpressionTestCase
+    public class ExpressionTermTestCase : IExpressionTestCase
     {
         public string Infix { get; set; }
         public int ExpectedCharIndex { get; set; }
@@ -48,7 +50,7 @@ namespace HeartScript.Tests.ExpressionPatternTests
         }
     }
 
-    public struct UnexpectedTokenTestCase : IExpressionTestCase
+    public class UnexpectedTokenTestCase : IExpressionTestCase
     {
         public string Infix { get; set; }
         public int ExpectedCharIndex { get; set; }

@@ -1,4 +1,3 @@
-using HeartScript.Parsing;
 using NUnit.Framework;
 
 namespace HeartScript.Tests.End2EndTests
