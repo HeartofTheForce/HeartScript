@@ -1,6 +1,7 @@
 using System.Collections.Generic;
+using HeartScript.Parsing;
 
-namespace HeartScript.Nodes
+namespace HeartScript.Expressions
 {
     public class ExpressionNode : INode
     {

@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using HeartScript.Parsing;
+using HeartScript.Expressions;
 using NUnit.Framework;
 
 namespace HeartScript.Tests.ExpressionPatternTests
@@ -149,10 +149,7 @@ namespace HeartScript.Tests.ExpressionPatternTests
         [TestCaseSource(nameof(s_testCases))]
         public void TestCases(ExpressionTestCase testCase)
         {
-            var ctx = new ParserContext(testCase.Infix);
-
-            var node = ExpressionPattern.Parse(s_testOperators, ctx);
-            Assert.AreEqual(testCase.ExpectedOutput, node.ToString());
+            testCase.Execute(s_testOperators);
         }
     }
 }

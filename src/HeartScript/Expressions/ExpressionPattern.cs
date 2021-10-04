@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using HeartScript.Nodes;
+using HeartScript.Parsing;
 
-namespace HeartScript.Parsing
+namespace HeartScript.Expressions
 {
     public class ExpressionPattern : IPattern
     {
@@ -39,7 +39,7 @@ namespace HeartScript.Parsing
         {
             int localOffset = ctx.Offset;
 
-            var nodeBuilders = new Stack<NodeBuilder>();
+            var nodeBuilders = new Stack<ExpressionNodeBuilder>();
             INode? operand = null;
 
             while (true)
@@ -85,7 +85,7 @@ namespace HeartScript.Parsing
             }
         }
 
-        private NodeBuilder? TryGetNodeBuilder(bool wantOperand, PatternParser parser, ParserContext ctx)
+        private ExpressionNodeBuilder? TryGetNodeBuilder(bool wantOperand, PatternParser parser, ParserContext ctx)
         {
             foreach (var x in _patterns)
             {
@@ -100,56 +100,17 @@ namespace HeartScript.Parsing
 
                 var result = parser.TryMatch(x.Pattern, ctx);
                 if (result != null)
-                    return new NodeBuilder(x, result);
+                    return new ExpressionNodeBuilder(x, result);
             }
 
             return null;
         }
     }
 
-    public class NodeBuilder
+    public class ExpressionTermException : PatternException
     {
-        private readonly OperatorInfo _operatorInfo;
-        private readonly INode _midNode;
-        private INode? _leftNode;
-        private INode? _rightNode;
-
-        public NodeBuilder(OperatorInfo operatorInfo, INode midNode)
+        public ExpressionTermException(int charIndex) : base(charIndex, $"Invalid Expression Term @ {charIndex}")
         {
-            _operatorInfo = operatorInfo;
-            _midNode = midNode;
-        }
-
-        public bool IsEvaluatedBefore(NodeBuilder right)
-        {
-            return OperatorInfo.IsEvaluatedBefore(_operatorInfo, right._operatorInfo);
-        }
-
-        public INode? FeedOperandLeft(INode? leftNode)
-        {
-            _leftNode = leftNode;
-            return TryCompleteNode();
-        }
-
-        public INode FeedOperandRight(INode rightNode)
-        {
-            _rightNode = rightNode;
-            return TryCompleteNode() ?? throw new Exception($"{nameof(NodeBuilder)} is incomplete");
-        }
-
-        private INode? TryCompleteNode()
-        {
-            bool haveLeft = _leftNode != null;
-            bool expectLeft = _operatorInfo.LeftPrecedence != null;
-            if (haveLeft != expectLeft)
-                return null;
-
-            bool haveRight = _rightNode != null;
-            bool expectRight = _operatorInfo.RightPrecedence != null;
-            if (haveRight != expectRight)
-                return null;
-
-            return new ExpressionNode(_leftNode, _midNode, _rightNode);
         }
     }
 }

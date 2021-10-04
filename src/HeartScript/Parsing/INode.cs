@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace HeartScript.Nodes
+namespace HeartScript.Parsing
 {
     public interface INode
     {

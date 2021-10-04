@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using HeartScript.Parsing;
+using HeartScript.Expressions;
 using NUnit.Framework;
 
 namespace HeartScript.Tests.ExpressionPatternTests

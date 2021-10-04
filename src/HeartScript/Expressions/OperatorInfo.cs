@@ -1,4 +1,6 @@
-namespace HeartScript.Parsing
+using HeartScript.Parsing;
+
+namespace HeartScript.Expressions
 {
     public class OperatorInfo
     {

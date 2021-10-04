@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Text.RegularExpressions;
-using HeartScript.Nodes;
+using HeartScript.Peg.Nodes;
 
 namespace HeartScript.Parsing
 {
@@ -51,16 +51,29 @@ namespace HeartScript.Parsing
                     throw new Exception($"0 length match @ {match.Index}, {this}");
 
                 var targetGroup = match.Groups[1];
-                var token = new Token(targetGroup.Value, targetGroup.Index);
                 ctx.Offset += match.Length;
 
-                return new PegNode(token.CharIndex, token.Value);
+                return new PegNode(targetGroup.Index, targetGroup.Value);
             }
 
             if (ctx.Exception == null || ctx.Exception.CharIndex <= ctx.Offset)
                 ctx.Exception = new UnexpectedTokenException(ctx.Offset, this);
 
             return null;
+        }
+    }
+
+    public class UnexpectedTokenException : PatternException
+    {
+        public string ExpectedPattern { get; }
+
+        public UnexpectedTokenException(int charIndex, string expectedPattern) : base(charIndex, $"Unexpected Token @ {charIndex} expected {expectedPattern}")
+        {
+            ExpectedPattern = expectedPattern;
+        }
+
+        public UnexpectedTokenException(int charIndex, LexerPattern lexerPattern) : this(charIndex, lexerPattern.ToString())
+        {
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using HeartScript.Expressions;
 using HeartScript.Parsing;
 
 namespace HeartScript.Cli

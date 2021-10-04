@@ -1,26 +1,12 @@
 using System;
-using System.Collections.Generic;
-using HeartScript.Nodes;
+using HeartScript.Parsing;
+using HeartScript.Peg.Nodes;
+using HeartScript.Peg.Patterns;
 #pragma warning disable IDE0066
 
-namespace HeartScript.Parsing
+namespace HeartScript.Peg
 {
-    public class PegBuilder
-    {
-        public Dictionary<string, Func<PegBuilder, INode, IPattern>> Builders { get; }
-
-        public PegBuilder()
-        {
-            Builders = new Dictionary<string, Func<PegBuilder, INode, IPattern>>();
-        }
-
-        public IPattern BuildKeyPattern(KeyNode keyNode)
-        {
-            return Builders[keyNode.Key](this, keyNode.Node);
-        }
-    }
-
-    public static class PegBuilderHelper
+    public static class PegHelper
     {
         private static readonly LexerPattern s_regex = LexerPattern.FromRegex("`(?:``|[^`])*`");
         private static readonly LexerPattern s_plainText = LexerPattern.FromRegex("'(?:''|[^'])*'");
@@ -40,9 +26,31 @@ namespace HeartScript.Parsing
                 .Then(QuantifierPattern.Optional(s_nonSignificant));
         }
 
-        public static PatternParser CreateParser()
+        public static PatternParser CreatePegParser()
         {
             var parser = new PatternParser();
+
+            parser.Patterns["peg"] = KeyPattern.Create("choice").TrimLeft();
+
+            parser.Patterns["choice"] = SequencePattern.Create()
+                .Then(KeyPattern.Create("sequence"))
+                .Then(QuantifierPattern.MinOrMore(
+                        0,
+                        SequencePattern.Create()
+                            .Then(LexerPattern.FromPlainText("/").TrimRight())
+                            .Then(KeyPattern.Create("sequence"))));
+
+            parser.Patterns["sequence"] = QuantifierPattern.MinOrMore(
+                1,
+                KeyPattern.Create("quantifier"));
+
+            parser.Patterns["quantifier"] = SequencePattern.Create()
+                .Then(KeyPattern.Create("term"))
+                .Then(QuantifierPattern.Optional(
+                    ChoicePattern.Create()
+                        .Or(LexerPattern.FromPlainText("?").TrimRight())
+                        .Or(LexerPattern.FromPlainText("*").TrimRight())
+                        .Or(LexerPattern.FromPlainText("+").TrimRight())));
 
             parser.Patterns["term"] = ChoicePattern.Create()
                     .Or(ChoicePattern.Create()
@@ -54,76 +62,66 @@ namespace HeartScript.Parsing
                         .Then(LexerPattern.FromPlainText(")").TrimRight()))
                     .Or(LexerPattern.FromRegex("\\w+").TrimRight());
 
-            parser.Patterns["sequence"] = QuantifierPattern.MinOrMore(
-                1,
-                KeyPattern.Create("quantifier")
-            );
-
-            parser.Patterns["quantifier"] = SequencePattern.Create()
-                .Then(KeyPattern.Create("term"))
-                .Then(QuantifierPattern.Optional(
-                    ChoicePattern.Create()
-                        .Or(LexerPattern.FromPlainText("?").TrimRight())
-                        .Or(LexerPattern.FromPlainText("*").TrimRight())
-                        .Or(LexerPattern.FromPlainText("+").TrimRight())));
-
-            parser.Patterns["choice"] = SequencePattern.Create()
-                .Then(KeyPattern.Create("sequence"))
-                .Then(QuantifierPattern.MinOrMore(
-                        0,
-                        SequencePattern.Create()
-                            .Then(LexerPattern.FromPlainText("/").TrimRight())
-                            .Then(KeyPattern.Create("sequence"))));
-
             return parser;
         }
 
-        public static PegBuilder CreateBuilder()
+        public static IPattern BuildPegPattern(KeyNode keyNode)
         {
-            var output = new PegBuilder();
+            var output = new PatternBuilder();
 
-            output.Builders["sequence"] = BuildSequence;
+            output.Builders["peg"] = BuildPeg;
             output.Builders["choice"] = BuildChoice;
-            output.Builders["term"] = BuildTerm;
+            output.Builders["sequence"] = BuildSequence;
             output.Builders["quantifier"] = BuildQuantifier;
+            output.Builders["term"] = BuildTerm;
 
-            return output;
+            return BuildKeyPattern(output, keyNode);
         }
 
-        static IPattern BuildChoice(PegBuilder ctx, INode node)
+        static IPattern BuildKeyPattern(PatternBuilder patternBuilder, KeyNode keyNode)
+        {
+            return patternBuilder.BuildPattern(keyNode.Key, keyNode.Node);
+        }
+
+        static IPattern BuildPeg(PatternBuilder ctx, INode node)
+        {
+            return BuildKeyPattern(ctx, (KeyNode)node.Children[1]);
+        }
+
+        static IPattern BuildChoice(PatternBuilder ctx, INode node)
         {
             var minOrMoreNode = node.Children[1];
 
             if (minOrMoreNode.Children.Count == 0)
-                return ctx.BuildKeyPattern((KeyNode)node.Children[0]);
+                return BuildKeyPattern(ctx, (KeyNode)node.Children[0]);
             else
             {
                 var output = ChoicePattern.Create()
-                   .Or(ctx.BuildKeyPattern((KeyNode)node.Children[0]));
+                   .Or(BuildKeyPattern(ctx, (KeyNode)node.Children[0]));
 
                 foreach (var child in minOrMoreNode.Children)
                 {
-                    output.Or(ctx.BuildKeyPattern((KeyNode)child.Children[0]));
+                    output.Or(BuildKeyPattern(ctx, (KeyNode)child.Children[0]));
                 }
 
                 return output;
             }
         }
 
-        static IPattern BuildSequence(PegBuilder ctx, INode node)
+        static IPattern BuildSequence(PatternBuilder ctx, INode node)
         {
             var output = SequencePattern.Create();
             foreach (var child in node.Children)
             {
-                output.Then(ctx.BuildKeyPattern((KeyNode)child));
+                output.Then(BuildKeyPattern(ctx, (KeyNode)child));
             }
 
             return output;
         }
 
-        static IPattern BuildQuantifier(PegBuilder ctx, INode node)
+        static IPattern BuildQuantifier(PatternBuilder ctx, INode node)
         {
-            var pattern = ctx.BuildKeyPattern((KeyNode)node.Children[0]);
+            var pattern = BuildKeyPattern(ctx, (KeyNode)node.Children[0]);
             var optional = node.Children[1];
 
             if (optional.Children.Count == 0)
@@ -139,7 +137,7 @@ namespace HeartScript.Parsing
             };
         }
 
-        static IPattern BuildTerm(PegBuilder ctx, INode node)
+        static IPattern BuildTerm(PatternBuilder ctx, INode node)
         {
             var root = (ChoiceNode)node;
 
@@ -168,7 +166,7 @@ namespace HeartScript.Parsing
                 case 1:
                     {
                         var sequenceNode = root.Node;
-                        return ctx.BuildKeyPattern((KeyNode)sequenceNode.Children[1]);
+                        return BuildKeyPattern(ctx, (KeyNode)sequenceNode.Children[1]);
                     }
                 case 2:
                     {

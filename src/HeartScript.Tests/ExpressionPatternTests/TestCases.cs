@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using HeartScript.Expressions;
 using HeartScript.Parsing;
 using NUnit.Framework;
 

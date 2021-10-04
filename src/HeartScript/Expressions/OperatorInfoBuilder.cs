@@ -1,8 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using HeartScript.Parsing;
+using HeartScript.Peg;
+using HeartScript.Peg.Nodes;
+using HeartScript.Peg.Patterns;
 
-namespace HeartScript.Parsing
+namespace HeartScript.Expressions
 {
     public static class OperatorInfoBuilder
     {
@@ -31,9 +35,7 @@ namespace HeartScript.Parsing
         private static OperatorInfo ParseOperatorInfo(string input, int lineNumber)
         {
             var ctx = new ParserContext(input);
-            var parser = PegBuilderHelper.CreateParser();
-            var builder = PegBuilderHelper.CreateBuilder();
-
+            var pegParser = PegHelper.CreatePegParser();
             var pattern = SequencePattern.Create()
                 .Then(ChoicePattern.Create()
                     .Or(s_digits)
@@ -43,9 +45,9 @@ namespace HeartScript.Parsing
                     .Or(s_digits)
                     .Or(s_none))
                 .Then(LexerPattern.FromPlainText(" "))
-                .Then(KeyPattern.Create("choice"));
+                .Then(KeyPattern.Create("peg"));
 
-            var result = parser.TryMatch(pattern, ctx);
+            var result = pegParser.TryMatch(pattern, ctx);
 
             if (result == null)
                 throw new Exception($"{ctx.Exception}, {lineNumber}");
@@ -65,7 +67,7 @@ namespace HeartScript.Parsing
                 rightPrecedence = null;
 
             var patternNode = (KeyNode)result.Children[4];
-            var operatorInfo = builder.BuildKeyPattern(patternNode);
+            var operatorInfo = PegHelper.BuildPegPattern(patternNode);
 
             return new OperatorInfo(operatorInfo, leftPrecedence, rightPrecedence);
         }
