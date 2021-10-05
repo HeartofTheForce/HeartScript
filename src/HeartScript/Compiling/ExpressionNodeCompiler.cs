@@ -33,12 +33,12 @@ namespace HeartScript.Compiling
 
             s_nodeCompilers[Prefix] = new CompileExpression[]
             {
-                CompilePrefix,
+                CompileUnaryPrefix,
             };
 
             s_nodeCompilers[Postfix] = new CompileExpression[]
             {
-                CompilePostfix,
+                CompileUnaryPostfix,
                 CompileStaticCall(typeof(Math)),
             };
 
@@ -170,16 +170,16 @@ namespace HeartScript.Compiling
             };
         }
 
-        private static readonly Dictionary<string, Func<Expression, Expression>> s_prefixCompilers = new Dictionary<string, Func<Expression, Expression>>()
+        private static readonly Dictionary<string, Func<Expression, Expression>> s_unaryPrefixCompilers = new Dictionary<string, Func<Expression, Expression>>()
         {
             ["+"] = Expression.UnaryPlus,
             ["-"] = Expression.Negate,
             ["~"] = Expression.Not,
         };
 
-        static Expression? CompilePrefix(CompilerScope scope, ExpressionNode node)
+        static Expression? CompileUnaryPrefix(CompilerScope scope, ExpressionNode node)
         {
-            if (s_prefixCompilers.TryGetValue(node.Value, out var compiler))
+            if (s_unaryPrefixCompilers.TryGetValue(node.Value, out var compiler))
             {
                 var right = Compile(scope, (ExpressionNode)node.Children[^1]);
                 return compiler(right);
@@ -188,14 +188,14 @@ namespace HeartScript.Compiling
             return null;
         }
 
-        private static readonly Dictionary<string, Func<Expression, Expression>> s_postfixCompilers = new Dictionary<string, Func<Expression, Expression>>()
+        private static readonly Dictionary<string, Func<Expression, Expression>> s_unaryPostfixCompilers = new Dictionary<string, Func<Expression, Expression>>()
         {
             ["!"] = (expression) => expression,
         };
 
-        static Expression? CompilePostfix(CompilerScope scope, ExpressionNode node)
+        static Expression? CompileUnaryPostfix(CompilerScope scope, ExpressionNode node)
         {
-            if (s_postfixCompilers.TryGetValue(node.Value, out var compiler))
+            if (s_unaryPostfixCompilers.TryGetValue(node.Value, out var compiler))
             {
                 var left = Compile(scope, (ExpressionNode)node.Children[0]);
                 return compiler(left);
