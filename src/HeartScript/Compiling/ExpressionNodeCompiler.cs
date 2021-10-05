@@ -22,6 +22,7 @@ namespace HeartScript.Compiling
             {
                 ParseFloat,
                 ParseInt,
+                CompileRoundBracket,
             };
 
             s_nodeCompilers[Prefix] = new Func<ExpressionNode, Expression?>[]
@@ -37,6 +38,7 @@ namespace HeartScript.Compiling
             s_nodeCompilers[Infix] = new Func<ExpressionNode, Expression?>[]
             {
                 CompileBinary,
+                CompileTernary,
             };
         }
 
@@ -87,6 +89,17 @@ namespace HeartScript.Compiling
             return null;
         }
 
+        static Expression? CompileRoundBracket(ExpressionNode node)
+        {
+            if (node.Value == "(")
+            {
+                var mid = Compile((ExpressionNode)node.Children[0]);
+                return mid;
+            }
+
+            return null;
+        }
+
         static Expression? CompilePrefix(ExpressionNode node)
         {
             var right = Compile((ExpressionNode)node.Children[^1]);
@@ -128,11 +141,29 @@ namespace HeartScript.Compiling
                 case "/": return Expression.Divide(left, right);
                 case "+": return Expression.Add(left, right);
                 case "-": return Expression.Subtract(left, right);
+                case "<=": return Expression.LessThanOrEqual(left, right);
+                case ">=": return Expression.GreaterThanOrEqual(left, right);
+                case "<": return Expression.LessThan(left, right);
+                case ">": return Expression.GreaterThan(left, right);
                 case "&": return Expression.And(left, right);
                 case "^": return Expression.ExclusiveOr(left, right);
                 case "|": return Expression.Or(left, right);
                 default:
                     break;
+            }
+
+            return null;
+        }
+
+        static Expression? CompileTernary(ExpressionNode node)
+        {
+            if (node.Value == "?")
+            {
+                var left = Compile((ExpressionNode)node.Children[0]);
+                var mid = Compile((ExpressionNode)node.Children[1]);
+                var right = Compile((ExpressionNode)node.Children[2]);
+
+                return Expression.Condition(left, mid, right);
             }
 
             return null;

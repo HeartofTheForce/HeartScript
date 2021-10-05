@@ -31,14 +31,26 @@ none 1 '~'
 #BinaryMinus
 4 4 '-'
 
+#LessThanOrEqual
+5 5 '<='
+
+#GreaterThanOrEqual
+5 5 '>='
+
+#LessThan
+5 5 '<'
+
+#GreaterThan
+5 5 '>'
+
 #BitwiseAnd
-4 4 '&'
+6 6 '&'
 
 #BitwiseXor
-4 4 '^'
+7 7 '^'
 
 #BitwiseOr
-4 4 '|'
+8 8 '|'
 
 #Constant
 none none `\d+(?:\.\d+)?`

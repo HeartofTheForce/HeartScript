@@ -35,6 +35,7 @@ namespace HeartScript.Cli
 
                 var compiledExpression = ExpressionNodeCompiler.Compile((ExpressionNode)node);
                 var compiledFunction = Expression.Lambda<Func<float>>(compiledExpression).Compile();
+
                 Console.WriteLine("Result");
                 Console.WriteLine(compiledFunction());
             }
