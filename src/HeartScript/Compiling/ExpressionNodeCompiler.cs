@@ -64,11 +64,23 @@ namespace HeartScript.Compiling
 
         public static Func<T> CompileFunction<T>(ExpressionNode node)
         {
-            var scope = new CompilerScope();
+            var scope = CompilerScope.Empty();
+
             var compiledExpression = Compile(scope, node);
             compiledExpression = ConvertIfRequired(compiledExpression, typeof(T));
 
             return Expression.Lambda<Func<T>>(compiledExpression).Compile();
+        }
+
+        public static Func<TContext, TResult> CompileFunction<TContext, TResult>(ExpressionNode node)
+        {
+            var parameters = new ParameterExpression[] { Expression.Parameter(typeof(TContext)) };
+            var scope = CompilerScope.FromMembers(parameters[0]);
+
+            var compiledExpression = Compile(scope, node);
+            compiledExpression = ConvertIfRequired(compiledExpression, typeof(TResult));
+
+            return Expression.Lambda<Func<TContext, TResult>>(compiledExpression, parameters).Compile();
         }
 
         static Expression Compile(CompilerScope scope, ExpressionNode node)
