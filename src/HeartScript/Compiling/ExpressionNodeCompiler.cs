@@ -147,39 +147,47 @@ namespace HeartScript.Compiling
             return null;
         }
 
+        static Expression CompileCall(ExpressionNode callNode, Expression? instance, Type type, BindingFlags bindingFlags)
+        {
+            var left = callNode.Children[0];
+
+            if (left.Children?.Count > 0)
+                throw new Exception($"{nameof(left)}.{nameof(left.Children)} must be empty");
+
+            string methodName = left.Value;
+            if (methodName == null)
+                throw new Exception($"{nameof(methodName)} cannot be null");
+
+            int parameterCount = callNode.Children.Count - 1;
+            var parameters = new Expression[parameterCount];
+            var parameterTypes = new Type[parameterCount];
+
+            for (int i = 0; i < parameterCount; i++)
+            {
+                parameters[i] = Compile((ExpressionNode)callNode.Children[i + 1]);
+                parameterTypes[i] = parameters[i].Type;
+            }
+
+            var methodInfo = type.GetMethod(methodName, bindingFlags, null, parameterTypes, null);
+            if (methodInfo == null)
+                throw new Exception($"{type.FullName} does not have an overload matching '{methodName}({string.Join(',', parameterTypes.Select(x => x.Name))})'");
+
+            var expectedParameters = methodInfo.GetParameters();
+            for (int i = 0; i < parameterCount; i++)
+            {
+                parameters[i] = ConvertIfRequired(parameters[i], expectedParameters[i].ParameterType);
+            }
+
+            return Expression.Call(instance, methodInfo, parameters);
+        }
+
         static Func<ExpressionNode, Expression?> CompileStaticCall(Type type)
         {
             return (node) =>
             {
+                var bindingFlags = BindingFlags.Public | BindingFlags.Static | BindingFlags.IgnoreCase;
                 if (node.Value == "(")
-                {
-                    var left = Compile((ExpressionNode)node.Children[0]) as ConstantExpression;
-                    if (left == null || left.Value.GetType() != typeof(string))
-                        throw new Exception($"{nameof(left)} must be type {typeof(string).Name}");
-
-                    int parameterCount = node.Children.Count - 1;
-                    var parameters = new Expression[parameterCount];
-                    var parameterTypes = new Type[parameterCount];
-
-                    for (int i = 0; i < parameterCount; i++)
-                    {
-                        parameters[i] = Compile((ExpressionNode)node.Children[i + 1]);
-                        parameterTypes[i] = parameters[i].Type;
-                    }
-
-                    var bindingFlags = BindingFlags.Public | BindingFlags.Static | BindingFlags.IgnoreCase;
-                    var methodInfo = type.GetMethod((string)left.Value, bindingFlags, null, parameterTypes, null);
-                    if (methodInfo == null)
-                        throw new Exception($"{type.FullName} does not have an overload matching '{left.Value}({string.Join(',', parameterTypes.Select(x => x.Name))})'");
-
-                    var expectedParameters = methodInfo.GetParameters();
-                    for (int i = 0; i < parameterCount; i++)
-                    {
-                        parameters[i] = ConvertIfRequired(parameters[i], expectedParameters[i].ParameterType);
-                    }
-
-                    return Expression.Call(null, methodInfo, parameters);
-                }
+                    return CompileCall(node, null, type, bindingFlags);
 
                 return null;
             };
