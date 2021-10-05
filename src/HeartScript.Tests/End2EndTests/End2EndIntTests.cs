@@ -7,7 +7,7 @@ namespace HeartScript.Tests.End2EndTests
     {
         static readonly End2EndTestCase[] s_testCases = new End2EndTestCase[]
         {
-            //ReturnFloat2Int
+            //ReturnDouble2Int
             new End2EndTestCase()
             {
                 Infix = "2.5 + 3.3",

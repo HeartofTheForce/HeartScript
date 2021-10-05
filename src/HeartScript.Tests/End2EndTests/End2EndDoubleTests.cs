@@ -3,17 +3,17 @@ using NUnit.Framework;
 namespace HeartScript.Tests.End2EndTests
 {
     [TestFixture]
-    public class End2EndFloatTests
+    public class End2EndDoubleTests
     {
         static readonly End2EndTestCase[] s_testCases = new End2EndTestCase[]
         {
-            //LeftToFloat
+            //LeftToDouble
             new End2EndTestCase()
             {
                 Infix = "2 + 1.5",
                 ExpectedNodeString = "(+ 2 1.5)",
             },
-            //RightToFloat
+            //RightToDouble
             new End2EndTestCase()
             {
                 Infix = "1.5 + 2",
@@ -25,7 +25,7 @@ namespace HeartScript.Tests.End2EndTests
                 Infix = "sin(1.0) + cos(1.0) + tan(1.0)",
                 ExpectedNodeString = "(+ (+ ($ sin 1.0) ($ cos 1.0)) ($ tan 1.0))",
             },
-            //MaxIntFloat
+            //MaxIntDouble
             new End2EndTestCase()
             {
                 Infix = "max(2, b)",

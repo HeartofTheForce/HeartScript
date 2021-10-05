@@ -1,7 +1,9 @@
 using System;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using HeartScript.Expressions;
+#pragma warning disable IDE0019
 
 namespace HeartScript.Compiling
 {
@@ -20,9 +22,10 @@ namespace HeartScript.Compiling
 
             s_nodeCompilers[Nullary] = new Func<ExpressionNode, Expression?>[]
             {
-                ParseFloat,
                 ParseInt,
+                ParseDouble,
                 CompileRoundBracket,
+                ParseIdentifier,
             };
 
             s_nodeCompilers[Prefix] = new Func<ExpressionNode, Expression?>[]
@@ -33,6 +36,7 @@ namespace HeartScript.Compiling
             s_nodeCompilers[Postfix] = new Func<ExpressionNode, Expression?>[]
             {
                 CompilePostfix,
+                CompileStaticCall(typeof(Math)),
             };
 
             s_nodeCompilers[Infix] = new Func<ExpressionNode, Expression?>[]
@@ -73,9 +77,9 @@ namespace HeartScript.Compiling
             return compiled;
         }
 
-        static Expression? ParseFloat(ExpressionNode node)
+        static Expression? ParseDouble(ExpressionNode node)
         {
-            if (float.TryParse(node.Value, out float value))
+            if (double.TryParse(node.Value, out double value))
                 return Expression.Constant(value);
 
             return null;
@@ -87,6 +91,11 @@ namespace HeartScript.Compiling
                 return Expression.Constant(value);
 
             return null;
+        }
+
+        static Expression? ParseIdentifier(ExpressionNode node)
+        {
+            return Expression.Constant(node.Value);
         }
 
         static Expression? CompileRoundBracket(ExpressionNode node)
@@ -128,6 +137,44 @@ namespace HeartScript.Compiling
             }
 
             return null;
+        }
+
+        static Func<ExpressionNode, Expression?> CompileStaticCall(Type type)
+        {
+            return (node) =>
+            {
+                if (node.Value == "(")
+                {
+                    var left = Compile((ExpressionNode)node.Children[0]) as ConstantExpression;
+                    if (left == null || left.Value.GetType() != typeof(string))
+                        throw new Exception($"{nameof(left)} must be type {typeof(string).Name}");
+
+                    int parameterCount = node.Children.Count - 1;
+                    var parameters = new Expression[parameterCount];
+                    var parameterTypes = new Type[parameterCount];
+
+                    for (int i = 0; i < parameterCount; i++)
+                    {
+                        parameters[i] = Compile((ExpressionNode)node.Children[i + 1]);
+                        parameterTypes[i] = parameters[i].Type;
+                    }
+
+                    var bindingFlags = BindingFlags.Public | BindingFlags.Static | BindingFlags.IgnoreCase;
+                    var methodInfo = type.GetMethod((string)left.Value, bindingFlags, null, parameterTypes, null);
+                    if (methodInfo == null)
+                        throw new Exception($"{type.FullName} does not have an overload matching '{left.Value}({string.Join(',', parameterTypes.Select(x => x.Name))})'");
+
+                    var expectedParameters = methodInfo.GetParameters();
+                    for (int i = 0; i < parameterCount; i++)
+                    {
+                        parameters[i] = Expression.Convert(parameters[i], expectedParameters[i].ParameterType);
+                    }
+
+                    return Expression.Call(null, methodInfo, parameters);
+                }
+
+                return null;
+            };
         }
 
         static Expression? CompileBinary(ExpressionNode node)
