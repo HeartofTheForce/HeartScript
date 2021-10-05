@@ -26,10 +26,12 @@ namespace HeartScript.Compiling
 
             s_nodeCompilers[Prefix] = new Func<ExpressionNode, Expression?>[]
             {
+                CompilePrefix,
             };
 
             s_nodeCompilers[Postfix] = new Func<ExpressionNode, Expression?>[]
             {
+                CompilePostfix,
             };
 
             s_nodeCompilers[Infix] = new Func<ExpressionNode, Expression?>[]
@@ -42,9 +44,10 @@ namespace HeartScript.Compiling
         {
             int index = 0;
 
-            if (node.HaveLeft)
-                index |= 1 << 0;
             if (node.HaveRight)
+                index |= 1 << 0;
+
+            if (node.HaveLeft)
                 index |= 1 << 1;
 
             return index;
@@ -80,6 +83,36 @@ namespace HeartScript.Compiling
         {
             if (int.TryParse(node.Value, out int value))
                 return Expression.Constant(value);
+
+            return null;
+        }
+
+        static Expression? CompilePrefix(ExpressionNode node)
+        {
+            var right = Compile((ExpressionNode)node.Children[^1]);
+
+            switch (node.Value)
+            {
+                case "+": return Expression.UnaryPlus(right);
+                case "-": return Expression.Negate(right);
+                case "~": return Expression.Not(right);
+                default:
+                    break;
+            }
+
+            return null;
+        }
+
+        static Expression? CompilePostfix(ExpressionNode node)
+        {
+            var left = Compile((ExpressionNode)node.Children[0]);
+
+            switch (node.Value)
+            {
+                case "!": return left;
+                default:
+                    break;
+            }
 
             return null;
         }
