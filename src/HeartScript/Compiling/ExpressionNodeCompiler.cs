@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -177,10 +178,29 @@ namespace HeartScript.Compiling
             };
         }
 
+        static bool IsFloatingPoint(Type type) =>
+            type == typeof(float) ||
+            type == typeof(double) ||
+            type == typeof(decimal);
+        static bool IsIntegral(Type type) =>
+            type == typeof(sbyte) ||
+            type == typeof(byte) ||
+            type == typeof(short) ||
+            type == typeof(int) ||
+            type == typeof(long) ||
+            type == typeof(ushort) ||
+            type == typeof(uint) ||
+            type == typeof(ulong);
+
         static Expression? CompileBinary(ExpressionNode node)
         {
             var left = Compile((ExpressionNode)node.Children[0]);
             var right = Compile((ExpressionNode)node.Children[^1]);
+
+            if (IsFloatingPoint(left.Type) && IsIntegral(right.Type))
+                right = Expression.Convert(right, left.Type);
+            else if (IsIntegral(left.Type) && IsFloatingPoint(right.Type))
+                left = Expression.Convert(left, right.Type);
 
             switch (node.Value)
             {
