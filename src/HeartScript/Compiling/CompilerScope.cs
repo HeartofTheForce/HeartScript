@@ -1,5 +1,4 @@
-#pragma warning disable IDE0019
-
+using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 
@@ -11,7 +10,7 @@ namespace HeartScript.Compiling
 
         public CompilerScope()
         {
-            _variables = new Dictionary<string, Expression>();
+            _variables = new Dictionary<string, Expression>(StringComparer.OrdinalIgnoreCase);
         }
 
         public bool TryGetVariable(string name, out Expression expression)
