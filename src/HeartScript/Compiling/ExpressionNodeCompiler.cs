@@ -1,5 +1,4 @@
 using System;
-using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -60,7 +59,15 @@ namespace HeartScript.Compiling
             return index;
         }
 
-        public static Expression Compile(ExpressionNode node)
+        public static Func<T> CompileFunction<T>(ExpressionNode node)
+        {
+            var compiledExpression = Compile(node);
+            compiledExpression = ConvertIfRequired(compiledExpression, typeof(T));
+
+            return Expression.Lambda<Func<T>>(compiledExpression).Compile();
+        }
+
+        static Expression Compile(ExpressionNode node)
         {
             var fixityCompilers = s_nodeCompilers[GetFixity(node)];
 
@@ -168,7 +175,7 @@ namespace HeartScript.Compiling
                     var expectedParameters = methodInfo.GetParameters();
                     for (int i = 0; i < parameterCount; i++)
                     {
-                        parameters[i] = Expression.Convert(parameters[i], expectedParameters[i].ParameterType);
+                        parameters[i] = ConvertIfRequired(parameters[i], expectedParameters[i].ParameterType);
                     }
 
                     return Expression.Call(null, methodInfo, parameters);
@@ -234,6 +241,14 @@ namespace HeartScript.Compiling
             }
 
             return null;
+        }
+
+        static Expression ConvertIfRequired(Expression expression, Type expectedType)
+        {
+            if (expression.Type != expectedType)
+                return Expression.Convert(expression, expectedType);
+
+            return expression;
         }
     }
 }

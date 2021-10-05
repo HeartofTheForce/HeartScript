@@ -33,8 +33,7 @@ namespace HeartScript.Cli
                 Console.WriteLine("Output");
                 Console.WriteLine(node);
 
-                var compiledExpression = ExpressionNodeCompiler.Compile((ExpressionNode)node);
-                var compiledFunction = Expression.Lambda<Func<double>>(compiledExpression).Compile();
+                var compiledFunction = ExpressionNodeCompiler.CompileFunction<double>((ExpressionNode)node);
 
                 Console.WriteLine("Result");
                 Console.WriteLine(compiledFunction());
