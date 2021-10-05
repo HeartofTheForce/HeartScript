@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -37,8 +38,8 @@ namespace HeartScript.Compiling
 
             s_nodeCompilers[Postfix] = new CompileExpression[]
             {
-                CompileStaticCall(typeof(Math)),
                 CompilePostfix,
+                CompileStaticCall(typeof(Math)),
             };
 
             s_nodeCompilers[Infix] = new CompileExpression[]
@@ -123,36 +124,6 @@ namespace HeartScript.Compiling
             return null;
         }
 
-        static Expression? CompilePrefix(CompilerScope scope, ExpressionNode node)
-        {
-            var right = Compile(scope, (ExpressionNode)node.Children[^1]);
-
-            switch (node.Value)
-            {
-                case "+": return Expression.UnaryPlus(right);
-                case "-": return Expression.Negate(right);
-                case "~": return Expression.Not(right);
-                default:
-                    break;
-            }
-
-            return null;
-        }
-
-        static Expression? CompilePostfix(CompilerScope scope, ExpressionNode node)
-        {
-            var left = Compile(scope, (ExpressionNode)node.Children[0]);
-
-            switch (node.Value)
-            {
-                case "!": return left;
-                default:
-                    break;
-            }
-
-            return null;
-        }
-
         static Expression CompileCall(CompilerScope scope, ExpressionNode callNode, Expression? instance, Type type, BindingFlags bindingFlags)
         {
             var left = callNode.Children[0];
@@ -199,45 +170,68 @@ namespace HeartScript.Compiling
             };
         }
 
-        static bool IsFloatingPoint(Type type) =>
-            type == typeof(float) ||
-            type == typeof(double) ||
-            type == typeof(decimal);
-        static bool IsIntegral(Type type) =>
-            type == typeof(sbyte) ||
-            type == typeof(byte) ||
-            type == typeof(short) ||
-            type == typeof(int) ||
-            type == typeof(long) ||
-            type == typeof(ushort) ||
-            type == typeof(uint) ||
-            type == typeof(ulong);
+        private static readonly Dictionary<string, Func<Expression, Expression>> s_prefixCompilers = new Dictionary<string, Func<Expression, Expression>>()
+        {
+            ["+"] = Expression.UnaryPlus,
+            ["-"] = Expression.Negate,
+            ["~"] = Expression.Not,
+        };
+
+        static Expression? CompilePrefix(CompilerScope scope, ExpressionNode node)
+        {
+            if (s_prefixCompilers.TryGetValue(node.Value, out var compiler))
+            {
+                var right = Compile(scope, (ExpressionNode)node.Children[^1]);
+                return compiler(right);
+            }
+
+            return null;
+        }
+
+        private static readonly Dictionary<string, Func<Expression, Expression>> s_postfixCompilers = new Dictionary<string, Func<Expression, Expression>>()
+        {
+            ["!"] = (expression) => expression,
+        };
+
+        static Expression? CompilePostfix(CompilerScope scope, ExpressionNode node)
+        {
+            if (s_postfixCompilers.TryGetValue(node.Value, out var compiler))
+            {
+                var left = Compile(scope, (ExpressionNode)node.Children[0]);
+                return compiler(left);
+            }
+
+            return null;
+        }
+
+        private static readonly Dictionary<string, Func<Expression, Expression, Expression>> s_binaryCompilers = new Dictionary<string, Func<Expression, Expression, Expression>>()
+        {
+            ["*"] = Expression.Multiply,
+            ["/"] = Expression.Divide,
+            ["+"] = Expression.Add,
+            ["-"] = Expression.Subtract,
+            ["<="] = Expression.LessThanOrEqual,
+            [">="] = Expression.GreaterThanOrEqual,
+            ["<"] = Expression.LessThan,
+            [">"] = Expression.GreaterThan,
+            ["&"] = Expression.And,
+            ["^"] = Expression.ExclusiveOr,
+            ["|"] = Expression.Or,
+        };
 
         static Expression? CompileBinary(CompilerScope scope, ExpressionNode node)
         {
-            var left = Compile(scope, (ExpressionNode)node.Children[0]);
-            var right = Compile(scope, (ExpressionNode)node.Children[^1]);
-
-            if (IsFloatingPoint(left.Type) && IsIntegral(right.Type))
-                right = Expression.Convert(right, left.Type);
-            else if (IsIntegral(left.Type) && IsFloatingPoint(right.Type))
-                left = Expression.Convert(left, right.Type);
-
-            switch (node.Value)
+            if (s_binaryCompilers.TryGetValue(node.Value, out var compiler))
             {
-                case "*": return Expression.Multiply(left, right);
-                case "/": return Expression.Divide(left, right);
-                case "+": return Expression.Add(left, right);
-                case "-": return Expression.Subtract(left, right);
-                case "<=": return Expression.LessThanOrEqual(left, right);
-                case ">=": return Expression.GreaterThanOrEqual(left, right);
-                case "<": return Expression.LessThan(left, right);
-                case ">": return Expression.GreaterThan(left, right);
-                case "&": return Expression.And(left, right);
-                case "^": return Expression.ExclusiveOr(left, right);
-                case "|": return Expression.Or(left, right);
-                default:
-                    break;
+                var left = Compile(scope, (ExpressionNode)node.Children[0]);
+                var right = Compile(scope, (ExpressionNode)node.Children[^1]);
+
+                if (IsFloatingPoint(left.Type) && IsIntegral(right.Type))
+                    right = Expression.Convert(right, left.Type);
+                else if (IsIntegral(left.Type) && IsFloatingPoint(right.Type))
+                    left = Expression.Convert(left, right.Type);
+
+                return compiler(left, right);
             }
 
             return null;
@@ -264,5 +258,19 @@ namespace HeartScript.Compiling
 
             return expression;
         }
+
+        static bool IsFloatingPoint(Type type) =>
+            type == typeof(float) ||
+            type == typeof(double) ||
+            type == typeof(decimal);
+        static bool IsIntegral(Type type) =>
+            type == typeof(sbyte) ||
+            type == typeof(byte) ||
+            type == typeof(short) ||
+            type == typeof(int) ||
+            type == typeof(long) ||
+            type == typeof(ushort) ||
+            type == typeof(uint) ||
+            type == typeof(ulong);
     }
 }
