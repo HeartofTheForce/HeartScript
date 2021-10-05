@@ -91,9 +91,9 @@ namespace HeartScript.Expressions
             {
                 bool valid;
                 if (wantOperand)
-                    valid = op.IsPrefix() || op.IsNullary();
+                    valid = op.IsNullary() || op.IsPrefix();
                 else
-                    valid = op.IsInfix() || op.IsPostfix();
+                    valid = op.IsPostfix() || op.IsInfix();
 
                 if (!valid)
                     continue;
