@@ -100,7 +100,10 @@ namespace HeartScript.Expressions
 
                 var result = parser.TryMatch(op.Pattern, ctx);
                 if (result != null)
+                {
+                    result.Name = op.Name;
                     return new ExpressionNodeBuilder(op, result);
+                }
             }
 
             return null;

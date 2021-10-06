@@ -103,31 +103,40 @@ namespace HeartScript.Compiling
 
         static Expression? ParseDouble(CompilerScope scope, ExpressionNode node)
         {
-            if (double.TryParse(node.Value, out double value))
-                return Expression.Constant(value);
+            if (node.Name == "Constant")
+            {
+                if (double.TryParse(node.Value, out double value))
+                    return Expression.Constant(value);
+            }
 
             return null;
         }
 
         static Expression? ParseInt(CompilerScope scope, ExpressionNode node)
         {
-            if (int.TryParse(node.Value, out int value))
-                return Expression.Constant(value);
+            if (node.Name == "Constant")
+            {
+                if (int.TryParse(node.Value, out int value))
+                    return Expression.Constant(value);
+            }
 
             return null;
         }
 
         static Expression? ParseIdentifier(CompilerScope scope, ExpressionNode node)
         {
-            if (scope.TryGetVariable(node.Value, out var variable))
-                return variable;
+            if (node.Name == "Identifier")
+            {
+                if (scope.TryGetVariable(node.Value, out var variable))
+                    return variable;
+            }
 
             return null;
         }
 
         static Expression? CompileRoundBracket(CompilerScope scope, ExpressionNode node)
         {
-            if (node.Value == "(")
+            if (node.Name == "RoundBracket")
             {
                 var mid = Compile(scope, (ExpressionNode)node.Children[0]);
                 return mid;
@@ -140,8 +149,8 @@ namespace HeartScript.Compiling
         {
             var left = callNode.Children[0];
 
-            if (left.Children?.Count > 0)
-                throw new Exception($"{nameof(left)}.{nameof(left.Children)} must be empty");
+            if (left.Name != "Identifier")
+                throw new Exception($"{nameof(left)}.{nameof(left.Name)} is not Identifier");
 
             string methodName = left.Value;
             if (methodName == null)
@@ -175,7 +184,7 @@ namespace HeartScript.Compiling
             return (scope, node) =>
             {
                 var bindingFlags = BindingFlags.Public | BindingFlags.Static | BindingFlags.IgnoreCase;
-                if (node.Value == "(")
+                if (node.Name == "Call")
                     return CompileCall(scope, node, null, type, bindingFlags);
 
                 return null;
@@ -184,14 +193,14 @@ namespace HeartScript.Compiling
 
         private static readonly Dictionary<string, Func<Expression, Expression>> s_unaryPrefixCompilers = new Dictionary<string, Func<Expression, Expression>>()
         {
-            ["+"] = Expression.UnaryPlus,
-            ["-"] = Expression.Negate,
-            ["~"] = Expression.Not,
+            ["PrefixPlus"] = Expression.UnaryPlus,
+            ["PrefixMinus"] = Expression.Negate,
+            ["BitwiseNot"] = Expression.Not,
         };
 
         static Expression? CompileUnaryPrefix(CompilerScope scope, ExpressionNode node)
         {
-            if (s_unaryPrefixCompilers.TryGetValue(node.Value, out var compiler))
+            if (node.Name != null && s_unaryPrefixCompilers.TryGetValue(node.Name, out var compiler))
             {
                 var right = Compile(scope, (ExpressionNode)node.Children[^1]);
                 return compiler(right);
@@ -202,12 +211,12 @@ namespace HeartScript.Compiling
 
         private static readonly Dictionary<string, Func<Expression, Expression>> s_unaryPostfixCompilers = new Dictionary<string, Func<Expression, Expression>>()
         {
-            ["!"] = (expression) => expression,
+            ["Factorial"] = (expression) => expression,
         };
 
         static Expression? CompileUnaryPostfix(CompilerScope scope, ExpressionNode node)
         {
-            if (s_unaryPostfixCompilers.TryGetValue(node.Value, out var compiler))
+            if (node.Name != null && s_unaryPostfixCompilers.TryGetValue(node.Name, out var compiler))
             {
                 var left = Compile(scope, (ExpressionNode)node.Children[0]);
                 return compiler(left);
@@ -218,22 +227,22 @@ namespace HeartScript.Compiling
 
         private static readonly Dictionary<string, Func<Expression, Expression, Expression>> s_binaryCompilers = new Dictionary<string, Func<Expression, Expression, Expression>>()
         {
-            ["*"] = Expression.Multiply,
-            ["/"] = Expression.Divide,
-            ["+"] = Expression.Add,
-            ["-"] = Expression.Subtract,
-            ["<="] = Expression.LessThanOrEqual,
-            [">="] = Expression.GreaterThanOrEqual,
-            ["<"] = Expression.LessThan,
-            [">"] = Expression.GreaterThan,
-            ["&"] = Expression.And,
-            ["^"] = Expression.ExclusiveOr,
-            ["|"] = Expression.Or,
+            ["Multiply"] = Expression.Multiply,
+            ["Divide"] = Expression.Divide,
+            ["BinaryPlus"] = Expression.Add,
+            ["BinaryMinus"] = Expression.Subtract,
+            ["LessThanOrEqual"] = Expression.LessThanOrEqual,
+            ["GreaterThanOrEqual"] = Expression.GreaterThanOrEqual,
+            ["LessThan"] = Expression.LessThan,
+            ["GreaterThan"] = Expression.GreaterThan,
+            ["BitwiseAnd"] = Expression.And,
+            ["BitwiseXor"] = Expression.ExclusiveOr,
+            ["BitwiseOr"] = Expression.Or,
         };
 
         static Expression? CompileBinary(CompilerScope scope, ExpressionNode node)
         {
-            if (s_binaryCompilers.TryGetValue(node.Value, out var compiler))
+            if (node.Name != null && s_binaryCompilers.TryGetValue(node.Name, out var compiler))
             {
                 var left = Compile(scope, (ExpressionNode)node.Children[0]);
                 var right = Compile(scope, (ExpressionNode)node.Children[^1]);
@@ -251,7 +260,7 @@ namespace HeartScript.Compiling
 
         static Expression? CompileTernary(CompilerScope scope, ExpressionNode node)
         {
-            if (node.Value == "?")
+            if (node.Name == "Ternary")
             {
                 var left = Compile(scope, (ExpressionNode)node.Children[0]);
                 var mid = Compile(scope, (ExpressionNode)node.Children[1]);

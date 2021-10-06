@@ -75,20 +75,20 @@ namespace HeartScript.Peg
             output.Builders["quantifier"] = BuildQuantifier;
             output.Builders["term"] = BuildTerm;
 
-            return BuildLookup(output, node);
+            return BuildLookup(output, (LookupNode)node);
         }
 
-        static IPattern BuildLookup(PatternBuilder builder, INode node)
+        static IPattern BuildLookup(PatternBuilder builder, LookupNode node)
         {
             if (node.Name == null)
                 throw new ArgumentException($"{nameof(node.Name)} cannot be null");
 
-            return builder.Builders[node.Name](builder, node);
+            return builder.Builders[node.Name](builder, node.Node);
         }
 
         static IPattern BuildPeg(PatternBuilder builder, INode node)
         {
-            return BuildLookup(builder, node.Children[1]);
+            return BuildLookup(builder, (LookupNode)node.Children[1]);
         }
 
         static IPattern BuildChoice(PatternBuilder builder, INode node)
@@ -96,15 +96,15 @@ namespace HeartScript.Peg
             var minOrMoreNode = node.Children[1];
 
             if (minOrMoreNode.Children.Count == 0)
-                return BuildLookup(builder, node.Children[0]);
+                return BuildLookup(builder, (LookupNode)node.Children[0]);
             else
             {
                 var output = ChoicePattern.Create()
-                   .Or(BuildLookup(builder, node.Children[0]));
+                   .Or(BuildLookup(builder, (LookupNode)node.Children[0]));
 
                 foreach (var child in minOrMoreNode.Children)
                 {
-                    output.Or(BuildLookup(builder, child.Children[0]));
+                    output.Or(BuildLookup(builder, (LookupNode)child.Children[0]));
                 }
 
                 return output;
@@ -116,7 +116,7 @@ namespace HeartScript.Peg
             var output = SequencePattern.Create();
             foreach (var child in node.Children)
             {
-                output.Then(BuildLookup(builder, child));
+                output.Then(BuildLookup(builder, (LookupNode)child));
             }
 
             return output;
@@ -124,7 +124,7 @@ namespace HeartScript.Peg
 
         static IPattern BuildQuantifier(PatternBuilder builder, INode node)
         {
-            var pattern = BuildLookup(builder, node.Children[0]);
+            var pattern = BuildLookup(builder, (LookupNode)node.Children[0]);
             var optional = node.Children[1];
 
             if (optional.Children.Count == 0)
@@ -169,7 +169,7 @@ namespace HeartScript.Peg
                 case 1:
                     {
                         var sequenceNode = root.Node;
-                        return BuildLookup(builder, sequenceNode.Children[1]);
+                        return BuildLookup(builder, (LookupNode)sequenceNode.Children[1]);
                     }
                 case 2:
                     {

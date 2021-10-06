@@ -10,6 +10,7 @@ namespace HeartScript.Expressions
 {
     public static class OperatorInfoBuilder
     {
+        private static readonly LexerPattern s_name = LexerPattern.FromRegex("[a-zA-Z]\\w*");
         private static readonly LexerPattern s_digits = LexerPattern.FromRegex("\\d+");
         private static readonly LexerPattern s_none = LexerPattern.FromPlainText("none");
 
@@ -37,14 +38,19 @@ namespace HeartScript.Expressions
             var ctx = new ParserContext(input);
             var pegParser = PegHelper.CreatePegParser();
             var pattern = SequencePattern.Create()
+                .Then(QuantifierPattern.Optional(SequencePattern.Create()
+                    .Then(s_name)
+                    .Then(LexerPattern.FromRegex("\\s+"))
+                    .Then(LexerPattern.FromRegex("->"))
+                    .Then(LexerPattern.FromRegex("\\s+"))))
                 .Then(ChoicePattern.Create()
                     .Or(s_digits)
                     .Or(s_none))
-                .Then(LexerPattern.FromPlainText(" "))
+                .Then(LexerPattern.FromRegex("\\s+"))
                 .Then(ChoicePattern.Create()
                     .Or(s_digits)
                     .Or(s_none))
-                .Then(LexerPattern.FromPlainText(" "))
+                .Then(LexerPattern.FromRegex("\\s+"))
                 .Then(LookupPattern.Create("peg"));
 
             var result = pegParser.TryMatch(pattern, ctx);
@@ -52,24 +58,33 @@ namespace HeartScript.Expressions
             if (result == null)
                 throw new Exception($"{ctx.Exception}, {lineNumber}");
 
-            var leftNode = (ChoiceNode)result.Children[0];
+            string? name = null;
+            var optionalNode = result.Children[0];
+            if (optionalNode.Children.Count > 0)
+            {
+                var sequenceNode = optionalNode.Children[0];
+                var nameNode = sequenceNode.Children[0];
+                name = nameNode.Value;
+            }
+
+            var leftNode = (ChoiceNode)result.Children[1];
             uint? leftPrecedence;
             if (uint.TryParse(leftNode.Node.Value, out uint leftValue))
                 leftPrecedence = leftValue;
             else
                 leftPrecedence = null;
 
-            var rightNode = (ChoiceNode)result.Children[2];
+            var rightNode = (ChoiceNode)result.Children[3];
             uint? rightPrecedence;
             if (uint.TryParse(rightNode.Node.Value, out uint rightValue))
                 rightPrecedence = rightValue;
             else
                 rightPrecedence = null;
 
-            var patternNode = result.Children[4];
+            var patternNode = result.Children[5];
             var operatorInfo = PegHelper.BuildPegPattern(patternNode);
 
-            return new OperatorInfo(operatorInfo, leftPrecedence, rightPrecedence);
+            return new OperatorInfo(name, operatorInfo, leftPrecedence, rightPrecedence);
         }
     }
 }

@@ -1,4 +1,5 @@
 using HeartScript.Parsing;
+using HeartScript.Peg.Nodes;
 
 namespace HeartScript.Peg.Patterns
 {
@@ -21,10 +22,7 @@ namespace HeartScript.Peg.Patterns
             var result = parser.TryMatch(parser.Patterns[_key], ctx);
 
             if (result != null)
-            {
-                result.Name = _key;
-                return result;
-            }
+                return new LookupNode(_key, result);
 
             return null;
         }

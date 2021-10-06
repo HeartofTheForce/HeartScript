@@ -17,6 +17,7 @@ namespace HeartScript.Expressions
 
         public ExpressionNode(INode? leftNode, INode midNode, INode? rightNode)
         {
+            Name = midNode.Name;
             Value = null;
             Children = new List<INode>();
 
