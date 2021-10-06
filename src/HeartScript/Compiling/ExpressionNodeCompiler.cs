@@ -136,7 +136,7 @@ namespace HeartScript.Compiling
 
         static Expression? CompileRoundBracket(CompilerScope scope, ExpressionNode node)
         {
-            if (node.Name == "RoundBracket")
+            if (node.Name == "()")
             {
                 var mid = Compile(scope, (ExpressionNode)node.Children[0]);
                 return mid;
@@ -184,7 +184,7 @@ namespace HeartScript.Compiling
             return (scope, node) =>
             {
                 var bindingFlags = BindingFlags.Public | BindingFlags.Static | BindingFlags.IgnoreCase;
-                if (node.Name == "Call")
+                if (node.Name == "$")
                     return CompileCall(scope, node, null, type, bindingFlags);
 
                 return null;
@@ -193,9 +193,9 @@ namespace HeartScript.Compiling
 
         private static readonly Dictionary<string, Func<Expression, Expression>> s_unaryPrefixCompilers = new Dictionary<string, Func<Expression, Expression>>()
         {
-            ["PrefixPlus"] = Expression.UnaryPlus,
-            ["PrefixMinus"] = Expression.Negate,
-            ["BitwiseNot"] = Expression.Not,
+            ["+"] = Expression.UnaryPlus,
+            ["-"] = Expression.Negate,
+            ["~"] = Expression.Not,
         };
 
         static Expression? CompileUnaryPrefix(CompilerScope scope, ExpressionNode node)
@@ -211,7 +211,7 @@ namespace HeartScript.Compiling
 
         private static readonly Dictionary<string, Func<Expression, Expression>> s_unaryPostfixCompilers = new Dictionary<string, Func<Expression, Expression>>()
         {
-            ["Factorial"] = (expression) => expression,
+            ["!"] = (expression) => expression,
         };
 
         static Expression? CompileUnaryPostfix(CompilerScope scope, ExpressionNode node)
@@ -227,17 +227,17 @@ namespace HeartScript.Compiling
 
         private static readonly Dictionary<string, Func<Expression, Expression, Expression>> s_binaryCompilers = new Dictionary<string, Func<Expression, Expression, Expression>>()
         {
-            ["Multiply"] = Expression.Multiply,
-            ["Divide"] = Expression.Divide,
-            ["BinaryPlus"] = Expression.Add,
-            ["BinaryMinus"] = Expression.Subtract,
-            ["LessThanOrEqual"] = Expression.LessThanOrEqual,
-            ["GreaterThanOrEqual"] = Expression.GreaterThanOrEqual,
-            ["LessThan"] = Expression.LessThan,
-            ["GreaterThan"] = Expression.GreaterThan,
-            ["BitwiseAnd"] = Expression.And,
-            ["BitwiseXor"] = Expression.ExclusiveOr,
-            ["BitwiseOr"] = Expression.Or,
+            ["*"] = Expression.Multiply,
+            ["/"] = Expression.Divide,
+            ["+"] = Expression.Add,
+            ["-"] = Expression.Subtract,
+            ["<="] = Expression.LessThanOrEqual,
+            [">="] = Expression.GreaterThanOrEqual,
+            ["<"] = Expression.LessThan,
+            [">"] = Expression.GreaterThan,
+            ["&"] = Expression.And,
+            ["^"] = Expression.ExclusiveOr,
+            ["|"] = Expression.Or,
         };
 
         static Expression? CompileBinary(CompilerScope scope, ExpressionNode node)
@@ -260,7 +260,7 @@ namespace HeartScript.Compiling
 
         static Expression? CompileTernary(CompilerScope scope, ExpressionNode node)
         {
-            if (node.Name == "Ternary")
+            if (node.Name == "?")
             {
                 var left = Compile(scope, (ExpressionNode)node.Children[0]);
                 var mid = Compile(scope, (ExpressionNode)node.Children[1]);

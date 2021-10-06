@@ -10,7 +10,7 @@ namespace HeartScript.Expressions
 {
     public static class OperatorInfoBuilder
     {
-        private static readonly LexerPattern s_name = LexerPattern.FromRegex("[a-zA-Z]\\w*");
+        private static readonly LexerPattern s_name = LexerPattern.FromRegex("'[^']*'");
         private static readonly LexerPattern s_digits = LexerPattern.FromRegex("\\d+");
         private static readonly LexerPattern s_none = LexerPattern.FromPlainText("none");
 
@@ -64,7 +64,7 @@ namespace HeartScript.Expressions
             {
                 var sequenceNode = optionalNode.Children[0];
                 var nameNode = sequenceNode.Children[0];
-                name = nameNode.Value;
+                name = nameNode.Value[1..^1];
             }
 
             var leftNode = (ChoiceNode)result.Children[1];

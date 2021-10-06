@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using HeartScript.Compiling;
 using HeartScript.Parsing;
 #pragma warning disable CS8618
 #pragma warning disable CS8625
@@ -66,21 +67,7 @@ namespace HeartScript.Expressions
 
         public override string ToString()
         {
-            string? children = string.Join(' ', Children);
-
-            string op = Value;
-            if (op == "(")
-            {
-                if (!HaveLeft)
-                    return children;
-                else
-                    op = "$";
-            }
-
-            if (children.Length > 0)
-                return $"({op} {children})";
-            else
-                return Value!;
+            return StringCompiler.Compile(this);
         }
     }
 }
