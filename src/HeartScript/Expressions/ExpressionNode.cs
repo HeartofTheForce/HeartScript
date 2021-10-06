@@ -19,7 +19,6 @@ namespace HeartScript.Expressions
         public ExpressionNode(INode? leftNode, INode midNode, INode? rightNode)
         {
             Name = midNode.Name;
-            Value = null;
             Children = new List<INode>();
 
             if (leftNode != null)
@@ -39,17 +38,12 @@ namespace HeartScript.Expressions
                     continue;
                 }
 
-                if (current.Value != null)
+                if (current.Children != null)
                 {
-                    if (Value == null)
-                        Value = current.Value;
-
-                    continue;
-                }
-
-                for (int i = current.Children.Count - 1; i >= 0; i--)
-                {
-                    nodeStack.Push(current.Children[i]);
+                    for (int i = current.Children.Count - 1; i >= 0; i--)
+                    {
+                        nodeStack.Push(current.Children[i]);
+                    }
                 }
             }
 
@@ -60,9 +54,15 @@ namespace HeartScript.Expressions
             }
 
             if (Children.Count > 0)
+            {
+                Value = null;
                 CharIndex = Children[0].CharIndex;
+            }
             else
+            {
+                Value = midNode.ToString().Trim();
                 CharIndex = midNode.CharIndex;
+            }
         }
 
         public override string ToString()
