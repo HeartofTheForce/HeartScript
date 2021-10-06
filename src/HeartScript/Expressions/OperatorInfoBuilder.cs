@@ -40,17 +40,17 @@ namespace HeartScript.Expressions
             var pattern = SequencePattern.Create()
                 .Then(QuantifierPattern.Optional(SequencePattern.Create()
                     .Then(s_name)
-                    .Then(LexerPattern.FromRegex("\\s+"))
-                    .Then(LexerPattern.FromRegex("->"))
-                    .Then(LexerPattern.FromRegex("\\s+"))))
+                    .Discard(LexerPattern.FromRegex("\\s+"))
+                    .Discard(LexerPattern.FromRegex("->"))))
+                .Discard(LexerPattern.FromRegex("\\s+"))
                 .Then(ChoicePattern.Create()
                     .Or(s_digits)
                     .Or(s_none))
-                .Then(LexerPattern.FromRegex("\\s+"))
+                .Discard(LexerPattern.FromRegex("\\s+"))
                 .Then(ChoicePattern.Create()
                     .Or(s_digits)
                     .Or(s_none))
-                .Then(LexerPattern.FromRegex("\\s+"))
+                .Discard(LexerPattern.FromRegex("\\s+"))
                 .Then(LookupPattern.Create("peg"));
 
             var result = pegParser.TryMatch(pattern, ctx);
@@ -62,8 +62,7 @@ namespace HeartScript.Expressions
             var optionalNode = result.Children[0];
             if (optionalNode.Children.Count > 0)
             {
-                var sequenceNode = optionalNode.Children[0];
-                var nameNode = sequenceNode.Children[0];
+                var nameNode = optionalNode.Children[0];
                 name = nameNode.Value[1..^1];
             }
 
@@ -74,14 +73,14 @@ namespace HeartScript.Expressions
             else
                 leftPrecedence = null;
 
-            var rightNode = (ChoiceNode)result.Children[3];
+            var rightNode = (ChoiceNode)result.Children[2];
             uint? rightPrecedence;
             if (uint.TryParse(rightNode.Node.Value, out uint rightValue))
                 rightPrecedence = rightValue;
             else
                 rightPrecedence = null;
 
-            var patternNode = result.Children[5];
+            var patternNode = result.Children[3];
             var operatorInfo = PegHelper.BuildPegPattern(patternNode);
 
             return new OperatorInfo(name, operatorInfo, leftPrecedence, rightPrecedence);
