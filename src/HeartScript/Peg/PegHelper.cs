@@ -88,7 +88,7 @@ namespace HeartScript.Peg
 
         static IPattern BuildPeg(PatternBuilder builder, INode node)
         {
-            return BuildLookup(builder, (LookupNode)node.Children[0]);
+            return BuildLookup(builder, (LookupNode)node);
         }
 
         static IPattern BuildChoice(PatternBuilder builder, INode node)
@@ -104,7 +104,7 @@ namespace HeartScript.Peg
 
             foreach (var child in minOrMoreNode.Children)
             {
-                output.Or(BuildLookup(builder, (LookupNode)child.Children[0]));
+                output.Or(BuildLookup(builder, (LookupNode)child));
             }
 
             return output;
@@ -112,6 +112,9 @@ namespace HeartScript.Peg
 
         static IPattern BuildSequence(PatternBuilder builder, INode node)
         {
+            if (node.Children.Count == 1)
+                return BuildLookup(builder, (LookupNode)node.Children[0]);
+
             var output = SequencePattern.Create();
             foreach (var child in node.Children)
             {
@@ -148,7 +151,7 @@ namespace HeartScript.Peg
                 case 0:
                     {
                         var choiceNode = (ChoiceNode)root.Node;
-                        var terminalNode = choiceNode.Node.Children[0];
+                        var terminalNode = choiceNode.Node;
 
                         switch (choiceNode.ChoiceIndex)
                         {
@@ -166,16 +169,11 @@ namespace HeartScript.Peg
                         }
                     };
                 case 1:
-                    {
-                        var sequenceNode = root.Node;
-                        return BuildLookup(builder, (LookupNode)sequenceNode.Children[0]);
-                    }
+                    return BuildLookup(builder, (LookupNode)root.Node);
                 case 2:
-                    {
-                        var terminalNode = root.Node.Children[0];
-                        return LookupPattern.Create(terminalNode.Value);
-                    }
-                default: throw new Exception();
+                    return LookupPattern.Create(root.Node.Value);
+                default:
+                    throw new Exception();
             }
         }
     }

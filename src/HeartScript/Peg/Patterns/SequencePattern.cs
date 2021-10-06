@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using HeartScript.Parsing;
 using HeartScript.Peg.Nodes;
@@ -6,12 +7,6 @@ namespace HeartScript.Peg.Patterns
 {
     public class SequencePattern : IPattern
     {
-        private struct SequenceStep
-        {
-            public IPattern Pattern { get; set; }
-            public bool Discard { get; set; }
-        }
-
         private readonly List<SequenceStep> _steps;
 
         private SequencePattern()
@@ -48,6 +43,9 @@ namespace HeartScript.Peg.Patterns
 
         public INode? Match(PatternParser parser, ParserContext ctx)
         {
+            if (_steps.Count <= 1)
+                throw new Exception($"Expected > 1 {nameof(_steps)} found: {_steps.Count}");
+
             int localOffset = ctx.Offset;
 
             var output = new List<INode>();
@@ -62,7 +60,20 @@ namespace HeartScript.Peg.Patterns
                     output.Add(result);
             }
 
-            return new PegNode(localOffset, output);
+            if (output.Count == 0)
+                throw new Exception($"Cannot {nameof(Discard)} all steps");
+
+            if (output.Count == 1)
+                return output[0];
+            else
+                return new PegNode(localOffset, output);
         }
+
+        private struct SequenceStep
+        {
+            public IPattern Pattern { get; set; }
+            public bool Discard { get; set; }
+        }
+
     }
 }

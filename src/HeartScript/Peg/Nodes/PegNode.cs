@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using HeartScript.Parsing;
 #pragma warning disable CS8618
@@ -41,7 +42,7 @@ namespace HeartScript.Peg.Nodes
             if (Children != null)
                 return string.Join("", Children);
 
-            throw new System.Exception();
+            throw new Exception();
         }
     }
 }
