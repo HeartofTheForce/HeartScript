@@ -1,6 +1,6 @@
-'()'          -> none none '(' expr ')'
+'()'         -> none none '(' expr ')'
 '$'          -> 0 none '(' (expr (',' expr)*)? ')'
-'?'          -> 2 99 '?' expr ':'
+'?:'         -> 2 99 '?' expr ':'
 '!'          -> 2 none '!'
 '+'          -> none 1 '+'
 '-'          -> none 1 '-'

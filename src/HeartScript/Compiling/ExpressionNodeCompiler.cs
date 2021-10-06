@@ -260,7 +260,7 @@ namespace HeartScript.Compiling
 
         static Expression? CompileTernary(CompilerScope scope, ExpressionNode node)
         {
-            if (node.Name == "?")
+            if (node.Name == "?:")
             {
                 var left = Compile(scope, (ExpressionNode)node.Children[0]);
                 var mid = Compile(scope, (ExpressionNode)node.Children[1]);

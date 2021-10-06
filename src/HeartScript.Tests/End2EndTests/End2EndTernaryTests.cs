@@ -11,43 +11,43 @@ namespace HeartScript.Tests.End2EndTests
             new End2EndTestCase()
             {
                 Infix = "a ? b : c ? d : e",
-                ExpectedNodeString = "(? a b (? c d e))",
+                ExpectedNodeString = "(?: a b (?: c d e))",
             },
             //TernaryBrackets
             new End2EndTestCase()
             {
                 Infix = "(a ? b : c) ? d : e",
-                ExpectedNodeString = "(? (? a b c) d e)",
+                ExpectedNodeString = "(?: (?: a b c) d e)",
             },
             //TernaryBinary
             new End2EndTestCase()
             {
                 Infix = "a ? b : c + 1",
-                ExpectedNodeString = "(? a b (+ c 1))",
+                ExpectedNodeString = "(?: a b (+ c 1))",
             },
             //NestedTernary
             new End2EndTestCase()
             {
                 Infix = "a ? b ? c : d : e",
-                ExpectedNodeString = "(? a (? b c d) e)",
+                ExpectedNodeString = "(?: a (?: b c d) e)",
             },
             //InfixTernary
             new End2EndTestCase()
             {
                 Infix = "a * b ? c : d",
-                ExpectedNodeString = "(* a (? b c d))",
+                ExpectedNodeString = "(* a (?: b c d))",
             },
             //PrefixTernary
             new End2EndTestCase()
             {
                 Infix = "-a ? b : c",
-                ExpectedNodeString = "(? (- a) b c)",
+                ExpectedNodeString = "(?: (- a) b c)",
             },
             //TernaryPostfix
             new End2EndTestCase()
             {
                 Infix = "a ? b : c!",
-                ExpectedNodeString = "(? a b (! c))",
+                ExpectedNodeString = "(?: a b (! c))",
             },
         };
 
