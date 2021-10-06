@@ -12,10 +12,5 @@ namespace HeartScript.Parsing
         {
             Builders = new Dictionary<string, Func<PatternBuilder, INode, IPattern>>();
         }
-
-        public IPattern BuildPattern(string key, INode node)
-        {
-            return Builders[key](this, node);
-        }
     }
 }

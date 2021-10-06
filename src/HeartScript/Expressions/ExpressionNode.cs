@@ -7,6 +7,7 @@ namespace HeartScript.Expressions
 {
     public class ExpressionNode : INode
     {
+        public string? Name { get; set; }
         public string Value { get; }
         public List<INode> Children { get; }
         public int CharIndex { get; set; }

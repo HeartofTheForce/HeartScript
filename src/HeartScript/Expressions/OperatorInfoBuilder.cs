@@ -45,7 +45,7 @@ namespace HeartScript.Expressions
                     .Or(s_digits)
                     .Or(s_none))
                 .Then(LexerPattern.FromPlainText(" "))
-                .Then(KeyPattern.Create("peg"));
+                .Then(LookupPattern.Create("peg"));
 
             var result = pegParser.TryMatch(pattern, ctx);
 
@@ -66,7 +66,7 @@ namespace HeartScript.Expressions
             else
                 rightPrecedence = null;
 
-            var patternNode = (KeyNode)result.Children[4];
+            var patternNode = result.Children[4];
             var operatorInfo = PegHelper.BuildPegPattern(patternNode);
 
             return new OperatorInfo(operatorInfo, leftPrecedence, rightPrecedence);

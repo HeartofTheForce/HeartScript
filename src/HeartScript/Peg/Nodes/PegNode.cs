@@ -7,6 +7,7 @@ namespace HeartScript.Peg.Nodes
 {
     public class PegNode : INode
     {
+        public string? Name { get; set; }
         public string Value { get; }
         public List<INode> Children { get; }
         public int CharIndex { get; set; }
