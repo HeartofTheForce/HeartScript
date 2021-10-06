@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using HeartScript.Parsing;
-#pragma warning disable IDE0019
 
 namespace HeartScript.Compiling
 {
@@ -16,12 +15,15 @@ namespace HeartScript.Compiling
 
         public static string Compile(INode node)
         {
-            if (node.Name != null && s_overrideCompilers.TryGetValue(node.Name, out var compiler))
+            if (node.Name != null)
             {
-                return compiler(node);
+                if (s_overrideCompilers.TryGetValue(node.Name, out var compiler))
+                    return compiler(node);
+
+                return CompileString(node.Name, node);
             }
 
-            return CompileString(node.Name, node);
+            throw new ArgumentException($"{nameof(node.Name)} cannot be null");
         }
 
         private static string CompileString(string operatorSymbol, INode node)

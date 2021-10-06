@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-#pragma warning disable IDE0066
 
 namespace HeartScript.Parsing
 {
