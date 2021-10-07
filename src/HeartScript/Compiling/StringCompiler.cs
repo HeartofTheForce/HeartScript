@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using HeartScript.Expressions;
 using HeartScript.Parsing;
 
 namespace HeartScript.Compiling
@@ -8,9 +10,9 @@ namespace HeartScript.Compiling
     {
         private static readonly Dictionary<string, Func<INode, string>> s_overrideCompilers = new Dictionary<string, Func<INode, string>>()
         {
-            ["()"] = (node) => node.Children[0].ToString(),
-            ["Constant"] = (node) => node.Value,
-            ["Identifier"] = (node) => node.Value,
+            ["()"] = (node) => node.Children[0].Children[1].ToString(),
+            ["Constant"] = (node) => node.Children[0].Value,
+            ["Identifier"] = (node) => node.Children[0].Value,
         };
 
         public static string Compile(INode node)
@@ -28,10 +30,16 @@ namespace HeartScript.Compiling
 
         private static string CompileString(string operatorSymbol, INode node)
         {
-            if (node.Children.Count > 0)
+            IEnumerable<INode> children;
+            if (node is ExpressionNode expressionNode)
+                children = CompilerHelper.GetChildren<ExpressionNode>(expressionNode);
+            else
+                children = node.Children;
+
+            if (children.Count() > 0)
             {
-                string? children = string.Join(' ', node.Children);
-                return $"({operatorSymbol} {children})";
+                string parameters = string.Join(' ', children);
+                return $"({operatorSymbol} {parameters})";
             }
 
             return $"({operatorSymbol})";

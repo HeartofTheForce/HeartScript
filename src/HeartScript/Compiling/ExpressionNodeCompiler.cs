@@ -4,7 +4,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using HeartScript.Expressions;
-#pragma warning disable IDE0019
 
 namespace HeartScript.Compiling
 {
@@ -53,10 +52,10 @@ namespace HeartScript.Compiling
         {
             int index = 0;
 
-            if (node.HaveRight)
+            if (node.RightIndex != -1)
                 index |= 1 << 0;
 
-            if (node.HaveLeft)
+            if (node.LeftIndex != -1)
                 index |= 1 << 1;
 
             return index;
@@ -105,7 +104,7 @@ namespace HeartScript.Compiling
         {
             if (node.Name == "Constant")
             {
-                if (double.TryParse(node.Value, out double value))
+                if (double.TryParse(node.MidNode.Value, out double value))
                     return Expression.Constant(value);
             }
 
@@ -116,7 +115,7 @@ namespace HeartScript.Compiling
         {
             if (node.Name == "Constant")
             {
-                if (int.TryParse(node.Value, out int value))
+                if (int.TryParse(node.MidNode.Value, out int value))
                     return Expression.Constant(value);
             }
 
@@ -127,7 +126,7 @@ namespace HeartScript.Compiling
         {
             if (node.Name == "Identifier")
             {
-                if (scope.TryGetVariable(node.Value, out var variable))
+                if (scope.TryGetVariable(node.MidNode.Value, out var variable))
                     return variable;
             }
 
@@ -138,7 +137,7 @@ namespace HeartScript.Compiling
         {
             if (node.Name == "()")
             {
-                var mid = Compile(scope, (ExpressionNode)node.Children[0]);
+                var mid = Compile(scope, (ExpressionNode)node.MidNode.Children[1].Children[0]);
                 return mid;
             }
 
@@ -147,22 +146,22 @@ namespace HeartScript.Compiling
 
         static Expression CompileCall(CompilerScope scope, ExpressionNode callNode, Expression? instance, Type type, BindingFlags bindingFlags)
         {
-            var left = callNode.Children[0];
+            var left = callNode.LeftNode;
 
             if (left.Name != "Identifier")
                 throw new Exception($"{nameof(left)}.{nameof(left.Name)} is not Identifier");
 
-            string methodName = left.Value;
+            string methodName = left.MidNode.Value;
             if (methodName == null)
                 throw new Exception($"{nameof(methodName)} cannot be null");
 
-            int parameterCount = callNode.Children.Count - 1;
-            var parameters = new Expression[parameterCount];
-            var parameterTypes = new Type[parameterCount];
+            var parameterNodes = CompilerHelper.GetChildren<ExpressionNode>(callNode.MidNode);
+            var parameters = new Expression[parameterNodes.Count];
+            var parameterTypes = new Type[parameterNodes.Count];
 
-            for (int i = 0; i < parameterCount; i++)
+            for (int i = 0; i < parameterNodes.Count; i++)
             {
-                parameters[i] = Compile(scope, (ExpressionNode)callNode.Children[i + 1]);
+                parameters[i] = Compile(scope, parameterNodes[i]);
                 parameterTypes[i] = parameters[i].Type;
             }
 
@@ -171,7 +170,7 @@ namespace HeartScript.Compiling
                 throw new Exception($"{type.FullName} does not have an overload matching '{methodName}({string.Join(',', parameterTypes.Select(x => x.Name))})'");
 
             var expectedParameters = methodInfo.GetParameters();
-            for (int i = 0; i < parameterCount; i++)
+            for (int i = 0; i < parameterNodes.Count; i++)
             {
                 parameters[i] = ConvertIfRequired(parameters[i], expectedParameters[i].ParameterType);
             }
@@ -202,7 +201,7 @@ namespace HeartScript.Compiling
         {
             if (node.Name != null && s_unaryPrefixCompilers.TryGetValue(node.Name, out var compiler))
             {
-                var right = Compile(scope, (ExpressionNode)node.Children[^1]);
+                var right = Compile(scope, node.RightNode);
                 return compiler(right);
             }
 
@@ -218,7 +217,7 @@ namespace HeartScript.Compiling
         {
             if (node.Name != null && s_unaryPostfixCompilers.TryGetValue(node.Name, out var compiler))
             {
-                var left = Compile(scope, (ExpressionNode)node.Children[0]);
+                var left = Compile(scope, node.LeftNode);
                 return compiler(left);
             }
 
@@ -244,8 +243,8 @@ namespace HeartScript.Compiling
         {
             if (node.Name != null && s_binaryCompilers.TryGetValue(node.Name, out var compiler))
             {
-                var left = Compile(scope, (ExpressionNode)node.Children[0]);
-                var right = Compile(scope, (ExpressionNode)node.Children[^1]);
+                var left = Compile(scope, node.LeftNode);
+                var right = Compile(scope, node.RightNode);
 
                 if (IsFloatingPoint(left.Type) && IsIntegral(right.Type))
                     right = Expression.Convert(right, left.Type);
@@ -262,9 +261,14 @@ namespace HeartScript.Compiling
         {
             if (node.Name == "?:")
             {
-                var left = Compile(scope, (ExpressionNode)node.Children[0]);
-                var mid = Compile(scope, (ExpressionNode)node.Children[1]);
-                var right = Compile(scope, (ExpressionNode)node.Children[2]);
+                var left = Compile(scope, node.LeftNode);
+                var mid = Compile(scope, (ExpressionNode)node.MidNode.Children[1].Children[0]);
+                var right = Compile(scope, node.RightNode);
+
+                if (IsIntegral(mid.Type) && IsFloatingPoint(right.Type))
+                    mid = Expression.Convert(mid, right.Type);
+                else if (IsFloatingPoint(mid.Type) && IsIntegral(right.Type))
+                    right = Expression.Convert(right, mid.Type);
 
                 return Expression.Condition(left, mid, right);
             }
@@ -284,6 +288,7 @@ namespace HeartScript.Compiling
             type == typeof(float) ||
             type == typeof(double) ||
             type == typeof(decimal);
+
         static bool IsIntegral(Type type) =>
             type == typeof(sbyte) ||
             type == typeof(byte) ||

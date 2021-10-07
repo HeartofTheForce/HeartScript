@@ -13,56 +13,44 @@ namespace HeartScript.Expressions
         public List<INode> Children { get; }
         public int CharIndex { get; set; }
 
-        public bool HaveLeft { get; }
-        public bool HaveRight { get; }
+        public ExpressionNode LeftNode => (ExpressionNode)Children[LeftIndex];
+        public INode MidNode => Children[MidIndex];
+        public ExpressionNode RightNode => (ExpressionNode)Children[RightIndex];
+
+        public int LeftIndex { get; }
+        public int MidIndex { get; }
+        public int RightIndex { get; }
 
         public ExpressionNode(ExpressionNode? leftNode, INode midNode, ExpressionNode? rightNode)
         {
             Name = midNode.Name;
+            Value = null;
             Children = new List<INode>();
 
             if (leftNode != null)
             {
-                HaveLeft = true;
                 Children.Add(leftNode);
-            }
-
-            var nodeStack = new Stack<INode>();
-            nodeStack.Push(midNode);
-            while (nodeStack.Count > 0)
-            {
-                var current = nodeStack.Pop();
-                if (current is ExpressionNode expressionNode)
-                {
-                    Children.Add(expressionNode);
-                    continue;
-                }
-
-                if (current.Children != null)
-                {
-                    for (int i = current.Children.Count - 1; i >= 0; i--)
-                    {
-                        nodeStack.Push(current.Children[i]);
-                    }
-                }
-            }
-
-            if (rightNode != null)
-            {
-                HaveRight = true;
-                Children.Add(rightNode);
-            }
-
-            if (Children.Count > 0)
-            {
-                Value = null;
-                CharIndex = Children[0].CharIndex;
+                LeftIndex = Children.Count - 1;
             }
             else
             {
-                Value = midNode.ToString().Trim();
-                CharIndex = midNode.CharIndex;
+                LeftIndex = -1;
             }
+
+            Children.Add(midNode);
+            MidIndex = Children.Count - 1;
+
+            if (rightNode != null)
+            {
+                Children.Add(rightNode);
+                RightIndex = Children.Count - 1;
+            }
+            else
+            {
+                RightIndex = -1;
+            }
+
+            CharIndex = Children[0].CharIndex;
         }
 
         public override string ToString()
