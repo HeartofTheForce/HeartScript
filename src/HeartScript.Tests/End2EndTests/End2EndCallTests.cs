@@ -52,8 +52,8 @@ namespace HeartScript.Tests.End2EndTests
             //CallChainedMultiParameterUnary
             new End2EndTestCase()
             {
-                Infix = "max(min(c, b), -a)",
-                ExpectedNodeString = "($ max ($ min c b) (- a))",
+                Infix = "max(min(c, b), +a)",
+                ExpectedNodeString = "($ max ($ min c b) (u+ a))",
             },
             //CallNestedExpressionParameter
             new End2EndTestCase()
@@ -65,7 +65,7 @@ namespace HeartScript.Tests.End2EndTests
             new End2EndTestCase()
             {
                 Infix = "clamp(a,b,c) + - d",
-                ExpectedNodeString = "(+ ($ clamp a b c) (- d))",
+                ExpectedNodeString = "(+ ($ clamp a b c) (u- d))",
             },
             //Postfix
             new End2EndTestCase()
@@ -77,7 +77,7 @@ namespace HeartScript.Tests.End2EndTests
             new End2EndTestCase()
             {
                 Infix = "-max(2, b)",
-                ExpectedNodeString = "(- ($ max 2 b))",
+                ExpectedNodeString = "(u- ($ max 2 b))",
             },
             //EmptyCall
             new End2EndTestCase()

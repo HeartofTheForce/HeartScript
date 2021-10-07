@@ -9,57 +9,31 @@ namespace HeartScript.Compiling
 {
     public static class ExpressionNodeCompiler
     {
-        private delegate Expression? CompileExpression(CompilerScope scope, ExpressionNode node);
+        private delegate Expression CompileExpression(CompilerScope scope, ExpressionNode node);
 
-        const int Nullary = 0;
-        const int Prefix = 1;
-        const int Postfix = 2;
-        const int Infix = 3;
-
-        private readonly static CompileExpression[][] s_nodeCompilers;
-
-        static ExpressionNodeCompiler()
+        private static readonly Dictionary<string, CompileExpression> s_nodeCompilers = new Dictionary<string, CompileExpression>()
         {
-            s_nodeCompilers = new CompileExpression[4][];
-
-            s_nodeCompilers[Nullary] = new CompileExpression[]
-            {
-                ParseInt,
-                ParseDouble,
-                CompileRoundBracket,
-                ParseIdentifier,
-            };
-
-            s_nodeCompilers[Prefix] = new CompileExpression[]
-            {
-                CompileUnaryPrefix,
-            };
-
-            s_nodeCompilers[Postfix] = new CompileExpression[]
-            {
-                CompileUnaryPostfix,
-                CompileStaticCall(typeof(Math)),
-            };
-
-            s_nodeCompilers[Infix] = new CompileExpression[]
-            {
-                CompileBinary,
-                CompileTernary,
-            };
-        }
-
-        static int GetFixity(ExpressionNode node)
-        {
-            int index = 0;
-
-            if (node.RightIndex != -1)
-                index |= 1 << 0;
-
-            if (node.LeftIndex != -1)
-                index |= 1 << 1;
-
-            return index;
-        }
+            ["()"] = (scope, node) => Compile(scope, (ExpressionNode)node.MidNode.Children[1].Children[0]),
+            ["$"] = CompileStaticCall(typeof(Math)),
+            ["u+"] = (scope, node) => Expression.UnaryPlus(Compile(scope, node.RightNode)),
+            ["u-"] = (scope, node) => Expression.Negate(Compile(scope, node.RightNode)),
+            ["~"] = (scope, node) => Expression.Not(Compile(scope, node.RightNode)),
+            ["!"] = (scope, node) => Compile(scope, node.LeftNode),
+            ["*"] = CompileBinary(Expression.Multiply),
+            ["/"] = CompileBinary(Expression.Divide),
+            ["+"] = CompileBinary(Expression.Add),
+            ["-"] = CompileBinary(Expression.Subtract),
+            ["<="] = CompileBinary(Expression.LessThanOrEqual),
+            [">="] = CompileBinary(Expression.GreaterThanOrEqual),
+            ["<"] = CompileBinary(Expression.LessThan),
+            [">"] = CompileBinary(Expression.GreaterThan),
+            ["&"] = CompileBinary(Expression.And),
+            ["^"] = CompileBinary(Expression.ExclusiveOr),
+            ["|"] = CompileBinary(Expression.Or),
+            ["?:"] = CompileTernary,
+            ["Constant"] = ParseConstant,
+            ["Identifier"] = ParseIdentifier,
+        };
 
         public static Func<T> CompileFunction<T>(ExpressionNode node)
         {
@@ -84,64 +58,29 @@ namespace HeartScript.Compiling
 
         static Expression Compile(CompilerScope scope, ExpressionNode node)
         {
-            var fixityCompilers = s_nodeCompilers[GetFixity(node)];
+            if (node.Name != null && s_nodeCompilers.TryGetValue(node.Name, out var compiler))
+                return compiler(scope, node);
 
-            Expression? compiled = null;
-            foreach (var compiler in fixityCompilers)
-            {
-                compiled = compiler(scope, node);
-                if (compiled != null)
-                    break;
-            }
-
-            if (compiled == null)
-                throw new ArgumentException($"{nameof(node)} does not have a matching compiler");
-
-            return compiled;
+            throw new ArgumentException($"{node.Name} does not have a matching compiler");
         }
 
-        static Expression? ParseDouble(CompilerScope scope, ExpressionNode node)
+        static Expression ParseConstant(CompilerScope scope, ExpressionNode node)
         {
-            if (node.Name == "Constant")
-            {
-                if (double.TryParse(node.MidNode.Value, out double value))
-                    return Expression.Constant(value);
-            }
+            if (double.TryParse(node.MidNode.Value, out double doubleValue))
+                return Expression.Constant(doubleValue);
 
-            return null;
+            if (int.TryParse(node.MidNode.Value, out int intValue))
+                return Expression.Constant(intValue);
+
+            throw new ArgumentException(nameof(node));
         }
 
-        static Expression? ParseInt(CompilerScope scope, ExpressionNode node)
+        static Expression ParseIdentifier(CompilerScope scope, ExpressionNode node)
         {
-            if (node.Name == "Constant")
-            {
-                if (int.TryParse(node.MidNode.Value, out int value))
-                    return Expression.Constant(value);
-            }
+            if (scope.TryGetVariable(node.MidNode.Value, out var variable))
+                return variable;
 
-            return null;
-        }
-
-        static Expression? ParseIdentifier(CompilerScope scope, ExpressionNode node)
-        {
-            if (node.Name == "Identifier")
-            {
-                if (scope.TryGetVariable(node.MidNode.Value, out var variable))
-                    return variable;
-            }
-
-            return null;
-        }
-
-        static Expression? CompileRoundBracket(CompilerScope scope, ExpressionNode node)
-        {
-            if (node.Name == "()")
-            {
-                var mid = Compile(scope, (ExpressionNode)node.MidNode.Children[1].Children[0]);
-                return mid;
-            }
-
-            return null;
+            throw new ArgumentException(nameof(node));
         }
 
         static Expression CompileCall(CompilerScope scope, ExpressionNode callNode, Expression? instance, Type type, BindingFlags bindingFlags)
@@ -183,65 +122,13 @@ namespace HeartScript.Compiling
             return (scope, node) =>
             {
                 var bindingFlags = BindingFlags.Public | BindingFlags.Static | BindingFlags.IgnoreCase;
-                if (node.Name == "$")
-                    return CompileCall(scope, node, null, type, bindingFlags);
-
-                return null;
+                return CompileCall(scope, node, null, type, bindingFlags);
             };
         }
 
-        private static readonly Dictionary<string, Func<Expression, Expression>> s_unaryPrefixCompilers = new Dictionary<string, Func<Expression, Expression>>()
+        static CompileExpression CompileBinary(Func<Expression, Expression, Expression> compiler)
         {
-            ["+"] = Expression.UnaryPlus,
-            ["-"] = Expression.Negate,
-            ["~"] = Expression.Not,
-        };
-
-        static Expression? CompileUnaryPrefix(CompilerScope scope, ExpressionNode node)
-        {
-            if (node.Name != null && s_unaryPrefixCompilers.TryGetValue(node.Name, out var compiler))
-            {
-                var right = Compile(scope, node.RightNode);
-                return compiler(right);
-            }
-
-            return null;
-        }
-
-        private static readonly Dictionary<string, Func<Expression, Expression>> s_unaryPostfixCompilers = new Dictionary<string, Func<Expression, Expression>>()
-        {
-            ["!"] = (expression) => expression,
-        };
-
-        static Expression? CompileUnaryPostfix(CompilerScope scope, ExpressionNode node)
-        {
-            if (node.Name != null && s_unaryPostfixCompilers.TryGetValue(node.Name, out var compiler))
-            {
-                var left = Compile(scope, node.LeftNode);
-                return compiler(left);
-            }
-
-            return null;
-        }
-
-        private static readonly Dictionary<string, Func<Expression, Expression, Expression>> s_binaryCompilers = new Dictionary<string, Func<Expression, Expression, Expression>>()
-        {
-            ["*"] = Expression.Multiply,
-            ["/"] = Expression.Divide,
-            ["+"] = Expression.Add,
-            ["-"] = Expression.Subtract,
-            ["<="] = Expression.LessThanOrEqual,
-            [">="] = Expression.GreaterThanOrEqual,
-            ["<"] = Expression.LessThan,
-            [">"] = Expression.GreaterThan,
-            ["&"] = Expression.And,
-            ["^"] = Expression.ExclusiveOr,
-            ["|"] = Expression.Or,
-        };
-
-        static Expression? CompileBinary(CompilerScope scope, ExpressionNode node)
-        {
-            if (node.Name != null && s_binaryCompilers.TryGetValue(node.Name, out var compiler))
+            return (scope, node) =>
             {
                 var left = Compile(scope, node.LeftNode);
                 var right = Compile(scope, node.RightNode);
@@ -252,28 +139,21 @@ namespace HeartScript.Compiling
                     left = Expression.Convert(left, right.Type);
 
                 return compiler(left, right);
-            }
-
-            return null;
+            };
         }
 
-        static Expression? CompileTernary(CompilerScope scope, ExpressionNode node)
+        static Expression CompileTernary(CompilerScope scope, ExpressionNode node)
         {
-            if (node.Name == "?:")
-            {
-                var left = Compile(scope, node.LeftNode);
-                var mid = Compile(scope, (ExpressionNode)node.MidNode.Children[1].Children[0]);
-                var right = Compile(scope, node.RightNode);
+            var left = Compile(scope, node.LeftNode);
+            var mid = Compile(scope, (ExpressionNode)node.MidNode.Children[1].Children[0]);
+            var right = Compile(scope, node.RightNode);
 
-                if (IsIntegral(mid.Type) && IsFloatingPoint(right.Type))
-                    mid = Expression.Convert(mid, right.Type);
-                else if (IsFloatingPoint(mid.Type) && IsIntegral(right.Type))
-                    right = Expression.Convert(right, mid.Type);
+            if (IsIntegral(mid.Type) && IsFloatingPoint(right.Type))
+                mid = Expression.Convert(mid, right.Type);
+            else if (IsFloatingPoint(mid.Type) && IsIntegral(right.Type))
+                right = Expression.Convert(right, mid.Type);
 
-                return Expression.Condition(left, mid, right);
-            }
-
-            return null;
+            return Expression.Condition(left, mid, right);
         }
 
         static Expression ConvertIfRequired(Expression expression, Type expectedType)

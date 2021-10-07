@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using HeartScript.Expressions;
 using HeartScript.Parsing;
 
 namespace HeartScript.Compiling

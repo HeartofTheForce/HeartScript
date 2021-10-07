@@ -13,13 +13,13 @@ namespace HeartScript.Expressions
         public List<INode> Children { get; }
         public int CharIndex { get; set; }
 
-        public ExpressionNode LeftNode => (ExpressionNode)Children[LeftIndex];
-        public INode MidNode => Children[MidIndex];
-        public ExpressionNode RightNode => (ExpressionNode)Children[RightIndex];
+        public ExpressionNode LeftNode => (ExpressionNode)Children[_leftIndex];
+        public INode MidNode => Children[_midIndex];
+        public ExpressionNode RightNode => (ExpressionNode)Children[_rightIndex];
 
-        public int LeftIndex { get; }
-        public int MidIndex { get; }
-        public int RightIndex { get; }
+        private readonly int _leftIndex;
+        private readonly int _midIndex;
+        private readonly int _rightIndex;
 
         public ExpressionNode(ExpressionNode? leftNode, INode midNode, ExpressionNode? rightNode)
         {
@@ -30,24 +30,24 @@ namespace HeartScript.Expressions
             if (leftNode != null)
             {
                 Children.Add(leftNode);
-                LeftIndex = Children.Count - 1;
+                _leftIndex = Children.Count - 1;
             }
             else
             {
-                LeftIndex = -1;
+                _leftIndex = -1;
             }
 
             Children.Add(midNode);
-            MidIndex = Children.Count - 1;
+            _midIndex = Children.Count - 1;
 
             if (rightNode != null)
             {
                 Children.Add(rightNode);
-                RightIndex = Children.Count - 1;
+                _rightIndex = Children.Count - 1;
             }
             else
             {
-                RightIndex = -1;
+                _rightIndex = -1;
             }
 
             CharIndex = Children[0].CharIndex;
