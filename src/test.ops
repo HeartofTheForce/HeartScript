@@ -1,6 +1,5 @@
 '()'         -> none none '(' expr ')'
 '$'          -> 0 none '(' (expr (',' expr)*)? ')'
-'?:'         -> 2 99 '?' expr ':'
 '!'          -> 2 none '!'
 '+'          -> none 1 '+'
 '-'          -> none 1 '-'
@@ -16,5 +15,6 @@
 '&'          -> 6 6 '&'
 '^'          -> 7 7 '^'
 '|'          -> 8 8 '|'
+'?:'         -> 9 99 '?' expr ':'
 'Constant'   -> none none `\d+(?:\.\d+)?`
 'Identifier' -> none none `[a-zA-Z]\w*`

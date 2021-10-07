@@ -35,7 +35,7 @@ namespace HeartScript.Tests.End2EndTests
             new End2EndTestCase()
             {
                 Infix = "a * b ? c : d",
-                ExpectedNodeString = "(* a (?: b c d))",
+                ExpectedNodeString = "(?: (* a b) c d)",
             },
             //PrefixTernary
             new End2EndTestCase()
