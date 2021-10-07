@@ -16,7 +16,7 @@ namespace HeartScript.Expressions
         public bool HaveLeft { get; }
         public bool HaveRight { get; }
 
-        public ExpressionNode(INode? leftNode, INode midNode, INode? rightNode)
+        public ExpressionNode(ExpressionNode? leftNode, INode midNode, ExpressionNode? rightNode)
         {
             Name = midNode.Name;
             Children = new List<INode>();

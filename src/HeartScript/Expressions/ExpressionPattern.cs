@@ -40,7 +40,7 @@ namespace HeartScript.Expressions
             int localOffset = ctx.Offset;
 
             var nodeBuilders = new Stack<ExpressionNodeBuilder>();
-            INode? operand = null;
+            ExpressionNode? operand = null;
 
             while (true)
             {
