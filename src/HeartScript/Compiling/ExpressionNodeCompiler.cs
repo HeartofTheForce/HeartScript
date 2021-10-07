@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using HeartScript.Expressions;
+using HeartScript.Peg.Nodes;
 
 namespace HeartScript.Compiling
 {
@@ -13,7 +14,7 @@ namespace HeartScript.Compiling
 
         private static readonly Dictionary<string, CompileExpression> s_nodeCompilers = new Dictionary<string, CompileExpression>()
         {
-            ["()"] = (scope, node) => Compile(scope, (ExpressionNode)node.MidNode.Children[1].Children[0]),
+            ["()"] = CompileRoundBracket,
             ["$"] = CompileStaticCall(typeof(Math)),
             ["u+"] = (scope, node) => Expression.UnaryPlus(Compile(scope, node.RightNode)),
             ["u-"] = (scope, node) => Expression.Negate(Compile(scope, node.RightNode)),
@@ -62,6 +63,12 @@ namespace HeartScript.Compiling
                 return compiler(scope, node);
 
             throw new ArgumentException($"{node.Name} does not have a matching compiler");
+        }
+
+        static Expression CompileRoundBracket(CompilerScope scope, ExpressionNode node)
+        {
+            var lookupNode = (LookupNode)node.MidNode.Children[1];
+            return Compile(scope, (ExpressionNode)lookupNode.Node);
         }
 
         static Expression ParseConstant(CompilerScope scope, ExpressionNode node)
