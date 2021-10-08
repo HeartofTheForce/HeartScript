@@ -30,7 +30,12 @@ namespace HeartScript.Expressions
             }
 
             if (!ctx.IsEOF)
-                throw new UnexpectedTokenException(ctx.Offset, "EOF");
+            {
+                if (ctx.Exception != null && ctx.Exception.CharIndex > ctx.Offset)
+                    throw ctx.Exception;
+                else
+                    throw new UnexpectedTokenException(ctx.Offset, "EOF");
+            }
 
             return result;
         }
@@ -45,12 +50,11 @@ namespace HeartScript.Expressions
                 var right = TryGetNodeBuilder(operand == null, parser, ctx);
                 if (right == null)
                 {
-                    if (ctx.Exception != null && ctx.Offset < ctx.Exception.CharIndex)
-                        return null;
-
                     if (operand == null)
                     {
-                        ctx.Exception = new ExpressionTermException(ctx.Offset);
+                        if (ctx.Exception == null || ctx.Exception.CharIndex <= ctx.Offset)
+                            ctx.Exception = new ExpressionTermException(ctx.Offset);
+
                         return null;
                     }
 
