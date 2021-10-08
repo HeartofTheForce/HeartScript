@@ -6,9 +6,9 @@ namespace HeartScript.Peg.Nodes
     {
         public INode Node => Children[0];
 
-        public LookupNode(string key, INode node) : base(node)
+        public LookupNode(string name, INode node) : base(node)
         {
-            Name = key;
+            Name = name;
         }
     }
 }
