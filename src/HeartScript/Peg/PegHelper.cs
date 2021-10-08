@@ -10,12 +10,12 @@ namespace HeartScript.Peg
     {
         private static readonly LexerPattern s_regex = LexerPattern.FromRegex("`(?:``|[^`])*`");
         private static readonly LexerPattern s_plainText = LexerPattern.FromRegex("'(?:''|[^'])*'");
-        public static readonly LexerPattern NonSignificant = LexerPattern.FromRegex("\\s+");
+        public static readonly LexerPattern NonSignificant = LexerPattern.FromRegex("\\s*");
 
         public static IPattern TrimLeft(this IPattern pattern)
         {
             return SequencePattern.Create()
-                .Discard(QuantifierPattern.Optional(NonSignificant))
+                .Discard(NonSignificant)
                 .Then(pattern);
         }
 
@@ -23,7 +23,7 @@ namespace HeartScript.Peg
         {
             return SequencePattern.Create()
                 .Then(pattern)
-                .Discard(QuantifierPattern.Optional(NonSignificant));
+                .Discard(NonSignificant);
         }
 
         public static PatternParser CreatePegParser()

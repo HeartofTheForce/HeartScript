@@ -53,4 +53,11 @@ namespace HeartScript.Parsing
             CharIndex = charIndex;
         }
     }
+
+    public class ZeroLengthMatchException : PatternException
+    {
+        public ZeroLengthMatchException(int charIndex) : base(charIndex, "Unexpected 0 length match")
+        {
+        }
+    }
 }

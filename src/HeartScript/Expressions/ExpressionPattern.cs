@@ -79,6 +79,7 @@ namespace HeartScript.Expressions
 
         private ExpressionNodeBuilder? TryGetNodeBuilder(bool wantOperand, PatternParser parser, ParserContext ctx)
         {
+            int localOffset = ctx.Offset;
             foreach (var op in _operators)
             {
                 bool valid;
@@ -93,6 +94,9 @@ namespace HeartScript.Expressions
                 var result = parser.TryMatch(op.Pattern, ctx);
                 if (result != null)
                 {
+                    if (localOffset == ctx.Offset)
+                        throw new ZeroLengthMatchException(ctx.Offset);
+
                     result.Name = op.Name;
                     return new ExpressionNodeBuilder(op, result);
                 }

@@ -43,6 +43,9 @@ namespace HeartScript.Peg.Patterns
                 if (result == null)
                     break;
 
+                if (_max == null && localOffset == ctx.Offset)
+                    throw new ZeroLengthMatchException(ctx.Offset);
+
                 output.Add(result);
             }
 
