@@ -37,8 +37,6 @@ namespace HeartScript.Expressions
 
         public INode? Match(PatternParser parser, ParserContext ctx)
         {
-            int localOffset = ctx.Offset;
-
             var nodeBuilders = new Stack<ExpressionNodeBuilder>();
             ExpressionNode? operand = null;
 
@@ -50,32 +48,22 @@ namespace HeartScript.Expressions
                     if (ctx.Exception != null && ctx.Offset < ctx.Exception.CharIndex)
                         return null;
 
-                    while (nodeBuilders.Count > 0)
-                    {
-                        if (operand == null)
-                        {
-                            ctx.Exception = new ExpressionTermException(ctx.Offset);
-                            return null;
-                        }
-
-                        operand = nodeBuilders.Pop().FeedOperandRight(operand);
-                    }
-
-                    if (operand != null)
-                        return operand;
-
-                    ctx.Exception = new ExpressionTermException(localOffset);
-                    return null;
-                }
-
-                while (nodeBuilders.TryPeek(out var left) && left.IsEvaluatedBefore(right))
-                {
                     if (operand == null)
                     {
                         ctx.Exception = new ExpressionTermException(ctx.Offset);
                         return null;
                     }
 
+                    while (nodeBuilders.Count > 0)
+                    {
+                        operand = nodeBuilders.Pop().FeedOperandRight(operand);
+                    }
+
+                    return operand;
+                }
+
+                while (nodeBuilders.TryPeek(out var left) && left.IsEvaluatedBefore(right))
+                {
                     operand = nodeBuilders.Pop().FeedOperandRight(operand);
                 }
 

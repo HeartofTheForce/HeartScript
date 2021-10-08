@@ -27,7 +27,7 @@ namespace HeartScript.Expressions
             return TryCompleteNode();
         }
 
-        public ExpressionNode FeedOperandRight(ExpressionNode rightNode)
+        public ExpressionNode FeedOperandRight(ExpressionNode? rightNode)
         {
             _rightNode = rightNode;
             return TryCompleteNode() ?? throw new Exception($"{nameof(ExpressionNodeBuilder)} is incomplete");
