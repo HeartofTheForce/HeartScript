@@ -5,7 +5,7 @@ using HeartScript.Peg.Nodes;
 
 namespace HeartScript.Peg.Patterns
 {
-   public class QuantifierPattern : IPattern
+    public class QuantifierPattern : IPattern
     {
         private readonly int _min;
         private readonly int? _max;
@@ -40,10 +40,10 @@ namespace HeartScript.Peg.Patterns
             {
                 var result = parser.TryMatch(_pattern, ctx);
 
-                if (result != null)
-                    output.Add(result);
-                else
+                if (result == null)
                     break;
+
+                output.Add(result);
             }
 
             if (output.Count >= _min)

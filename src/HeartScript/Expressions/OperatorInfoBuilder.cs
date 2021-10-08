@@ -38,19 +38,18 @@ namespace HeartScript.Expressions
             var ctx = new ParserContext(input);
             var pegParser = PegHelper.CreatePegParser();
             var pattern = SequencePattern.Create()
-                .Then(QuantifierPattern.Optional(SequencePattern.Create()
-                    .Then(s_name)
-                    .Discard(LexerPattern.FromRegex("\\s+"))
-                    .Discard(LexerPattern.FromRegex("->"))))
-                .Discard(LexerPattern.FromRegex("\\s+"))
+                .Then(s_name)
+                .Discard(PegHelper.NonSignificant)
+                .Discard(LexerPattern.FromRegex("->"))
+                .Discard(PegHelper.NonSignificant)
                 .Then(ChoicePattern.Create()
                     .Or(s_digits)
                     .Or(s_none))
-                .Discard(LexerPattern.FromRegex("\\s+"))
+                .Discard(PegHelper.NonSignificant)
                 .Then(ChoicePattern.Create()
                     .Or(s_digits)
                     .Or(s_none))
-                .Discard(LexerPattern.FromRegex("\\s+"))
+                .Discard(PegHelper.NonSignificant)
                 .Then(LookupPattern.Create("peg"));
 
             var result = pegParser.TryMatch(pattern, ctx);
@@ -59,12 +58,8 @@ namespace HeartScript.Expressions
                 throw new Exception($"{ctx.Exception}, {lineNumber}");
 
             string? name = null;
-            var optionalNode = result.Children[0];
-            if (optionalNode.Children.Count > 0)
-            {
-                var nameNode = optionalNode.Children[0];
-                name = nameNode.Value[1..^1];
-            }
+            var nameNode = result.Children[0];
+            name = nameNode.Value[1..^1];
 
             var leftNode = (ChoiceNode)result.Children[1];
             uint? leftPrecedence;
