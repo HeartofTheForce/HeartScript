@@ -8,7 +8,7 @@ namespace HeartScript.Tests.CompilerTests
     {
         static readonly IExpressionCompilerTestCase[] s_testCases = new IExpressionCompilerTestCase[]
         {
-            //func()
+            //$
             new ExpressionCompilerTestCase<double>()
             {
                 Infix = "Sin(1)",
