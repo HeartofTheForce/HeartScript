@@ -28,12 +28,15 @@ namespace HeartScript.Compiling
             [">="] = CompileBinary(Expression.GreaterThanOrEqual),
             ["<"] = CompileBinary(Expression.LessThan),
             [">"] = CompileBinary(Expression.GreaterThan),
+            ["=="] = CompileBinary(Expression.Equal),
+            ["!="] = CompileBinary(Expression.NotEqual),
             ["&"] = CompileBinary(Expression.And),
             ["^"] = CompileBinary(Expression.ExclusiveOr),
             ["|"] = CompileBinary(Expression.Or),
             ["?:"] = CompileTernary,
             ["real"] = ParseReal,
             ["integral"] = ParseIntegral,
+            ["boolean"] = ParseBoolean,
             ["identifier"] = ParseIdentifier,
         };
 
@@ -74,16 +77,24 @@ namespace HeartScript.Compiling
 
         static Expression ParseReal(CompilerScope scope, ExpressionNode node)
         {
-            if (double.TryParse(node.MidNode.Value, out double doubleValue))
-                return Expression.Constant(doubleValue);
+            if (double.TryParse(node.MidNode.Value, out double value))
+                return Expression.Constant(value);
 
             throw new ArgumentException(nameof(node));
         }
 
         static Expression ParseIntegral(CompilerScope scope, ExpressionNode node)
         {
-            if (int.TryParse(node.MidNode.Value, out int intValue))
-                return Expression.Constant(intValue);
+            if (int.TryParse(node.MidNode.Value, out int value))
+                return Expression.Constant(value);
+
+            throw new ArgumentException(nameof(node));
+        }
+
+        static Expression ParseBoolean(CompilerScope scope, ExpressionNode node)
+        {
+            if (bool.TryParse(node.MidNode.Children[0].Value, out bool value))
+                return Expression.Constant(value);
 
             throw new ArgumentException(nameof(node));
         }

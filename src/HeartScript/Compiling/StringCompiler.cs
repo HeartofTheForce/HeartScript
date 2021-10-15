@@ -13,6 +13,7 @@ namespace HeartScript.Compiling
             ["()"] = (node) => node.Children[0].Children[1].ToString(),
             ["real"] = (node) => node.Children[0].Value,
             ["integral"] = (node) => node.Children[0].Value,
+            ["boolean"] = (node) => node.Children[0].Children[0].Value,
             ["identifier"] = (node) => node.Children[0].Value,
         };
 
