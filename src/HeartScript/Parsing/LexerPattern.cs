@@ -47,9 +47,6 @@ namespace HeartScript.Parsing
             var match = Regex.Match(ctx.Input, ctx.Offset);
             if (match.Success)
             {
-                if (match.Length == 0)
-                    throw new Exception($"0 length match @ {match.Index}, {this}");
-
                 var targetGroup = match.Groups[1];
                 ctx.Offset += match.Length;
 

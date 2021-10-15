@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using HeartScript.Parsing;
 #pragma warning disable CS8618
@@ -7,6 +8,7 @@ namespace HeartScript.Peg.Nodes
 {
     public class PegNode : INode
     {
+        public string? Name { get; set; }
         public string Value { get; }
         public List<INode> Children { get; }
         public int CharIndex { get; set; }
@@ -40,7 +42,7 @@ namespace HeartScript.Peg.Nodes
             if (Children != null)
                 return string.Join("", Children);
 
-            throw new System.Exception();
+            throw new Exception();
         }
     }
 }

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using HeartScript.Compiling;
 using HeartScript.Parsing;
 #pragma warning disable CS8618
 #pragma warning disable CS8625
@@ -7,78 +8,54 @@ namespace HeartScript.Expressions
 {
     public class ExpressionNode : INode
     {
+        public string? Name { get; set; }
         public string Value { get; }
         public List<INode> Children { get; }
         public int CharIndex { get; set; }
 
-        public bool HaveLeft { get; }
-        public bool HaveRight { get; }
+        public ExpressionNode LeftNode => (ExpressionNode)Children[_leftIndex];
+        public INode MidNode => Children[_midIndex];
+        public ExpressionNode RightNode => (ExpressionNode)Children[_rightIndex];
 
-        public ExpressionNode(INode? leftNode, INode midNode, INode? rightNode)
+        private readonly int _leftIndex;
+        private readonly int _midIndex;
+        private readonly int _rightIndex;
+
+        public ExpressionNode(ExpressionNode? leftNode, INode midNode, ExpressionNode? rightNode)
         {
+            Name = midNode.Name;
             Value = null;
             Children = new List<INode>();
 
             if (leftNode != null)
             {
-                HaveLeft = true;
                 Children.Add(leftNode);
+                _leftIndex = Children.Count - 1;
             }
-
-            var nodeStack = new Stack<INode>();
-            nodeStack.Push(midNode);
-            while (nodeStack.Count > 0)
+            else
             {
-                var current = nodeStack.Pop();
-                if (current is ExpressionNode expressionNode)
-                {
-                    Children.Add(expressionNode);
-                    continue;
-                }
-
-                if (current.Value != null)
-                {
-                    if (Value == null)
-                        Value = current.Value;
-
-                    continue;
-                }
-
-                for (int i = current.Children.Count - 1; i >= 0; i--)
-                {
-                    nodeStack.Push(current.Children[i]);
-                }
+                _leftIndex = -1;
             }
+
+            Children.Add(midNode);
+            _midIndex = Children.Count - 1;
 
             if (rightNode != null)
             {
-                HaveRight = true;
                 Children.Add(rightNode);
+                _rightIndex = Children.Count - 1;
+            }
+            else
+            {
+                _rightIndex = -1;
             }
 
-            if (Children.Count > 0)
-                CharIndex = Children[0].CharIndex;
-            else
-                CharIndex = midNode.CharIndex;
+            CharIndex = Children[0].CharIndex;
         }
 
         public override string ToString()
         {
-            string? children = string.Join(' ', Children);
-
-            string op = Value;
-            if (op == "(")
-            {
-                if (!HaveLeft)
-                    return children;
-                else
-                    op = "$";
-            }
-
-            if (children.Length > 0)
-                return $"({op} {children})";
-            else
-                return Value!;
+            return StringCompiler.Compile(this);
         }
     }
 }

@@ -3,18 +3,18 @@ using HeartScript.Peg.Nodes;
 
 namespace HeartScript.Peg.Patterns
 {
-    public class KeyPattern : IPattern
+    public class LookupPattern : IPattern
     {
         private readonly string _key;
 
-        private KeyPattern(string key)
+        private LookupPattern(string key)
         {
             _key = key;
         }
 
-        public static KeyPattern Create(string key)
+        public static LookupPattern Create(string key)
         {
-            return new KeyPattern(key);
+            return new LookupPattern(key);
         }
 
         public INode? Match(PatternParser parser, ParserContext ctx)
@@ -22,9 +22,9 @@ namespace HeartScript.Peg.Patterns
             var result = parser.TryMatch(parser.Patterns[_key], ctx);
 
             if (result != null)
-                return new KeyNode(_key, result);
-            else
-                return null;
+                return new LookupNode(_key, result);
+
+            return null;
         }
     }
 }

@@ -1,47 +1,27 @@
-#RoundBracket
-none none '(' expr ')'
+#WantOperand (Nullary, Prefix)
+'()'         -> none none '(' expr ')'
+'u+'         -> none 1 '+'
+'u-'         -> none 1 '-'
+'~'          -> none 1 '~'
+'real'       -> none none `\d+\.\d+`
+'integral'   -> none none `\d+?`
+'boolean'    -> none none 'true' / 'false'
+'identifier' -> none none `[a-zA-Z]\w*`
 
-#Call
-0 none '(' (expr (',' expr)*)? ')'
-
-#Ternary
-2 99 '?' expr ':'
-
-#Factorial
-2 none '!'
-
-#PrefixPlus
-none 1 '+'
-
-#PrefixMinus
-none 1 '-'
-
-#BitwiseNot
-none 1 '~'
-
-#Multiply
-3 3 '*'
-
-#Divide
-3 3 '/'
-
-#BinaryPlus
-4 4 '+'
-
-#BinaryMinus
-4 4 '-'
-
-#BitwiseAnd
-4 4 '&'
-
-#BitwiseXor
-4 4 '^'
-
-#BitwiseOr
-4 4 '|'
-
-#Constant
-none none `\d+(?:\.\d+)?`
-
-#Identifier
-none none `[a-zA-Z]\w*`
+#HaveOperand (Postfix, Infix)
+'$'          -> 0 none '(' (expr (',' expr)*)? ')'
+'*'          -> 3 3 '*'
+'/'          -> 3 3 '/'
+'+'          -> 4 4 '+'
+'-'          -> 4 4 '-'
+'<='         -> 5 5 '<='
+'>='         -> 5 5 '>='
+'<'          -> 5 5 '<'
+'>'          -> 5 5 '>'
+'=='         -> 6 6 '=='
+'!='         -> 6 6 '!='
+'&'          -> 7 7 '&'
+'^'          -> 8 8 '^'
+'|'          -> 9 9 '|'
+'?:'         -> 10 99 '?' expr ':'
+'!'          -> 2 none '!'

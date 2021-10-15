@@ -20,7 +20,7 @@ namespace HeartScript.Tests.ExpressionPatternTests
             new ExpressionTestCase()
             {
                 Infix = "{}",
-                ExpectedOutput = "{",
+                ExpectedOutput = "({)",
             },
             new UnexpectedTokenTestCase()
             {
@@ -32,7 +32,7 @@ namespace HeartScript.Tests.ExpressionPatternTests
             new ExpressionTestCase()
             {
                 Infix = "[]",
-                ExpectedOutput = "[",
+                ExpectedOutput = "([)",
             },
             new UnexpectedTokenTestCase()
             {
@@ -44,7 +44,7 @@ namespace HeartScript.Tests.ExpressionPatternTests
             new ExpressionTestCase()
             {
                 Infix = "?",
-                ExpectedOutput = "?",
+                ExpectedOutput = "(?)",
             },
             new UnexpectedTokenTestCase()
             {
@@ -56,7 +56,7 @@ namespace HeartScript.Tests.ExpressionPatternTests
             new ExpressionTestCase()
             {
                 Infix = "|",
-                ExpectedOutput = "|",
+                ExpectedOutput = "(|)",
             },
             new UnexpectedTokenTestCase()
             {
@@ -68,7 +68,7 @@ namespace HeartScript.Tests.ExpressionPatternTests
             new ExpressionTestCase()
             {
                 Infix = "& *",
-                ExpectedOutput = "&",
+                ExpectedOutput = "(&)",
             },
             new UnexpectedTokenTestCase()
             {

@@ -7,8 +7,8 @@ namespace HeartScript.Expressions
     {
         private readonly OperatorInfo _operatorInfo;
         private readonly INode _midNode;
-        private INode? _leftNode;
-        private INode? _rightNode;
+        private ExpressionNode? _leftNode;
+        private ExpressionNode? _rightNode;
 
         public ExpressionNodeBuilder(OperatorInfo operatorInfo, INode midNode)
         {
@@ -21,19 +21,19 @@ namespace HeartScript.Expressions
             return OperatorInfo.IsEvaluatedBefore(_operatorInfo, right._operatorInfo);
         }
 
-        public INode? FeedOperandLeft(INode? leftNode)
+        public ExpressionNode? FeedOperandLeft(ExpressionNode? leftNode)
         {
             _leftNode = leftNode;
             return TryCompleteNode();
         }
 
-        public INode FeedOperandRight(INode rightNode)
+        public ExpressionNode FeedOperandRight(ExpressionNode? rightNode)
         {
             _rightNode = rightNode;
             return TryCompleteNode() ?? throw new Exception($"{nameof(ExpressionNodeBuilder)} is incomplete");
         }
 
-        private INode? TryCompleteNode()
+        private ExpressionNode? TryCompleteNode()
         {
             bool haveLeft = _leftNode != null;
             bool expectLeft = _operatorInfo.LeftPrecedence != null;

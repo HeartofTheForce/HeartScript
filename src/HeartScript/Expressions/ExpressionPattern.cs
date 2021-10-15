@@ -30,52 +30,44 @@ namespace HeartScript.Expressions
             }
 
             if (!ctx.IsEOF)
-                throw new UnexpectedTokenException(ctx.Offset, "EOF");
+            {
+                if (ctx.Exception != null && ctx.Exception.CharIndex > ctx.Offset)
+                    throw ctx.Exception;
+                else
+                    throw new UnexpectedTokenException(ctx.Offset, "EOF");
+            }
 
             return result;
         }
 
         public INode? Match(PatternParser parser, ParserContext ctx)
         {
-            int localOffset = ctx.Offset;
-
             var nodeBuilders = new Stack<ExpressionNodeBuilder>();
-            INode? operand = null;
+            ExpressionNode? operand = null;
 
             while (true)
             {
                 var right = TryGetNodeBuilder(operand == null, parser, ctx);
                 if (right == null)
                 {
-                    if (ctx.Exception != null && ctx.Offset < ctx.Exception.CharIndex)
+                    if (operand == null)
+                    {
+                        if (ctx.Exception == null || ctx.Exception.CharIndex <= ctx.Offset)
+                            ctx.Exception = new ExpressionTermException(ctx.Offset);
+
                         return null;
+                    }
 
                     while (nodeBuilders.Count > 0)
                     {
-                        if (operand == null)
-                        {
-                            ctx.Exception = new ExpressionTermException(ctx.Offset);
-                            return null;
-                        }
-
                         operand = nodeBuilders.Pop().FeedOperandRight(operand);
                     }
 
-                    if (operand != null)
-                        return operand;
-
-                    ctx.Exception = new ExpressionTermException(localOffset);
-                    return null;
+                    return operand;
                 }
 
                 while (nodeBuilders.TryPeek(out var left) && left.IsEvaluatedBefore(right))
                 {
-                    if (operand == null)
-                    {
-                        ctx.Exception = new ExpressionTermException(ctx.Offset);
-                        return null;
-                    }
-
                     operand = nodeBuilders.Pop().FeedOperandRight(operand);
                 }
 
@@ -87,6 +79,7 @@ namespace HeartScript.Expressions
 
         private ExpressionNodeBuilder? TryGetNodeBuilder(bool wantOperand, PatternParser parser, ParserContext ctx)
         {
+            int localOffset = ctx.Offset;
             foreach (var op in _operators)
             {
                 bool valid;
@@ -100,7 +93,13 @@ namespace HeartScript.Expressions
 
                 var result = parser.TryMatch(op.Pattern, ctx);
                 if (result != null)
+                {
+                    if (localOffset == ctx.Offset)
+                        throw new ZeroLengthMatchException(ctx.Offset);
+
+                    result.Name = op.Name;
                     return new ExpressionNodeBuilder(op, result);
+                }
             }
 
             return null;
