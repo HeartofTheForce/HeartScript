@@ -3,9 +3,9 @@
 'u+'         -> none 1 '+'
 'u-'         -> none 1 '-'
 '~'          -> none 1 '~'
-'real'   -> none none `\d+\.\d+`
+'real'       -> none none `\d+\.\d+`
 'integral'   -> none none `\d+?`
-'boolean'   -> none none 'true' / 'false'
+'boolean'    -> none none 'true' / 'false'
 'identifier' -> none none `[a-zA-Z]\w*`
 
 #HaveOperand (Postfix, Infix)
