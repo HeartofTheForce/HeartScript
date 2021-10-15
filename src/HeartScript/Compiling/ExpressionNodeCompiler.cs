@@ -32,8 +32,9 @@ namespace HeartScript.Compiling
             ["^"] = CompileBinary(Expression.ExclusiveOr),
             ["|"] = CompileBinary(Expression.Or),
             ["?:"] = CompileTernary,
-            ["Constant"] = ParseConstant,
-            ["Identifier"] = ParseIdentifier,
+            ["real"] = ParseReal,
+            ["integral"] = ParseIntegral,
+            ["identifier"] = ParseIdentifier,
         };
 
         public static Func<T> CompileFunction<T>(ExpressionNode node)
@@ -71,11 +72,16 @@ namespace HeartScript.Compiling
             return Compile(scope, (ExpressionNode)lookupNode.Node);
         }
 
-        static Expression ParseConstant(CompilerScope scope, ExpressionNode node)
+        static Expression ParseReal(CompilerScope scope, ExpressionNode node)
         {
             if (double.TryParse(node.MidNode.Value, out double doubleValue))
                 return Expression.Constant(doubleValue);
 
+            throw new ArgumentException(nameof(node));
+        }
+
+        static Expression ParseIntegral(CompilerScope scope, ExpressionNode node)
+        {
             if (int.TryParse(node.MidNode.Value, out int intValue))
                 return Expression.Constant(intValue);
 
@@ -94,8 +100,8 @@ namespace HeartScript.Compiling
         {
             var left = callNode.LeftNode;
 
-            if (left.Name != "Identifier")
-                throw new Exception($"{nameof(left)}.{nameof(left.Name)} is not Identifier");
+            if (left.Name != "identifier")
+                throw new Exception($"{nameof(left)}.{nameof(left.Name)} is not identifier");
 
             string methodName = left.MidNode.Value;
             if (methodName == null)
@@ -140,9 +146,9 @@ namespace HeartScript.Compiling
                 var left = Compile(scope, node.LeftNode);
                 var right = Compile(scope, node.RightNode);
 
-                if (IsFloatingPoint(left.Type) && IsIntegral(right.Type))
+                if (IsReal(left.Type) && IsIntegral(right.Type))
                     right = Expression.Convert(right, left.Type);
-                else if (IsIntegral(left.Type) && IsFloatingPoint(right.Type))
+                else if (IsIntegral(left.Type) && IsReal(right.Type))
                     left = Expression.Convert(left, right.Type);
 
                 return compiler(left, right);
@@ -155,9 +161,9 @@ namespace HeartScript.Compiling
             var mid = Compile(scope, (ExpressionNode)node.MidNode.Children[1].Children[0]);
             var right = Compile(scope, node.RightNode);
 
-            if (IsIntegral(mid.Type) && IsFloatingPoint(right.Type))
+            if (IsIntegral(mid.Type) && IsReal(right.Type))
                 mid = Expression.Convert(mid, right.Type);
-            else if (IsFloatingPoint(mid.Type) && IsIntegral(right.Type))
+            else if (IsReal(mid.Type) && IsIntegral(right.Type))
                 right = Expression.Convert(right, mid.Type);
 
             return Expression.Condition(left, mid, right);
@@ -171,7 +177,7 @@ namespace HeartScript.Compiling
             return expression;
         }
 
-        static bool IsFloatingPoint(Type type) =>
+        static bool IsReal(Type type) =>
             type == typeof(float) ||
             type == typeof(double) ||
             type == typeof(decimal);

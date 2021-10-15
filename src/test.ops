@@ -12,9 +12,12 @@
 '>='         -> 5 5 '>='
 '<'          -> 5 5 '<'
 '>'          -> 5 5 '>'
-'&'          -> 6 6 '&'
-'^'          -> 7 7 '^'
-'|'          -> 8 8 '|'
-'?:'         -> 9 99 '?' expr ':'
-'Constant'   -> none none `\d+(?:\.\d+)?`
-'Identifier' -> none none `[a-zA-Z]\w*`
+'=='         -> 6 6 '=='
+'!='         -> 6 6 '!='
+'&'          -> 7 7 '&'
+'^'          -> 8 8 '^'
+'|'          -> 9 9 '|'
+'?:'         -> 10 99 '?' expr ':'
+'real'   -> none none `\d+\.\d+`
+'integral'   -> none none `\d+?`
+'identifier' -> none none `[a-zA-Z]\w*`

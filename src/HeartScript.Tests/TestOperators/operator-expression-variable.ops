@@ -13,4 +13,4 @@
 #Pass VariableExpressions SameDelimiter SameTerminator
 '&' -> none none '&' (expr ('*' expr)*)? '*'
 
-'Identifier' -> none none `[a-zA-Z]\w*`
+'identifier' -> none none `[a-zA-Z]\w*`

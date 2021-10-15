@@ -11,8 +11,9 @@ namespace HeartScript.Compiling
         private static readonly Dictionary<string, Func<INode, string>> s_overrideCompilers = new Dictionary<string, Func<INode, string>>()
         {
             ["()"] = (node) => node.Children[0].Children[1].ToString(),
-            ["Constant"] = (node) => node.Children[0].Value,
-            ["Identifier"] = (node) => node.Children[0].Value,
+            ["real"] = (node) => node.Children[0].Value,
+            ["integral"] = (node) => node.Children[0].Value,
+            ["identifier"] = (node) => node.Children[0].Value,
         };
 
         public static string Compile(INode node)
