@@ -23,6 +23,12 @@ namespace HeartScript.Tests.CompilerTests
             },
             new ExpressionCompilerTestCase<double>()
             {
+                Infix = "Max(0.5, 1.5)",
+                ExpectedString = "($ Max 0.5 1.5)",
+                ExpectedExpression = () => Math.Max(0.5, 1.5),
+            },
+            new ExpressionCompilerTestCase<double>()
+            {
                 Infix = "Max(0.5, 1)",
                 ExpectedString = "($ Max 0.5 1)",
                 ExpectedExpression = () => Math.Max(0.5, 1),
@@ -32,12 +38,6 @@ namespace HeartScript.Tests.CompilerTests
                 Infix = "Max(0, 1.5)",
                 ExpectedString = "($ Max 0 1.5)",
                 ExpectedExpression = () => Math.Max(0, 1.5),
-            },
-            new ExpressionCompilerTestCase<double>()
-            {
-                Infix = "Max(0.5, 1.5)",
-                ExpectedString = "($ Max 0.5 1.5)",
-                ExpectedExpression = () => Math.Max(0.5, 1.5),
             },
             //!
             new ExpressionCompilerTestCase<double>()
