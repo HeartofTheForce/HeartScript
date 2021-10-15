@@ -67,7 +67,7 @@ namespace HeartScript.Tests.CompilerTests
                 Infix = "DoubleA",
                 Input = new DemoContext()
                 {
-                    DoubleA = 1.0,
+                    DoubleA = 1.5,
                 },
                 ExpectedString = "DoubleA",
                 ExpectedExpression = (ctx) => ctx.DoubleA,
