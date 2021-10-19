@@ -4,7 +4,7 @@
 'u-'         -> none 1 '-'
 '~'          -> none 1 '~'
 'real'       -> none none `\d+\.\d+`
-'integral'   -> none none `\d+?`
+'integral'   -> none none `\d+`
 'boolean'    -> none none 'true' / 'false'
 'identifier' -> none none `[a-zA-Z]\w*`
 

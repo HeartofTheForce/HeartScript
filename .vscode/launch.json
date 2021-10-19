@@ -11,7 +11,7 @@
       "preLaunchTask": "build",
       "program": "${workspaceFolder}/src/HeartScript.Cli/bin/Debug/net5.0/HeartScript.Cli.dll",
       "logging": { "moduleLoad": false },
-      "args": ["-1 < 0 ? max(a * b + c!, 4) : (2 + 5)"],
+      "args": ["-10 < 0 ? max(a * b + c!, 4) : (2 + 5)"],
       "cwd": "${workspaceFolder}",
       "console": "internalConsole",
       "stopAtEntry": false
