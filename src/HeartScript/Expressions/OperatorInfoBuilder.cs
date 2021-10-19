@@ -76,7 +76,7 @@ namespace HeartScript.Expressions
                 rightPrecedence = null;
 
             var patternNode = result.Children[3];
-            var operatorInfo = PegHelper.BuildPegPattern(patternNode);
+            var operatorInfo = PegHelper.BuildLookup(patternNode);
 
             return new OperatorInfo(name, operatorInfo, leftPrecedence, rightPrecedence);
         }

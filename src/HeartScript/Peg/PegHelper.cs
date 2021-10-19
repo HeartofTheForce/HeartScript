@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using HeartScript.Parsing;
 using HeartScript.Peg.Nodes;
 using HeartScript.Peg.Patterns;
@@ -8,6 +9,15 @@ namespace HeartScript.Peg
 {
     public static class PegHelper
     {
+        private static readonly Dictionary<string, Func<INode, IPattern>> s_builders = new Dictionary<string, Func<INode, IPattern>>()
+        {
+            ["peg"] = BuildPeg,
+            ["choice"] = BuildChoice,
+            ["sequence"] = BuildSequence,
+            ["quantifier"] = BuildQuantifier,
+            ["term"] = BuildTerm,
+        };
+
         private static readonly LexerPattern s_regex = LexerPattern.FromRegex("`(?:``|[^`])*`");
         private static readonly LexerPattern s_plainText = LexerPattern.FromRegex("'(?:''|[^'])*'");
         public static readonly LexerPattern NonSignificant = LexerPattern.FromRegex("\\s*");
@@ -65,35 +75,24 @@ namespace HeartScript.Peg
             return parser;
         }
 
-        public static IPattern BuildPegPattern(INode node)
+        public static IPattern BuildLookup(INode node)
         {
-            var output = new PatternBuilder();
+            var lookupNode = (LookupNode)node;
 
-            output.Builders["peg"] = BuildPeg;
-            output.Builders["choice"] = BuildChoice;
-            output.Builders["sequence"] = BuildSequence;
-            output.Builders["quantifier"] = BuildQuantifier;
-            output.Builders["term"] = BuildTerm;
-
-            return BuildLookup(output, (LookupNode)node);
-        }
-
-        static IPattern BuildLookup(PatternBuilder builder, LookupNode node)
-        {
-            if (node.Name == null)
+            if (lookupNode.Name == null)
                 throw new ArgumentException($"{nameof(node.Name)} cannot be null");
 
-            return builder.Builders[node.Name](builder, node.Node);
+            return s_builders[lookupNode.Name](lookupNode.Node);
         }
 
-        static IPattern BuildPeg(PatternBuilder builder, INode node)
+        static IPattern BuildPeg(INode node)
         {
-            return BuildLookup(builder, (LookupNode)node);
+            return BuildLookup(node);
         }
 
-        static IPattern BuildChoice(PatternBuilder builder, INode node)
+        static IPattern BuildChoice(INode node)
         {
-            var leftNode = BuildLookup(builder, (LookupNode)node.Children[0]);
+            var leftNode = BuildLookup(node.Children[0]);
             var minOrMoreNode = node.Children[1];
 
             if (minOrMoreNode.Children.Count == 0)
@@ -104,29 +103,29 @@ namespace HeartScript.Peg
 
             foreach (var child in minOrMoreNode.Children)
             {
-                output.Or(BuildLookup(builder, (LookupNode)child));
+                output.Or(BuildLookup(child));
             }
 
             return output;
         }
 
-        static IPattern BuildSequence(PatternBuilder builder, INode node)
+        static IPattern BuildSequence(INode node)
         {
             if (node.Children.Count == 1)
-                return BuildLookup(builder, (LookupNode)node.Children[0]);
+                return BuildLookup(node.Children[0]);
 
             var output = SequencePattern.Create();
             foreach (var child in node.Children)
             {
-                output.Then(BuildLookup(builder, (LookupNode)child));
+                output.Then(BuildLookup(child));
             }
 
             return output;
         }
 
-        static IPattern BuildQuantifier(PatternBuilder builder, INode node)
+        static IPattern BuildQuantifier(INode node)
         {
-            var pattern = BuildLookup(builder, (LookupNode)node.Children[0]);
+            var pattern = BuildLookup(node.Children[0]);
             var optional = node.Children[1];
 
             if (optional.Children.Count == 0)
@@ -142,7 +141,7 @@ namespace HeartScript.Peg
             };
         }
 
-        static IPattern BuildTerm(PatternBuilder builder, INode node)
+        static IPattern BuildTerm(INode node)
         {
             var root = (ChoiceNode)node;
 
@@ -169,7 +168,7 @@ namespace HeartScript.Peg
                         }
                     };
                 case 1:
-                    return BuildLookup(builder, (LookupNode)root.Node);
+                    return BuildLookup(root.Node);
                 case 2:
                     return LookupPattern.Create(root.Node.Value);
                 default:
