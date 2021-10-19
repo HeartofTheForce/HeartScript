@@ -8,7 +8,7 @@ namespace HeartScript.Expressions
 {
     public class ExpressionNode : INode
     {
-        public string? Name { get; set; }
+        public string? Name { get; }
         public string Value { get; }
         public List<INode> Children { get; }
         public int CharIndex { get; set; }
@@ -21,9 +21,9 @@ namespace HeartScript.Expressions
         private readonly int _midIndex;
         private readonly int _rightIndex;
 
-        public ExpressionNode(ExpressionNode? leftNode, INode midNode, ExpressionNode? rightNode)
+        public ExpressionNode(string? name, ExpressionNode? leftNode, INode midNode, ExpressionNode? rightNode)
         {
-            Name = midNode.Name;
+            Name = name;
             Value = null;
             Children = new List<INode>();
 

@@ -50,7 +50,7 @@ namespace HeartScript.Parsing
                 var targetGroup = match.Groups[1];
                 ctx.Offset += match.Length;
 
-                return new PegNode(targetGroup.Index, targetGroup.Value);
+                return new PegNode(null, targetGroup.Index, targetGroup.Value);
             }
 
             if (ctx.Exception == null || ctx.Exception.CharIndex <= ctx.Offset)

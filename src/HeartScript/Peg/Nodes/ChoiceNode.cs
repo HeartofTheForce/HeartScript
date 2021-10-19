@@ -7,7 +7,7 @@ namespace HeartScript.Peg.Nodes
         public int ChoiceIndex { get; }
         public INode Node => Children[0];
 
-        public ChoiceNode(int choiceIndex, INode node) : base(node)
+        public ChoiceNode(int choiceIndex, INode node) : base(null, node)
         {
             ChoiceIndex = choiceIndex;
         }

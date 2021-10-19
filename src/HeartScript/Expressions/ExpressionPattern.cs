@@ -97,7 +97,6 @@ namespace HeartScript.Expressions
                     if (localOffset == ctx.Offset)
                         throw new ZeroLengthMatchException(ctx.Offset);
 
-                    result.Name = op.Name;
                     return new ExpressionNodeBuilder(op, result);
                 }
             }

@@ -66,7 +66,7 @@ namespace HeartScript.Peg.Patterns
             if (output.Count == 1)
                 return output[0];
             else
-                return new PegNode(localOffset, output);
+                return new PegNode(null, localOffset, output);
         }
 
         private struct SequenceStep

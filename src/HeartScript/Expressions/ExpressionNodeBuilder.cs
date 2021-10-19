@@ -45,7 +45,7 @@ namespace HeartScript.Expressions
             if (haveRight != expectRight)
                 return null;
 
-            return new ExpressionNode(_leftNode, _midNode, _rightNode);
+            return new ExpressionNode(_operatorInfo.Name, _leftNode, _midNode, _rightNode);
         }
     }
 }

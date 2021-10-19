@@ -50,7 +50,7 @@ namespace HeartScript.Peg.Patterns
             }
 
             if (output.Count >= _min)
-                return new PegNode(localOffset, output);
+                return new PegNode(null, localOffset, output);
             else
                 return null;
         }
