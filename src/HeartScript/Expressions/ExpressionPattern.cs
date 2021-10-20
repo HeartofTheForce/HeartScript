@@ -84,9 +84,15 @@ namespace HeartScript.Expressions
             {
                 bool valid;
                 if (wantOperand)
-                    valid = op.IsNullary() || op.IsPrefix();
+                {
+                    //Nullary, Prefix
+                    valid = op.LeftPrecedence == null;
+                }
                 else
-                    valid = op.IsPostfix() || op.IsInfix();
+                {
+                    //Postfix, Infix
+                    valid = op.LeftPrecedence != null;
+                }
 
                 if (!valid)
                     continue;
