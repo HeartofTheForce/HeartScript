@@ -5,20 +5,15 @@ namespace HeartScript.Expressions
 {
     public class ExpressionNodeBuilder
     {
-        private readonly OperatorInfo _operatorInfo;
+        public readonly OperatorInfo OperatorInfo;
         private readonly INode _midNode;
         private ExpressionNode? _leftNode;
         private ExpressionNode? _rightNode;
 
         public ExpressionNodeBuilder(OperatorInfo operatorInfo, INode midNode)
         {
-            _operatorInfo = operatorInfo;
+            OperatorInfo = operatorInfo;
             _midNode = midNode;
-        }
-
-        public bool IsEvaluatedBefore(ExpressionNodeBuilder right)
-        {
-            return OperatorInfo.IsEvaluatedBefore(_operatorInfo, right._operatorInfo);
         }
 
         public ExpressionNode? FeedOperandLeft(ExpressionNode? leftNode)
@@ -36,16 +31,16 @@ namespace HeartScript.Expressions
         private ExpressionNode? TryCompleteNode()
         {
             bool haveLeft = _leftNode != null;
-            bool expectLeft = _operatorInfo.LeftPrecedence != null;
+            bool expectLeft = OperatorInfo.LeftPrecedence != null;
             if (haveLeft != expectLeft)
                 return null;
 
             bool haveRight = _rightNode != null;
-            bool expectRight = _operatorInfo.RightPrecedence != null;
+            bool expectRight = OperatorInfo.RightPrecedence != null;
             if (haveRight != expectRight)
                 return null;
 
-            return new ExpressionNode(_operatorInfo.Name, _leftNode, _midNode, _rightNode);
+            return new ExpressionNode(OperatorInfo.Name, _leftNode, _midNode, _rightNode);
         }
     }
 }

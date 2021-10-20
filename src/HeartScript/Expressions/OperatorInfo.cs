@@ -21,13 +21,5 @@ namespace HeartScript.Expressions
             LeftPrecedence = leftPrecedence;
             RightPrecedence = rightPrecedence;
         }
-
-        public static bool IsEvaluatedBefore(OperatorInfo left, OperatorInfo right)
-        {
-            if (left.RightPrecedence == null || right.LeftPrecedence == null)
-                return left.RightPrecedence == null;
-
-            return left.RightPrecedence <= right.LeftPrecedence;
-        }
     }
 }

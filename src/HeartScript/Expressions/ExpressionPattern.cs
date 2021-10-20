@@ -66,7 +66,7 @@ namespace HeartScript.Expressions
                     return operand;
                 }
 
-                while (nodeBuilders.TryPeek(out var left) && left.IsEvaluatedBefore(right))
+                while (nodeBuilders.TryPeek(out var left) && IsEvaluatedBefore(left.OperatorInfo, right.OperatorInfo))
                 {
                     operand = nodeBuilders.Pop().FeedOperandRight(operand);
                 }
@@ -108,6 +108,14 @@ namespace HeartScript.Expressions
             }
 
             return null;
+        }
+
+        private static bool IsEvaluatedBefore(OperatorInfo left, OperatorInfo right)
+        {
+            if (left.RightPrecedence == null || right.LeftPrecedence == null)
+                return left.RightPrecedence == null;
+
+            return left.RightPrecedence <= right.LeftPrecedence;
         }
     }
 
