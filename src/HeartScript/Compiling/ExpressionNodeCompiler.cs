@@ -88,10 +88,10 @@ namespace HeartScript.Compiling
 
         static Expression Compile(CompilerScope scope, ExpressionNode node)
         {
-            if (node.Name != null && s_nodeCompilers.TryGetValue(node.Name, out var compiler))
+            if (node.Key != null && s_nodeCompilers.TryGetValue(node.Key, out var compiler))
                 return compiler(scope, node);
 
-            throw new ArgumentException($"{node.Name} does not have a matching compiler");
+            throw new ArgumentException($"{node.Key} does not have a matching compiler");
         }
 
         static Expression CompileRoundBracket(CompilerScope scope, ExpressionNode node)
@@ -143,7 +143,7 @@ namespace HeartScript.Compiling
             if (callNode.LeftNode == null)
                 throw new Exception($"{nameof(callNode.LeftNode)} cannot be null");
 
-            if (callNode.LeftNode.Name != "identifier")
+            if (callNode.LeftNode.Key != "identifier")
                 throw new Exception($"{nameof(callNode.LeftNode)} is not identifier");
 
             var leftValueNode = (ValueNode)callNode.LeftNode.MidNode;

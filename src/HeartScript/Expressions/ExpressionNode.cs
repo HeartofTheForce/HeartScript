@@ -5,16 +5,16 @@ namespace HeartScript.Expressions
 {
     public class ExpressionNode : IParseNode
     {
-        public string Name { get; }
+        public string Key { get; }
         public int CharIndex { get; set; }
 
         public ExpressionNode? LeftNode { get; }
         public IParseNode MidNode { get; }
         public ExpressionNode? RightNode { get; }
 
-        public ExpressionNode(string name, ExpressionNode? leftNode, IParseNode midNode, ExpressionNode? rightNode)
+        public ExpressionNode(string key, ExpressionNode? leftNode, IParseNode midNode, ExpressionNode? rightNode)
         {
-            Name = name;
+            Key = key;
 
             LeftNode = leftNode;
             MidNode = midNode;

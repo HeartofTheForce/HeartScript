@@ -44,7 +44,7 @@ namespace HeartScript.Compiling
         {
             if (node is ExpressionNode expressionNode)
             {
-                if (s_overrideCompilers.TryGetValue(expressionNode.Name, out var compiler))
+                if (s_overrideCompilers.TryGetValue(expressionNode.Key, out var compiler))
                     return compiler(expressionNode);
 
                 IEnumerable<IParseNode> children = CompilerHelper.GetChildren<ExpressionNode>(expressionNode);
@@ -52,10 +52,10 @@ namespace HeartScript.Compiling
                 if (children.Count() > 0)
                 {
                     string parameters = string.Join(' ', children);
-                    return $"({expressionNode.Name} {parameters})";
+                    return $"({expressionNode.Key} {parameters})";
                 }
 
-                return $"({expressionNode.Name})";
+                return $"({expressionNode.Key})";
             }
 
             throw new NotImplementedException();

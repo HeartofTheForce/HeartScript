@@ -58,8 +58,8 @@ namespace HeartScript.Expressions
 
             var sequenceNode = (SequenceNode)result;
 
-            var nameNode = (ValueNode)sequenceNode.Children[0];
-            string name = nameNode.Value[1..^1];
+            var keyNode = (ValueNode)sequenceNode.Children[0];
+            string key = keyNode.Value[1..^1];
 
             var leftNode = (ChoiceNode)sequenceNode.Children[1];
             uint? leftPrecedence = null;
@@ -80,7 +80,7 @@ namespace HeartScript.Expressions
             var patternNode = sequenceNode.Children[3];
             var operatorInfo = PegHelper.BuildLookup(patternNode);
 
-            return new OperatorInfo(name, operatorInfo, leftPrecedence, rightPrecedence);
+            return new OperatorInfo(key, operatorInfo, leftPrecedence, rightPrecedence);
         }
     }
 }
