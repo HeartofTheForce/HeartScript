@@ -57,7 +57,6 @@ namespace HeartScript.Peg.Patterns
 
     public class QuantifierNode : IParseNode
     {
-        public string? Name { get; }
         public int CharIndex { get; }
         public List<IParseNode> Children { get; }
 

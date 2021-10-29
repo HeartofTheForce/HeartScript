@@ -60,7 +60,6 @@ namespace HeartScript.Parsing
 
     public class ValueNode : IParseNode
     {
-        public string? Name { get; }
         public int CharIndex { get; }
         public string Value { get; }
 
