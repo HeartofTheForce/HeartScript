@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using HeartScript.Parsing;
 using HeartScript.Peg;
-using HeartScript.Peg.Nodes;
 using HeartScript.Peg.Patterns;
 
 namespace HeartScript.Expressions
@@ -57,25 +56,28 @@ namespace HeartScript.Expressions
             if (result == null)
                 throw new Exception($"{ctx.Exception}, {lineNumber}");
 
-            string? name = null;
-            var nameNode = result.Children[0];
-            name = nameNode.Value[1..^1];
+            var sequenceNode = (SequenceNode)result;
 
-            var leftNode = (ChoiceNode)result.Children[1];
-            uint? leftPrecedence;
-            if (uint.TryParse(leftNode.Node.Value, out uint leftValue))
-                leftPrecedence = leftValue;
-            else
-                leftPrecedence = null;
+            var nameNode = (ValueNode)sequenceNode.Children[0];
+            string name = nameNode.Value[1..^1];
 
-            var rightNode = (ChoiceNode)result.Children[2];
-            uint? rightPrecedence;
-            if (uint.TryParse(rightNode.Node.Value, out uint rightValue))
-                rightPrecedence = rightValue;
-            else
-                rightPrecedence = null;
+            var leftNode = (ChoiceNode)sequenceNode.Children[1];
+            uint? leftPrecedence = null;
+            if (leftNode.ChoiceIndex == 0)
+            {
+                var valueNode = (ValueNode)leftNode.Node;
+                leftPrecedence = uint.Parse(valueNode.Value);
+            }
 
-            var patternNode = result.Children[3];
+            var rightNode = (ChoiceNode)sequenceNode.Children[2];
+            uint? rightPrecedence = null;
+            if (rightNode.ChoiceIndex == 0)
+            {
+                var valueNode = (ValueNode)rightNode.Node;
+                rightPrecedence = uint.Parse(valueNode.Value);
+            }
+
+            var patternNode = sequenceNode.Children[3];
             var operatorInfo = PegHelper.BuildLookup(patternNode);
 
             return new OperatorInfo(name, operatorInfo, leftPrecedence, rightPrecedence);

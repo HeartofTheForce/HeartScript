@@ -6,11 +6,11 @@ namespace HeartScript.Expressions
     public class ExpressionNodeBuilder
     {
         public readonly OperatorInfo OperatorInfo;
-        private readonly INode _midNode;
+        private readonly IParseNode _midNode;
         private ExpressionNode? _leftNode;
         private ExpressionNode? _rightNode;
 
-        public ExpressionNodeBuilder(OperatorInfo operatorInfo, INode midNode)
+        public ExpressionNodeBuilder(OperatorInfo operatorInfo, IParseNode midNode)
         {
             OperatorInfo = operatorInfo;
             _midNode = midNode;

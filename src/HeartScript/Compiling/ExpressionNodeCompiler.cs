@@ -4,7 +4,8 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using HeartScript.Expressions;
-using HeartScript.Peg.Nodes;
+using HeartScript.Parsing;
+using HeartScript.Peg.Patterns;
 
 namespace HeartScript.Compiling
 {
@@ -16,10 +17,34 @@ namespace HeartScript.Compiling
         {
             ["()"] = CompileRoundBracket,
             ["$"] = CompileStaticCall(typeof(Math)),
-            ["u+"] = (scope, node) => Expression.UnaryPlus(Compile(scope, node.RightNode)),
-            ["u-"] = (scope, node) => Expression.Negate(Compile(scope, node.RightNode)),
-            ["~"] = (scope, node) => Expression.Not(Compile(scope, node.RightNode)),
-            ["!"] = (scope, node) => Compile(scope, node.LeftNode),
+            ["u+"] = (scope, node) =>
+            {
+                if (node.RightNode == null)
+                    throw new Exception($"{nameof(node.LeftNode)} cannot be null");
+
+                return Expression.UnaryPlus(Compile(scope, node.RightNode));
+            },
+            ["u-"] = (scope, node) =>
+            {
+                if (node.RightNode == null)
+                    throw new Exception($"{nameof(node.LeftNode)} cannot be null");
+
+                return Expression.Negate(Compile(scope, node.RightNode));
+            },
+            ["~"] = (scope, node) =>
+            {
+                if (node.RightNode == null)
+                    throw new Exception($"{nameof(node.LeftNode)} cannot be null");
+
+                return Expression.Not(Compile(scope, node.RightNode));
+            },
+            ["!"] = (scope, node) =>
+            {
+                if (node.LeftNode == null)
+                    throw new Exception($"{nameof(node.LeftNode)} cannot be null");
+
+                return Compile(scope, node.LeftNode);
+            },
             ["*"] = CompileBinary(Expression.Multiply),
             ["/"] = CompileBinary(Expression.Divide),
             ["+"] = CompileBinary(Expression.Add),
@@ -71,13 +96,15 @@ namespace HeartScript.Compiling
 
         static Expression CompileRoundBracket(CompilerScope scope, ExpressionNode node)
         {
-            var lookupNode = (LookupNode)node.MidNode.Children[1];
+            var sequenceNode = (SequenceNode)node.MidNode;
+            var lookupNode = (LookupNode)sequenceNode.Children[1];
             return Compile(scope, (ExpressionNode)lookupNode.Node);
         }
 
         static Expression ParseReal(CompilerScope scope, ExpressionNode node)
         {
-            if (double.TryParse(node.MidNode.Value, out double value))
+            var valueNode = (ValueNode)node.MidNode;
+            if (double.TryParse(valueNode.Value, out double value))
                 return Expression.Constant(value);
 
             throw new ArgumentException(nameof(node));
@@ -85,7 +112,8 @@ namespace HeartScript.Compiling
 
         static Expression ParseIntegral(CompilerScope scope, ExpressionNode node)
         {
-            if (int.TryParse(node.MidNode.Value, out int value))
+            var valueNode = (ValueNode)node.MidNode;
+            if (int.TryParse(valueNode.Value, out int value))
                 return Expression.Constant(value);
 
             throw new ArgumentException(nameof(node));
@@ -93,7 +121,9 @@ namespace HeartScript.Compiling
 
         static Expression ParseBoolean(CompilerScope scope, ExpressionNode node)
         {
-            if (bool.TryParse(node.MidNode.Children[0].Value, out bool value))
+            var choiceNode = (ChoiceNode)node.MidNode;
+            var valueNode = (ValueNode)choiceNode.Node;
+            if (bool.TryParse(valueNode.Value, out bool value))
                 return Expression.Constant(value);
 
             throw new ArgumentException(nameof(node));
@@ -101,7 +131,8 @@ namespace HeartScript.Compiling
 
         static Expression ParseIdentifier(CompilerScope scope, ExpressionNode node)
         {
-            if (scope.TryGetVariable(node.MidNode.Value, out var variable))
+            var valueNode = (ValueNode)node.MidNode;
+            if (scope.TryGetVariable(valueNode.Value, out var variable))
                 return variable;
 
             throw new ArgumentException(nameof(node));
@@ -109,12 +140,14 @@ namespace HeartScript.Compiling
 
         static Expression CompileCall(CompilerScope scope, ExpressionNode callNode, Expression? instance, Type type, BindingFlags bindingFlags)
         {
-            var left = callNode.LeftNode;
+            if (callNode.LeftNode == null)
+                throw new Exception($"{nameof(callNode.LeftNode)} cannot be null");
 
-            if (left.Name != "identifier")
-                throw new Exception($"{nameof(left)}.{nameof(left.Name)} is not identifier");
+            if (callNode.LeftNode.Name != "identifier")
+                throw new Exception($"{nameof(callNode.LeftNode)} is not identifier");
 
-            string methodName = left.MidNode.Value;
+            var leftValueNode = (ValueNode)callNode.LeftNode.MidNode;
+            string methodName = leftValueNode.Value;
             if (methodName == null)
                 throw new Exception($"{nameof(methodName)} cannot be null");
 
@@ -154,6 +187,11 @@ namespace HeartScript.Compiling
         {
             return (scope, node) =>
             {
+                if (node.LeftNode == null)
+                    throw new Exception($"{nameof(node.LeftNode)} cannot be null");
+                if (node.RightNode == null)
+                    throw new Exception($"{nameof(node.RightNode)} cannot be null");
+
                 var left = Compile(scope, node.LeftNode);
                 var right = Compile(scope, node.RightNode);
 
@@ -168,9 +206,17 @@ namespace HeartScript.Compiling
 
         static Expression CompileTernary(CompilerScope scope, ExpressionNode node)
         {
+            if (node.LeftNode == null)
+                throw new Exception($"{nameof(node.LeftNode)} cannot be null");
+            if (node.RightNode == null)
+                throw new Exception($"{nameof(node.RightNode)} cannot be null");
+
             var left = Compile(scope, node.LeftNode);
-            var mid = Compile(scope, (ExpressionNode)node.MidNode.Children[1].Children[0]);
             var right = Compile(scope, node.RightNode);
+
+            var sequenceNode = (SequenceNode)node.MidNode;
+            var lookupNode = (LookupNode)sequenceNode.Children[1];
+            var mid = Compile(scope, (ExpressionNode)lookupNode.Node);
 
             if (IsIntegral(mid.Type) && IsReal(right.Type))
                 mid = Expression.Convert(mid, right.Type);

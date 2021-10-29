@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using HeartScript.Parsing;
-using HeartScript.Peg.Nodes;
 
 namespace HeartScript.Peg.Patterns
 {
@@ -24,7 +23,7 @@ namespace HeartScript.Peg.Patterns
             return this;
         }
 
-        public INode? Match(PatternParser parser, ParserContext ctx)
+        public IParseNode? Match(PatternParser parser, ParserContext ctx)
         {
             for (int i = 0; i < _patterns.Count; i++)
             {
@@ -35,6 +34,19 @@ namespace HeartScript.Peg.Patterns
             }
 
             return null;
+        }
+    }
+
+    public class ChoiceNode : IParseNode
+    {
+        public int CharIndex { get; }
+        public int ChoiceIndex { get; }
+        public IParseNode Node { get; }
+
+        public ChoiceNode(int choiceIndex, IParseNode node)
+        {
+            ChoiceIndex = choiceIndex;
+            Node = node;
         }
     }
 }

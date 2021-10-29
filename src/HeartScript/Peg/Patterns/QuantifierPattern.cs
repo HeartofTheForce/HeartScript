@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using HeartScript.Parsing;
-using HeartScript.Peg.Nodes;
 
 namespace HeartScript.Peg.Patterns
 {
@@ -31,11 +30,11 @@ namespace HeartScript.Peg.Patterns
             return new QuantifierPattern(0, 1, pattern);
         }
 
-        public INode? Match(PatternParser parser, ParserContext ctx)
+        public IParseNode? Match(PatternParser parser, ParserContext ctx)
         {
             int localOffset = ctx.Offset;
 
-            var output = new List<INode>();
+            var output = new List<IParseNode>();
             while (_max == null || output.Count < _max)
             {
                 var result = parser.TryMatch(_pattern, ctx);
@@ -50,9 +49,23 @@ namespace HeartScript.Peg.Patterns
             }
 
             if (output.Count >= _min)
-                return new PegNode(null, localOffset, output);
+                return new QuantifierNode(localOffset, output);
             else
                 return null;
         }
     }
+
+    public class QuantifierNode : IParseNode
+    {
+        public string? Name { get; }
+        public int CharIndex { get; }
+        public List<IParseNode> Children { get; }
+
+        public QuantifierNode(int charIndex, List<IParseNode> children)
+        {
+            CharIndex = charIndex;
+            Children = children;
+        }
+    }
+
 }
