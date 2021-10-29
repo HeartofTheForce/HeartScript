@@ -4,19 +4,19 @@ namespace HeartScript.Expressions
 {
     public class OperatorInfo
     {
-        public string? Name { get; }
+        public string Key { get; }
         public IPattern Pattern { get; }
 
         public uint? LeftPrecedence { get; }
         public uint? RightPrecedence { get; }
 
         public OperatorInfo(
-            string? name,
+            string key,
             IPattern pattern,
             uint? leftPrecedence,
             uint? rightPrecedence)
         {
-            Name = name;
+            Key = key;
             Pattern = pattern;
             LeftPrecedence = leftPrecedence;
             RightPrecedence = rightPrecedence;

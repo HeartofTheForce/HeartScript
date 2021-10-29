@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using HeartScript.Parsing;
-using HeartScript.Peg.Nodes;
 
 namespace HeartScript.Peg.Patterns
 {
@@ -41,14 +40,14 @@ namespace HeartScript.Peg.Patterns
             return this;
         }
 
-        public INode? Match(PatternParser parser, ParserContext ctx)
+        public IParseNode? Match(PatternParser parser, ParserContext ctx)
         {
             if (_steps.Count <= 1)
                 throw new Exception($"Expected > 1 {nameof(_steps)} found: {_steps.Count}");
 
             int localOffset = ctx.Offset;
 
-            var output = new List<INode>();
+            var output = new List<IParseNode>();
             foreach (var step in _steps)
             {
                 var result = parser.TryMatch(step.Pattern, ctx);
@@ -66,7 +65,7 @@ namespace HeartScript.Peg.Patterns
             if (output.Count == 1)
                 return output[0];
             else
-                return new PegNode(null, localOffset, output);
+                return new SequenceNode(localOffset, output);
         }
 
         private struct SequenceStep
@@ -74,6 +73,17 @@ namespace HeartScript.Peg.Patterns
             public IPattern Pattern { get; set; }
             public bool Discard { get; set; }
         }
+    }
 
+    public class SequenceNode : IParseNode
+    {
+        public int CharIndex { get; }
+        public List<IParseNode> Children { get; }
+
+        public SequenceNode(int charIndex, List<IParseNode> children)
+        {
+            CharIndex = charIndex;
+            Children = children;
+        }
     }
 }

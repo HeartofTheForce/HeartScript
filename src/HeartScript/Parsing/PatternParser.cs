@@ -12,7 +12,7 @@ namespace HeartScript.Parsing
             Patterns = new Dictionary<string, IPattern>();
         }
 
-        public INode? TryMatch(IPattern pattern, ParserContext ctx)
+        public IParseNode? TryMatch(IPattern pattern, ParserContext ctx)
         {
             int localOffset = ctx.Offset;
 
@@ -41,7 +41,7 @@ namespace HeartScript.Parsing
 
     public interface IPattern
     {
-        INode? Match(PatternParser parser, ParserContext ctx);
+        IParseNode? Match(PatternParser parser, ParserContext ctx);
     }
 
     public abstract class PatternException : Exception

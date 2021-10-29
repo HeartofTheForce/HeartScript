@@ -13,7 +13,7 @@ namespace HeartScript.Expressions
             _operators = operators;
         }
 
-        public static INode Parse(IEnumerable<OperatorInfo> operators, ParserContext ctx)
+        public static IParseNode Parse(IEnumerable<OperatorInfo> operators, ParserContext ctx)
         {
             var expressionPattern = new ExpressionPattern(operators);
 
@@ -40,7 +40,7 @@ namespace HeartScript.Expressions
             return result;
         }
 
-        public INode? Match(PatternParser parser, ParserContext ctx)
+        public IParseNode? Match(PatternParser parser, ParserContext ctx)
         {
             var nodeBuilders = new Stack<ExpressionNodeBuilder>();
             ExpressionNode? operand = null;

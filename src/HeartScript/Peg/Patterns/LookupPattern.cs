@@ -1,5 +1,4 @@
 using HeartScript.Parsing;
-using HeartScript.Peg.Nodes;
 
 namespace HeartScript.Peg.Patterns
 {
@@ -17,7 +16,7 @@ namespace HeartScript.Peg.Patterns
             return new LookupPattern(key);
         }
 
-        public INode? Match(PatternParser parser, ParserContext ctx)
+        public IParseNode? Match(PatternParser parser, ParserContext ctx)
         {
             var result = parser.TryMatch(parser.Patterns[_key], ctx);
 
@@ -25,6 +24,19 @@ namespace HeartScript.Peg.Patterns
                 return new LookupNode(_key, result);
 
             return null;
+        }
+    }
+
+    public class LookupNode : IParseNode
+    {
+        public int CharIndex { get; }
+        public string Key { get; }
+        public IParseNode Node { get; }
+
+        public LookupNode(string key, IParseNode node)
+        {
+            Key = key;
+            Node = node;
         }
     }
 }

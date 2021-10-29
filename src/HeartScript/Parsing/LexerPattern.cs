@@ -1,6 +1,4 @@
-﻿using System;
-using System.Text.RegularExpressions;
-using HeartScript.Peg.Nodes;
+﻿using System.Text.RegularExpressions;
 
 namespace HeartScript.Parsing
 {
@@ -42,7 +40,7 @@ namespace HeartScript.Parsing
                 return Pattern;
         }
 
-        public INode? Match(PatternParser parser, ParserContext ctx)
+        public IParseNode? Match(PatternParser parser, ParserContext ctx)
         {
             var match = Regex.Match(ctx.Input, ctx.Offset);
             if (match.Success)
@@ -50,13 +48,25 @@ namespace HeartScript.Parsing
                 var targetGroup = match.Groups[1];
                 ctx.Offset += match.Length;
 
-                return new PegNode(null, targetGroup.Index, targetGroup.Value);
+                return new ValueNode(targetGroup.Index, targetGroup.Value);
             }
 
             if (ctx.Exception == null || ctx.Exception.CharIndex <= ctx.Offset)
                 ctx.Exception = new UnexpectedTokenException(ctx.Offset, this);
 
             return null;
+        }
+    }
+
+    public class ValueNode : IParseNode
+    {
+        public int CharIndex { get; }
+        public string Value { get; }
+
+        public ValueNode(int charIndex, string value)
+        {
+            CharIndex = charIndex;
+            Value = value;
         }
     }
 
