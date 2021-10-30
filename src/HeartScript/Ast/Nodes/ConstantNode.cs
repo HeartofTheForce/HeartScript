@@ -1,6 +1,6 @@
 using System;
 
-namespace HeartScript.Ast
+namespace HeartScript.Ast.Nodes
 {
     public class ConstantNode : AstNode
     {

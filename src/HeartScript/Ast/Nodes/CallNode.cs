@@ -1,7 +1,7 @@
 using System;
 using System.Reflection;
 
-namespace HeartScript.Ast
+namespace HeartScript.Ast.Nodes
 {
     public class CallNode : AstNode
     {
