@@ -17,7 +17,7 @@ namespace HeartScript.Compiling
             var ast = AstBuilder.Build(scope, node);
             ast = AstBuilder.ConvertIfRequired(ast, typeof(T));
 
-            var methodInfo = Compile("AssemblyName", "ModuleName", "TypeName", "MethodName", typeof(T), null);
+            var methodInfo = Compile("AssemblyName", "ModuleName", "TypeName", "MethodName", typeof(T), new ParameterNode[] { });
 
             return (Func<T>)methodInfo.CreateDelegate(typeof(Func<T>));
         }
@@ -41,7 +41,7 @@ namespace HeartScript.Compiling
             string typeName,
             string methodName,
             Type returnType,
-            ParameterNode[]? parameters)
+            ParameterNode[] parameters)
         {
             var assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName(assemblyName), AssemblyBuilderAccess.Run);
             var moduleBuilder = assemblyBuilder.DefineDynamicModule(moduleName);
