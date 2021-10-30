@@ -25,6 +25,7 @@ namespace HeartScript.Compiling
                 typeof(int),
                 typeof(double),
                 typeof(bool),
+                typeof(Math),
             };
 
             _parameterMap = new Dictionary<ParameterNode, int>();
@@ -40,9 +41,10 @@ namespace HeartScript.Compiling
             return _parameterMap[node];
         }
 
-        public bool IsAllowed(Type type)
+        public void AssertAllowed(Type type)
         {
-            return _typeWhitelist.Contains(type);
+            if (!_typeWhitelist.Contains(type))
+                throw new Exception($"{type} is not allowed");
         }
     }
 
@@ -99,9 +101,7 @@ namespace HeartScript.Compiling
 
         private static void Emit(EmitScope scope, AstNode node)
         {
-            if (!scope.IsAllowed(node.Type))
-                throw new Exception($"{node.Type} is not allowed");
-
+            scope.AssertAllowed(node.Type);
             switch (node)
             {
                 case ConstantNode constantNode: EmitConstant(scope, constantNode); break;
@@ -227,6 +227,8 @@ namespace HeartScript.Compiling
         {
             if (node.Instance != null)
                 Emit(scope, node.Instance);
+            else
+                scope.AssertAllowed(node.MethodInfo.ReflectedType);
 
             foreach (var parameter in node.Parameters)
             {
@@ -240,6 +242,8 @@ namespace HeartScript.Compiling
         {
             if (node.Instance != null)
                 Emit(scope, node.Instance);
+            else
+                scope.AssertAllowed(node.Member.ReflectedType);
 
             switch (node.Member)
             {
