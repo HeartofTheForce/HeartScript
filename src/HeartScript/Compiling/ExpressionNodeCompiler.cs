@@ -39,9 +39,7 @@ namespace HeartScript.Compiling
             var ast = AstBuilder.Build(scope, node);
             ast = AstBuilder.ConvertIfRequired(ast, typeof(T));
 
-            var methodInfo = Compile("AssemblyName", "ModuleName", "TypeName", "MethodName", ast, typeof(T), new ParameterNode[] { });
-
-            return (Func<T>)methodInfo.CreateDelegate(typeof(Func<T>));
+            return Compile<Func<T>>("AssemblyName", "ModuleName", "TypeName", "MethodName", ast, typeof(T), new ParameterNode[0]);
         }
 
         public static Func<TContext, TResult> CompileFunction<TContext, TResult>(ExpressionNode node)
@@ -52,12 +50,10 @@ namespace HeartScript.Compiling
             var ast = AstBuilder.Build(scope, node);
             ast = AstBuilder.ConvertIfRequired(ast, typeof(TResult));
 
-            var methodInfo = Compile("AssemblyName", "ModuleName", "TypeName", "MethodName", ast, typeof(TResult), parameters);
-
-            return (Func<TContext, TResult>)methodInfo.CreateDelegate(typeof(Func<TContext, TResult>));
+            return Compile<Func<TContext, TResult>>("AssemblyName", "ModuleName", "TypeName", "MethodName", ast, typeof(TResult), parameters);
         }
 
-        private static MethodInfo Compile(
+        private static T Compile<T>(
             string assemblyName,
             string moduleName,
             string typeName,
@@ -65,6 +61,7 @@ namespace HeartScript.Compiling
             AstNode ast,
             Type returnType,
             ParameterNode[] parameters)
+            where T : Delegate
         {
             var assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName(assemblyName), AssemblyBuilderAccess.Run);
             var moduleBuilder = assemblyBuilder.DefineDynamicModule(moduleName);
@@ -81,7 +78,7 @@ namespace HeartScript.Compiling
             var loadedType = typeBuilder.CreateType();
             var loadedMethodInfo = loadedType.GetMethod(methodBuilder.Name, parameterTypes);
 
-            return loadedMethodInfo;
+            return (T)loadedMethodInfo.CreateDelegate(typeof(T));
         }
 
         private static void Emit(EmitScope scope, AstNode node)
