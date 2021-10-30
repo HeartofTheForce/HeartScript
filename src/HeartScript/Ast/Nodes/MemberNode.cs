@@ -22,22 +22,20 @@ namespace HeartScript.Ast.Nodes
 
         private static Type GetUnderlyingType(MemberInfo member)
         {
-            return member.MemberType switch
+            return member switch
             {
-                MemberTypes.Field => ((FieldInfo)member).FieldType,
-                MemberTypes.Method => ((MethodInfo)member).ReturnType,
-                MemberTypes.Property => ((PropertyInfo)member).PropertyType,
+                FieldInfo fieldInfo => fieldInfo.FieldType,
+                PropertyInfo propertyInfo => propertyInfo.PropertyType,
                 _ => throw new NotImplementedException(),
             };
         }
 
         private static bool IsStatic(MemberInfo member)
         {
-            return member.MemberType switch
+            return member switch
             {
-                MemberTypes.Field => ((FieldInfo)member).IsStatic,
-                MemberTypes.Method => ((MethodInfo)member).IsStatic,
-                MemberTypes.Property => ((PropertyInfo)member).GetMethod.IsStatic,
+                FieldInfo fieldInfo => fieldInfo.IsStatic,
+                PropertyInfo propertyInfo => propertyInfo.GetMethod.IsStatic,
                 _ => throw new NotImplementedException(),
             };
         }
