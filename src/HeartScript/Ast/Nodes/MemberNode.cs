@@ -43,7 +43,7 @@ namespace HeartScript.Ast.Nodes
 
     public partial class AstNode
     {
-        public static MemberNode Field(AstNode instance, FieldInfo fieldInfo) => new MemberNode(instance, fieldInfo);
-        public static MemberNode Property(AstNode instance, PropertyInfo propertyInfo) => new MemberNode(instance, propertyInfo);
+        public static MemberNode Field(AstNode? instance, FieldInfo fieldInfo) => new MemberNode(instance, fieldInfo);
+        public static MemberNode Property(AstNode? instance, PropertyInfo propertyInfo) => new MemberNode(instance, propertyInfo);
     }
 }

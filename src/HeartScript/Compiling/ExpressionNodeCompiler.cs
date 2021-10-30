@@ -183,7 +183,6 @@ namespace HeartScript.Compiling
                 case AstType.Not: scope.ILGenerator.Emit(OpCodes.Not); break;
                 default: throw new NotImplementedException();
             }
-
         }
 
         private static void EmitConditional(EmitScope scope, ConditionalNode node)
