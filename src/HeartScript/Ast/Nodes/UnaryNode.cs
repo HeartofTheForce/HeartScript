@@ -4,7 +4,7 @@ namespace HeartScript.Ast.Nodes
     {
         public AstNode Operand { get; }
 
-        public UnaryNode(AstNode operand) : base(operand.Type)
+        public UnaryNode(AstNode operand, AstType nodeType) : base(operand.Type, nodeType)
         {
             Operand = operand;
         }

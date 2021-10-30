@@ -8,7 +8,7 @@ namespace HeartScript.Ast.Nodes
         public AstNode Target { get; }
         public AstNode[] Parameters { get; }
 
-        public CallNode(MethodInfo methodInfo, AstNode target, AstNode[] parameters) : base(methodInfo.ReturnType)
+        public CallNode(MethodInfo methodInfo, AstNode target, AstNode[] parameters) : base(methodInfo.ReturnType, AstType.Call)
         {
             var parameterInfos = methodInfo.GetParameters();
 
