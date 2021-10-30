@@ -69,6 +69,7 @@ namespace HeartScript.Compiling
                 case BinaryNode binaryNode: EmitBinary(ilGenerator, binaryNode); break;
                 case UnaryNode unaryNode: EmitUnary(ilGenerator, unaryNode); break;
                 case ConditionalNode conditionalNode: EmitConditional(ilGenerator, conditionalNode); break;
+                case CallNode callNode: EmitCall(ilGenerator, callNode); break;
                 default: throw new NotImplementedException();
             }
         }
@@ -174,6 +175,19 @@ namespace HeartScript.Compiling
             Emit(ilGenerator, node.IfFalse);
 
             ilGenerator.MarkLabel(endLabel);
+        }
+
+        private static void EmitCall(ILGenerator ilGenerator, CallNode node)
+        {
+            if (node.Instance != null)
+                Emit(ilGenerator, node.Instance);
+
+            foreach (var parameter in node.Parameters)
+            {
+                Emit(ilGenerator, parameter);
+            }
+
+            ilGenerator.EmitCall(OpCodes.Call, node.MethodInfo, null);
         }
     }
 }

@@ -6,6 +6,7 @@ namespace HeartScript.Ast.Nodes
     public class CallNode : AstNode
     {
         public AstNode? Instance { get; }
+        public MethodInfo MethodInfo { get; }
         public AstNode[] Parameters { get; }
 
         public CallNode(AstNode? instance, MethodInfo methodInfo, AstNode[] parameters) : base(methodInfo.ReturnType, AstType.Call)
@@ -28,6 +29,7 @@ namespace HeartScript.Ast.Nodes
             }
 
             Instance = instance;
+            MethodInfo = methodInfo;
             Parameters = parameters;
         }
     }
