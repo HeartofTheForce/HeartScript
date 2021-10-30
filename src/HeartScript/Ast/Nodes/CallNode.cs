@@ -5,11 +5,17 @@ namespace HeartScript.Ast.Nodes
 {
     public class CallNode : AstNode
     {
-        public AstNode Target { get; }
+        public AstNode? Instance { get; }
         public AstNode[] Parameters { get; }
 
-        public CallNode(MethodInfo methodInfo, AstNode target, AstNode[] parameters) : base(methodInfo.ReturnType, AstType.Call)
+        public CallNode(AstNode? instance, MethodInfo methodInfo, AstNode[] parameters) : base(methodInfo.ReturnType, AstType.Call)
         {
+            if (methodInfo.IsStatic && instance != null)
+                throw new ArgumentException($"{nameof(instance)} must be null for static member");
+
+            if (!methodInfo.IsStatic && instance == null)
+                throw new ArgumentException($"{nameof(instance)} must not be null for instance member");
+
             var parameterInfos = methodInfo.GetParameters();
 
             if (parameters.Length != parameterInfos.Length)
@@ -21,8 +27,13 @@ namespace HeartScript.Ast.Nodes
                     throw new ArgumentException($"Parameter Type mismatch, {i}");
             }
 
-            Target = target;
+            Instance = instance;
             Parameters = parameters;
         }
+    }
+
+    public partial class AstNode
+    {
+        public static CallNode Call(AstNode? instance, MethodInfo methodInfo, AstNode[] parameters) => new CallNode(instance, methodInfo, parameters);
     }
 }

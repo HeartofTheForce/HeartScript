@@ -3,7 +3,7 @@ namespace HeartScript.Ast
     public enum AstType
     {
         UnaryPlus,
-        UnaryMinus,
+        Negate,
         Not,
         Constant,
         MemberAccess,
@@ -12,8 +12,8 @@ namespace HeartScript.Ast
         Divide,
         Add,
         Subtract,
-        LessThanEqual,
-        GreaterThanEqual,
+        LessThanOrEqual,
+        GreaterThanOrEqual,
         LessThan,
         GreaterThan,
         Equal,

@@ -13,5 +13,9 @@ namespace HeartScript.Ast.Nodes
 
             Value = value;
         }
+
+        public ConstantNode(object value) : this(value, value.GetType())
+        {
+        }
     }
 }

@@ -151,7 +151,7 @@ namespace HeartScript.Compiling
             if (methodName == null)
                 throw new Exception($"{nameof(methodName)} cannot be null");
 
-            var parameterNodes = CompilerHelper.GetChildren<ExpressionNode>(callNode.MidNode);
+            var parameterNodes = ParseNodeHelper.GetChildren<ExpressionNode>(callNode.MidNode);
             var parameters = new Expression[parameterNodes.Count];
             var parameterTypes = new Type[parameterNodes.Count];
 
