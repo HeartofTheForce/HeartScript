@@ -91,6 +91,12 @@ namespace HeartScript.Compiling
                 return;
             }
 
+            if (node.Type == typeof(bool))
+            {
+                ilGenerator.Emit(OpCodes.Ldc_I4, (bool)node.Value ? 1 : 0);
+                return;
+            }
+
             throw new NotImplementedException();
         }
 
