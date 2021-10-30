@@ -5,18 +5,18 @@ namespace HeartScript.Ast.Nodes
 {
     public class MemberNode : AstNode
     {
-        public AstNode? Expression { get; }
+        public AstNode? Instance { get; }
         public MemberInfo Member { get; }
 
-        public MemberNode(AstNode? expression, MemberInfo member) : base(GetUnderlyingType(member), AstType.MemberAccess)
+        public MemberNode(AstNode? instance, MemberInfo member) : base(GetUnderlyingType(member), AstType.MemberAccess)
         {
-            if (IsStatic(member) && expression != null)
-                throw new ArgumentException($"{nameof(expression)} must be null for static member");
+            if (IsStatic(member) && instance != null)
+                throw new ArgumentException($"{nameof(instance)} must be null for static member");
 
-            if (!IsStatic(member) && expression == null)
-                throw new ArgumentException($"{nameof(expression)} must not be null for instance member");
+            if (!IsStatic(member) && instance == null)
+                throw new ArgumentException($"{nameof(instance)} must not be null for instance member");
 
-            Expression = expression;
+            Instance = instance;
             Member = member;
         }
 
@@ -45,6 +45,7 @@ namespace HeartScript.Ast.Nodes
 
     public partial class AstNode
     {
-        public static ConstantNode Identifier(string name) => new ConstantNode("TEMP_MEMBER_ACCESS");
+        public static MemberNode Field(AstNode instance, FieldInfo fieldInfo) => new MemberNode(instance, fieldInfo);
+        public static MemberNode Property(AstNode instance, PropertyInfo propertyInfo) => new MemberNode(instance, propertyInfo);
     }
 }

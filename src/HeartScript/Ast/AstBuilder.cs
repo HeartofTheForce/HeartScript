@@ -11,39 +11,39 @@ namespace HeartScript.Ast
 {
     public static class AstBuilder
     {
-        private delegate AstNode AstNodeBuilder(ExpressionNode node);
+        private delegate AstNode AstNodeBuilder(AstScope scope, ExpressionNode node);
 
         private static readonly Dictionary<string, AstNodeBuilder> s_nodeBuilders = new Dictionary<string, AstNodeBuilder>()
         {
             ["()"] = BuildRoundBracket,
             ["$"] = BuildStaticCall(typeof(Math)),
-            ["u+"] = (node) =>
+            ["u+"] = (scope, node) =>
             {
                 if (node.RightNode == null)
                     throw new Exception($"{nameof(node.RightNode)} cannot be null");
 
-                return AstNode.UnaryPlus(BuildExpressionNode(node.RightNode));
+                return AstNode.UnaryPlus(BuildExpressionNode(scope, node.RightNode));
             },
-            ["u-"] = (node) =>
+            ["u-"] = (scope, node) =>
             {
                 if (node.RightNode == null)
                     throw new Exception($"{nameof(node.RightNode)} cannot be null");
 
-                return AstNode.Negate(BuildExpressionNode(node.RightNode));
+                return AstNode.Negate(BuildExpressionNode(scope, node.RightNode));
             },
-            ["~"] = (node) =>
+            ["~"] = (scope, node) =>
             {
                 if (node.RightNode == null)
                     throw new Exception($"{nameof(node.RightNode)} cannot be null");
 
-                return AstNode.Not(BuildExpressionNode(node.RightNode));
+                return AstNode.Not(BuildExpressionNode(scope, node.RightNode));
             },
-            ["!"] = (node) =>
+            ["!"] = (scope, node) =>
             {
                 if (node.LeftNode == null)
                     throw new Exception($"{nameof(node.LeftNode)} cannot be null");
 
-                return BuildExpressionNode(node.LeftNode);
+                return BuildExpressionNode(scope, node.LeftNode);
             },
             ["*"] = BuildBinary(AstNode.Multiply),
             ["/"] = BuildBinary(AstNode.Divide),
@@ -65,30 +65,30 @@ namespace HeartScript.Ast
             ["identifier"] = ParseIdentifier,
         };
 
-        public static AstNode Build(IParseNode parseNode)
+        public static AstNode Build(AstScope scope, IParseNode parseNode)
         {
             if (parseNode is ExpressionNode expressionNode)
-                return BuildExpressionNode(expressionNode);
+                return BuildExpressionNode(scope, expressionNode);
 
             throw new NotImplementedException();
         }
 
-        static AstNode BuildExpressionNode(ExpressionNode node)
+        static AstNode BuildExpressionNode(AstScope scope, ExpressionNode node)
         {
             if (node.Key != null && s_nodeBuilders.TryGetValue(node.Key, out var builder))
-                return builder(node);
+                return builder(scope, node);
 
             throw new ArgumentException($"{node.Key} does not have a matching builder");
         }
 
-        static AstNode BuildRoundBracket(ExpressionNode node)
+        static AstNode BuildRoundBracket(AstScope scope, ExpressionNode node)
         {
             var sequenceNode = (SequenceNode)node.MidNode;
             var lookupNode = (LookupNode)sequenceNode.Children[1];
-            return BuildExpressionNode((ExpressionNode)lookupNode.Node);
+            return BuildExpressionNode(scope, (ExpressionNode)lookupNode.Node);
         }
 
-        static AstNode ParseReal(ExpressionNode node)
+        static AstNode ParseReal(AstScope scope, ExpressionNode node)
         {
             var valueNode = (ValueNode)node.MidNode;
             if (double.TryParse(valueNode.Value, out double value))
@@ -97,7 +97,7 @@ namespace HeartScript.Ast
             throw new ArgumentException(nameof(node));
         }
 
-        static AstNode ParseIntegral(ExpressionNode node)
+        static AstNode ParseIntegral(AstScope scope, ExpressionNode node)
         {
             var valueNode = (ValueNode)node.MidNode;
             if (int.TryParse(valueNode.Value, out int value))
@@ -106,7 +106,7 @@ namespace HeartScript.Ast
             throw new ArgumentException(nameof(node));
         }
 
-        static AstNode ParseBoolean(ExpressionNode node)
+        static AstNode ParseBoolean(AstScope scope, ExpressionNode node)
         {
             var choiceNode = (ChoiceNode)node.MidNode;
             var valueNode = (ValueNode)choiceNode.Node;
@@ -116,13 +116,16 @@ namespace HeartScript.Ast
             throw new ArgumentException(nameof(node));
         }
 
-        static AstNode ParseIdentifier(ExpressionNode node)
+        static AstNode ParseIdentifier(AstScope scope, ExpressionNode node)
         {
             var valueNode = (ValueNode)node.MidNode;
-            return AstNode.Identifier(valueNode.Value);
+            if (scope.TryGetVariable(valueNode.Value, out var variable))
+                return variable;
+
+            throw new ArgumentException(nameof(node));
         }
 
-        static AstNode BuildCall(ExpressionNode callNode, AstNode? instance, Type type, BindingFlags bindingFlags)
+        static AstNode BuildCall(AstScope scope, ExpressionNode callNode, AstNode? instance, Type type, BindingFlags bindingFlags)
         {
             if (callNode.LeftNode == null)
                 throw new Exception($"{nameof(callNode.LeftNode)} cannot be null");
@@ -141,7 +144,7 @@ namespace HeartScript.Ast
 
             for (int i = 0; i < parameterNodes.Count; i++)
             {
-                parameters[i] = Build(parameterNodes[i]);
+                parameters[i] = Build(scope, parameterNodes[i]);
                 parameterTypes[i] = parameters[i].Type;
             }
 
@@ -160,24 +163,24 @@ namespace HeartScript.Ast
 
         static AstNodeBuilder BuildStaticCall(Type type)
         {
-            return (node) =>
+            return (scope, node) =>
             {
                 var bindingFlags = BindingFlags.Public | BindingFlags.Static | BindingFlags.IgnoreCase;
-                return BuildCall(node, null, type, bindingFlags);
+                return BuildCall(scope, node, null, type, bindingFlags);
             };
         }
 
         static AstNodeBuilder BuildBinary(Func<AstNode, AstNode, AstNode> builder)
         {
-            return (node) =>
+            return (scope, node) =>
             {
                 if (node.LeftNode == null)
                     throw new Exception($"{nameof(node.LeftNode)} cannot be null");
                 if (node.RightNode == null)
                     throw new Exception($"{nameof(node.RightNode)} cannot be null");
 
-                var left = BuildExpressionNode(node.LeftNode);
-                var right = BuildExpressionNode(node.RightNode);
+                var left = BuildExpressionNode(scope, node.LeftNode);
+                var right = BuildExpressionNode(scope, node.RightNode);
 
                 if (IsReal(left.Type) && IsIntegral(right.Type))
                     right = AstNode.Convert(right, left.Type);
@@ -188,19 +191,19 @@ namespace HeartScript.Ast
             };
         }
 
-        static AstNode BuildTernary(ExpressionNode node)
+        static AstNode BuildTernary(AstScope scope, ExpressionNode node)
         {
             if (node.LeftNode == null)
                 throw new Exception($"{nameof(node.LeftNode)} cannot be null");
             if (node.RightNode == null)
                 throw new Exception($"{nameof(node.RightNode)} cannot be null");
 
-            var left = BuildExpressionNode(node.LeftNode);
-            var right = BuildExpressionNode(node.RightNode);
+            var left = BuildExpressionNode(scope, node.LeftNode);
+            var right = BuildExpressionNode(scope, node.RightNode);
 
             var sequenceNode = (SequenceNode)node.MidNode;
             var lookupNode = (LookupNode)sequenceNode.Children[1];
-            var mid = BuildExpressionNode((ExpressionNode)lookupNode.Node);
+            var mid = BuildExpressionNode(scope, (ExpressionNode)lookupNode.Node);
 
             if (IsIntegral(mid.Type) && IsReal(right.Type))
                 mid = AstNode.Convert(mid, right.Type);
