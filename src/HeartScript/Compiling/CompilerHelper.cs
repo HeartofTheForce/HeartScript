@@ -54,6 +54,7 @@ namespace HeartScript.Compiling
                 case ExpressionNode expressionNode:
                     {
                         var output = new List<IParseNode>();
+
                         if (expressionNode.LeftNode != null)
                             output.Add(expressionNode.LeftNode);
 

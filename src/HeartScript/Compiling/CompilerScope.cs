@@ -19,6 +19,7 @@ namespace HeartScript.Compiling
             var variables = new Dictionary<string, Expression>();
             return new CompilerScope(variables);
         }
+
         public static CompilerScope FromMembers(Expression expression)
         {
             var variables = new Dictionary<string, Expression>(StringComparer.OrdinalIgnoreCase);

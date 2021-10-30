@@ -20,21 +20,21 @@ namespace HeartScript.Compiling
             ["u+"] = (scope, node) =>
             {
                 if (node.RightNode == null)
-                    throw new Exception($"{nameof(node.LeftNode)} cannot be null");
+                    throw new Exception($"{nameof(node.RightNode)} cannot be null");
 
                 return Expression.UnaryPlus(Compile(scope, node.RightNode));
             },
             ["u-"] = (scope, node) =>
             {
                 if (node.RightNode == null)
-                    throw new Exception($"{nameof(node.LeftNode)} cannot be null");
+                    throw new Exception($"{nameof(node.RightNode)} cannot be null");
 
                 return Expression.Negate(Compile(scope, node.RightNode));
             },
             ["~"] = (scope, node) =>
             {
                 if (node.RightNode == null)
-                    throw new Exception($"{nameof(node.LeftNode)} cannot be null");
+                    throw new Exception($"{nameof(node.RightNode)} cannot be null");
 
                 return Expression.Not(Compile(scope, node.RightNode));
             },
