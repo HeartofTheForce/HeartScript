@@ -48,13 +48,13 @@ namespace HeartScript.Cli
                 Console.WriteLine(ex);
             }
         }
+    }
 
-        class TestContext<T>
-            where T : struct
-        {
-            public T A { get; set; }
-            public T B { get; set; }
-            public T C { get; set; }
-        }
+    public class TestContext<T>
+        where T : struct
+    {
+        public T A { get; set; }
+        public T B { get; set; }
+        public T C { get; set; }
     }
 }
