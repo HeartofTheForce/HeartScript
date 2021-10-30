@@ -12,21 +12,37 @@ namespace HeartScript.Compiling
     public class EmitScope
     {
         public ILGenerator ILGenerator { get; }
+
+        private readonly HashSet<Type> _typeWhitelist;
         private readonly Dictionary<ParameterNode, int> _parameterMap;
 
         public EmitScope(ILGenerator iLGenerator, ParameterNode[] parameters)
         {
             ILGenerator = iLGenerator;
+
+            _typeWhitelist = new HashSet<Type>()
+            {
+                typeof(int),
+                typeof(double),
+                typeof(bool),
+            };
+
             _parameterMap = new Dictionary<ParameterNode, int>();
             for (int i = 0; i < parameters.Length; i++)
             {
                 _parameterMap[parameters[i]] = i;
+                _typeWhitelist.Add(parameters[i].Type);
             }
         }
 
         public int GetParameterIndex(ParameterNode node)
         {
             return _parameterMap[node];
+        }
+
+        public bool IsAllowed(Type type)
+        {
+            return _typeWhitelist.Contains(type);
         }
     }
 
@@ -83,6 +99,9 @@ namespace HeartScript.Compiling
 
         private static void Emit(EmitScope scope, AstNode node)
         {
+            if (!scope.IsAllowed(node.Type))
+                throw new Exception($"{node.Type} is not allowed");
+
             switch (node)
             {
                 case ConstantNode constantNode: EmitConstant(scope, constantNode); break;
