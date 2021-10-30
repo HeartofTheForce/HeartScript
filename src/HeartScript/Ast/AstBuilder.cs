@@ -213,7 +213,7 @@ namespace HeartScript.Ast
             return new ConditionalNode(left, mid, right);
         }
 
-        static AstNode ConvertIfRequired(AstNode expression, Type expectedType)
+        public static AstNode ConvertIfRequired(AstNode expression, Type expectedType)
         {
             if (expression.Type != expectedType)
                 return AstNode.Convert(expression, expectedType);

@@ -11,7 +11,7 @@ namespace HeartScript.Ast.Nodes
             Operand = operand;
         }
 
-        public UnaryNode(AstNode operand, AstType nodeType) : this(operand, operand.GetType(), nodeType)
+        public UnaryNode(AstNode operand, AstType nodeType) : this(operand, operand.Type, nodeType)
         {
         }
     }

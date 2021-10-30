@@ -23,5 +23,6 @@ namespace HeartScript.Ast
         Or,
         Conditional,
         Convert,
+        Parameter,
     }
 }
