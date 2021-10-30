@@ -45,6 +45,6 @@ namespace HeartScript.Ast.Nodes
 
     public partial class AstNode
     {
-        public static ConstantNode MemberAccess(string name) => new ConstantNode("TEMP_MEMBER_ACCESS");
+        public static ConstantNode Identifier(string name) => new ConstantNode("TEMP_MEMBER_ACCESS");
     }
 }

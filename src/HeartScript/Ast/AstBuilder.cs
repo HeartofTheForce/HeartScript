@@ -119,7 +119,7 @@ namespace HeartScript.Ast
         static AstNode ParseIdentifier(ExpressionNode node)
         {
             var valueNode = (ValueNode)node.MidNode;
-            return AstNode.MemberAccess(valueNode.Value);
+            return AstNode.Identifier(valueNode.Value);
         }
 
         static AstNode BuildCall(ExpressionNode callNode, AstNode? instance, Type type, BindingFlags bindingFlags)
