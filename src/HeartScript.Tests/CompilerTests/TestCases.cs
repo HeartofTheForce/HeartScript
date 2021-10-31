@@ -38,7 +38,7 @@ namespace HeartScript.Tests.CompilerTests
             Assert.AreEqual(ExpectedString, node.ToString());
 
             var expectedResult = ExpectedExpression();
-            var compiledExpression = ExpressionNodeCompiler.CompileFunction<T>((ExpressionNode)node);
+            var compiledExpression = EmitCompiler.CompileFunction<T>(node);
             var actualResult = compiledExpression();
             Assert.AreEqual(expectedResult, actualResult);
         }
@@ -64,7 +64,7 @@ namespace HeartScript.Tests.CompilerTests
             Assert.AreEqual(ExpectedString, node.ToString());
 
             var expectedResult = ExpectedExpression(Input);
-            var compiledExpression = ExpressionNodeCompiler.CompileFunction<TIn, TOut>((ExpressionNode)node);
+            var compiledExpression = EmitCompiler.CompileFunction<TIn, TOut>(node);
             var actualResult = compiledExpression(Input);
             Assert.AreEqual(expectedResult, actualResult);
         }

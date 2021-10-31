@@ -4,13 +4,13 @@ using System.Reflection;
 using System.Reflection.Emit;
 using HeartScript.Ast;
 using HeartScript.Ast.Nodes;
-using HeartScript.Expressions;
+using HeartScript.Parsing;
 
 namespace HeartScript.Compiling
 {
-    public static class ExpressionNodeCompiler
+    public static class EmitCompiler
     {
-        public static Func<T> CompileFunction<T>(ExpressionNode node)
+        public static Func<T> CompileFunction<T>(IParseNode node)
         {
             var scope = AstScope.Empty();
 
@@ -28,7 +28,7 @@ namespace HeartScript.Compiling
                 new ParameterNode[0]);
         }
 
-        public static Func<TContext, TResult> CompileFunction<TContext, TResult>(ExpressionNode node)
+        public static Func<TContext, TResult> CompileFunction<TContext, TResult>(IParseNode node)
         {
             var parameters = new ParameterNode[] { AstNode.Parameter(0, typeof(TContext)) };
             var scope = AstScope.FromMembers(parameters[0]);

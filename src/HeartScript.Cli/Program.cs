@@ -32,7 +32,7 @@ namespace HeartScript.Cli
                 Console.WriteLine("Output");
                 Console.WriteLine(node);
 
-                var compiledFunction = ExpressionNodeCompiler.CompileFunction<TestContext<double>, double>((ExpressionNode)node);
+                var compiledFunction = EmitCompiler.CompileFunction<TestContext<double>, double>(node);
                 var testContext = new TestContext<double>()
                 {
                     A = 1.1,
