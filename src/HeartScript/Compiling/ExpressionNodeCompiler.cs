@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -9,45 +8,6 @@ using HeartScript.Expressions;
 
 namespace HeartScript.Compiling
 {
-    public class EmitScope
-    {
-        public ILGenerator ILGenerator { get; }
-
-        private readonly HashSet<Type> _typeWhitelist;
-        private readonly Dictionary<ParameterNode, int> _parameterMap;
-
-        public EmitScope(ILGenerator iLGenerator, ParameterNode[] parameters)
-        {
-            ILGenerator = iLGenerator;
-
-            _typeWhitelist = new HashSet<Type>()
-            {
-                typeof(int),
-                typeof(double),
-                typeof(bool),
-                typeof(Math),
-            };
-
-            _parameterMap = new Dictionary<ParameterNode, int>();
-            for (int i = 0; i < parameters.Length; i++)
-            {
-                _parameterMap[parameters[i]] = i;
-                _typeWhitelist.Add(parameters[i].Type);
-            }
-        }
-
-        public int GetParameterIndex(ParameterNode node)
-        {
-            return _parameterMap[node];
-        }
-
-        public void AssertAllowed(Type type)
-        {
-            if (!_typeWhitelist.Contains(type))
-                throw new Exception($"{type} is not allowed");
-        }
-    }
-
     public static class ExpressionNodeCompiler
     {
         public static Func<T> CompileFunction<T>(ExpressionNode node)
@@ -57,18 +17,34 @@ namespace HeartScript.Compiling
             var ast = AstBuilder.Build(scope, node);
             ast = AstBuilder.ConvertIfRequired(ast, typeof(T));
 
-            return Compile<Func<T>>("AssemblyName", "ModuleName", "TypeName", "MethodName", ast, typeof(T), new ParameterNode[0]);
+            return Compile<Func<T>>(
+                "AssemblyName",
+                "ModuleName",
+                "TypeName",
+                "MethodName",
+                ast,
+                scope,
+                typeof(T),
+                new ParameterNode[0]);
         }
 
         public static Func<TContext, TResult> CompileFunction<TContext, TResult>(ExpressionNode node)
         {
-            var parameters = new ParameterNode[] { AstNode.Parameter(typeof(TContext)) };
+            var parameters = new ParameterNode[] { AstNode.Parameter(0, typeof(TContext)) };
             var scope = AstScope.FromMembers(parameters[0]);
 
             var ast = AstBuilder.Build(scope, node);
             ast = AstBuilder.ConvertIfRequired(ast, typeof(TResult));
 
-            return Compile<Func<TContext, TResult>>("AssemblyName", "ModuleName", "TypeName", "MethodName", ast, typeof(TResult), parameters);
+            return Compile<Func<TContext, TResult>>(
+                "AssemblyName",
+                "ModuleName",
+                "TypeName",
+                "MethodName",
+                ast,
+                scope,
+                typeof(TResult),
+                parameters);
         }
 
         private static T Compile<T>(
@@ -77,6 +53,7 @@ namespace HeartScript.Compiling
             string typeName,
             string methodName,
             AstNode ast,
+            AstScope scope,
             Type returnType,
             ParameterNode[] parameters)
             where T : Delegate
@@ -89,8 +66,7 @@ namespace HeartScript.Compiling
             var methodBuilder = typeBuilder.DefineMethod(methodName, MethodAttributes.Public | MethodAttributes.Static, returnType, parameterTypes);
 
             var ilGenerator = methodBuilder.GetILGenerator();
-            var emitScope = new EmitScope(ilGenerator, parameters);
-            Emit(emitScope, ast);
+            Emit(ilGenerator, scope, ast);
             ilGenerator.Emit(OpCodes.Ret);
 
             var loadedType = typeBuilder.CreateType();
@@ -99,93 +75,93 @@ namespace HeartScript.Compiling
             return (T)loadedMethodInfo.CreateDelegate(typeof(T));
         }
 
-        private static void Emit(EmitScope scope, AstNode node)
+        private static void Emit(ILGenerator ilGenerator, AstScope scope, AstNode node)
         {
             scope.AssertAllowed(node.Type);
             switch (node)
             {
-                case ConstantNode constantNode: EmitConstant(scope, constantNode); break;
-                case BinaryNode binaryNode: EmitBinary(scope, binaryNode); break;
-                case UnaryNode unaryNode: EmitUnary(scope, unaryNode); break;
-                case ConditionalNode conditionalNode: EmitConditional(scope, conditionalNode); break;
-                case CallNode callNode: EmitCall(scope, callNode); break;
-                case ParameterNode parameterNode: EmitParameter(scope, parameterNode); break;
-                case MemberNode memberNode: EmitMemberAccess(scope, memberNode); break;
+                case ConstantNode constantNode: EmitConstant(ilGenerator, scope, constantNode); break;
+                case BinaryNode binaryNode: EmitBinary(ilGenerator, scope, binaryNode); break;
+                case UnaryNode unaryNode: EmitUnary(ilGenerator, scope, unaryNode); break;
+                case ConditionalNode conditionalNode: EmitConditional(ilGenerator, scope, conditionalNode); break;
+                case CallNode callNode: EmitCall(ilGenerator, scope, callNode); break;
+                case ParameterNode parameterNode: EmitParameter(ilGenerator, scope, parameterNode); break;
+                case MemberNode memberNode: EmitMemberAccess(ilGenerator, scope, memberNode); break;
                 default: throw new NotImplementedException();
             }
         }
 
-        private static void EmitConstant(EmitScope scope, ConstantNode node)
+        private static void EmitConstant(ILGenerator ilGenerator, AstScope scope, ConstantNode node)
         {
             if (node.Value == null)
                 throw new ArgumentException(nameof(node.Value));
 
             if (node.Type == typeof(int))
             {
-                scope.ILGenerator.Emit(OpCodes.Ldc_I4, (int)node.Value);
+                ilGenerator.Emit(OpCodes.Ldc_I4, (int)node.Value);
                 return;
             }
 
             if (node.Type == typeof(double))
             {
-                scope.ILGenerator.Emit(OpCodes.Ldc_R8, (double)node.Value);
+                ilGenerator.Emit(OpCodes.Ldc_R8, (double)node.Value);
                 return;
             }
 
             if (node.Type == typeof(bool))
             {
-                scope.ILGenerator.Emit(OpCodes.Ldc_I4, (bool)node.Value ? 1 : 0);
+                ilGenerator.Emit(OpCodes.Ldc_I4, (bool)node.Value ? 1 : 0);
                 return;
             }
 
             throw new NotImplementedException();
         }
 
-        private static void EmitBinary(EmitScope scope, BinaryNode node)
+        private static void EmitBinary(ILGenerator ilGenerator, AstScope scope, BinaryNode node)
         {
-            Emit(scope, node.Left);
-            Emit(scope, node.Right);
+            Emit(ilGenerator, scope, node.Left);
+            Emit(ilGenerator, scope, node.Right);
 
             switch (node.NodeType)
             {
-                case AstType.Multiply: scope.ILGenerator.Emit(OpCodes.Mul); break;
-                case AstType.Divide: scope.ILGenerator.Emit(OpCodes.Div); break;
-                case AstType.Add: scope.ILGenerator.Emit(OpCodes.Add); break;
-                case AstType.Subtract: scope.ILGenerator.Emit(OpCodes.Sub); break;
+                case AstType.Multiply: ilGenerator.Emit(OpCodes.Mul); break;
+                case AstType.Divide: ilGenerator.Emit(OpCodes.Div); break;
+                case AstType.Add: ilGenerator.Emit(OpCodes.Add); break;
+                case AstType.Subtract: ilGenerator.Emit(OpCodes.Sub); break;
                 case AstType.LessThanOrEqual:
                     {
-                        scope.ILGenerator.Emit(OpCodes.Cgt);
-                        scope.ILGenerator.Emit(OpCodes.Ldc_I4, 0);
-                        scope.ILGenerator.Emit(OpCodes.Ceq);
+                        ilGenerator.Emit(OpCodes.Cgt);
+                        ilGenerator.Emit(OpCodes.Ldc_I4, 0);
+                        ilGenerator.Emit(OpCodes.Ceq);
                     }
                     break;
                 case AstType.GreaterThanOrEqual:
                     {
-                        scope.ILGenerator.Emit(OpCodes.Clt);
-                        scope.ILGenerator.Emit(OpCodes.Ldc_I4, 0);
-                        scope.ILGenerator.Emit(OpCodes.Ceq);
+                        ilGenerator.Emit(OpCodes.Clt);
+                        ilGenerator.Emit(OpCodes.Ldc_I4, 0);
+                        ilGenerator.Emit(OpCodes.Ceq);
                     }
                     break;
-                case AstType.LessThan: scope.ILGenerator.Emit(OpCodes.Clt); break;
-                case AstType.GreaterThan: scope.ILGenerator.Emit(OpCodes.Cgt); break;
-                case AstType.Equal: scope.ILGenerator.Emit(OpCodes.Ceq); break;
+                case AstType.LessThan: ilGenerator.Emit(OpCodes.Clt); break;
+                case AstType.GreaterThan: ilGenerator.Emit(OpCodes.Cgt); break;
+                case AstType.Equal: ilGenerator.Emit(OpCodes.Ceq); break;
                 case AstType.NotEqual:
                     {
-                        scope.ILGenerator.Emit(OpCodes.Ceq);
-                        scope.ILGenerator.Emit(OpCodes.Ldc_I4, 0);
-                        scope.ILGenerator.Emit(OpCodes.Ceq);
+                        ilGenerator.Emit(OpCodes.Ceq);
+                        ilGenerator.Emit(OpCodes.Ldc_I4, 0);
+                        ilGenerator.Emit(OpCodes.Ceq);
                     }
                     break;
-                case AstType.And: scope.ILGenerator.Emit(OpCodes.And); break;
-                case AstType.ExclusiveOr: scope.ILGenerator.Emit(OpCodes.Xor); break;
-                case AstType.Or: scope.ILGenerator.Emit(OpCodes.Or); break;
+                case AstType.And: ilGenerator.Emit(OpCodes.And); break;
+                case AstType.ExclusiveOr: ilGenerator.Emit(OpCodes.Xor); break;
+                case AstType.Or: ilGenerator.Emit(OpCodes.Or); break;
                 default: throw new NotImplementedException();
             }
         }
 
-        private static void EmitUnary(EmitScope scope, UnaryNode node)
+        private static void EmitUnary(ILGenerator ilGenerator, AstScope scope, UnaryNode node)
         {
-            Emit(scope, node.Operand);
+            Emit(ilGenerator, scope, node.Operand);
 
             switch (node.NodeType)
             {
@@ -194,69 +170,68 @@ namespace HeartScript.Compiling
                         if (node.Operand.Type != typeof(int) || node.Type != typeof(double))
                             throw new NotImplementedException();
 
-                        scope.ILGenerator.Emit(OpCodes.Conv_R8);
+                        ilGenerator.Emit(OpCodes.Conv_R8);
                     }
                     break;
                 case AstType.UnaryPlus: break;
-                case AstType.Negate: scope.ILGenerator.Emit(OpCodes.Neg); break;
-                case AstType.Not: scope.ILGenerator.Emit(OpCodes.Not); break;
+                case AstType.Negate: ilGenerator.Emit(OpCodes.Neg); break;
+                case AstType.Not: ilGenerator.Emit(OpCodes.Not); break;
                 default: throw new NotImplementedException();
             }
         }
 
-        private static void EmitConditional(EmitScope scope, ConditionalNode node)
+        private static void EmitConditional(ILGenerator ilGenerator, AstScope scope, ConditionalNode node)
         {
-            var ifFalseLabel = scope.ILGenerator.DefineLabel();
-            var endLabel = scope.ILGenerator.DefineLabel();
+            var ifFalseLabel = ilGenerator.DefineLabel();
+            var endLabel = ilGenerator.DefineLabel();
 
-            Emit(scope, node.Test);
-            scope.ILGenerator.Emit(OpCodes.Brfalse, ifFalseLabel);
+            Emit(ilGenerator, scope, node.Test);
+            ilGenerator.Emit(OpCodes.Brfalse, ifFalseLabel);
 
             //true
-            Emit(scope, node.IfTrue);
-            scope.ILGenerator.Emit(OpCodes.Br, endLabel);
+            Emit(ilGenerator, scope, node.IfTrue);
+            ilGenerator.Emit(OpCodes.Br, endLabel);
 
             //false
-            scope.ILGenerator.MarkLabel(ifFalseLabel);
-            Emit(scope, node.IfFalse);
+            ilGenerator.MarkLabel(ifFalseLabel);
+            Emit(ilGenerator, scope, node.IfFalse);
 
-            scope.ILGenerator.MarkLabel(endLabel);
+            ilGenerator.MarkLabel(endLabel);
         }
 
-        private static void EmitCall(EmitScope scope, CallNode node)
+        private static void EmitCall(ILGenerator ilGenerator, AstScope scope, CallNode node)
         {
             if (node.Instance != null)
-                Emit(scope, node.Instance);
+                Emit(ilGenerator, scope, node.Instance);
             else
                 scope.AssertAllowed(node.MethodInfo.ReflectedType);
 
             foreach (var parameter in node.Parameters)
             {
-                Emit(scope, parameter);
+                Emit(ilGenerator, scope, parameter);
             }
 
-            scope.ILGenerator.EmitCall(OpCodes.Call, node.MethodInfo, null);
+            ilGenerator.EmitCall(OpCodes.Call, node.MethodInfo, null);
         }
 
-        private static void EmitMemberAccess(EmitScope scope, MemberNode node)
+        private static void EmitMemberAccess(ILGenerator ilGenerator, AstScope scope, MemberNode node)
         {
             if (node.Instance != null)
-                Emit(scope, node.Instance);
+                Emit(ilGenerator, scope, node.Instance);
             else
                 scope.AssertAllowed(node.Member.ReflectedType);
 
             switch (node.Member)
             {
-                case FieldInfo fieldInfo: scope.ILGenerator.Emit(OpCodes.Ldfld, fieldInfo); break;
-                case PropertyInfo propertyInfo: scope.ILGenerator.EmitCall(OpCodes.Call, propertyInfo.GetMethod, null); break;
+                case FieldInfo fieldInfo: ilGenerator.Emit(OpCodes.Ldfld, fieldInfo); break;
+                case PropertyInfo propertyInfo: ilGenerator.EmitCall(OpCodes.Call, propertyInfo.GetMethod, null); break;
                 default: throw new NotImplementedException();
             };
         }
 
-        private static void EmitParameter(EmitScope scope, ParameterNode node)
+        private static void EmitParameter(ILGenerator ilGenerator, AstScope scope, ParameterNode node)
         {
-            int parameterIndex = scope.GetParameterIndex(node);
-            scope.ILGenerator.Emit(OpCodes.Ldarg, parameterIndex);
+            ilGenerator.Emit(OpCodes.Ldarg, node.ParameterIndex);
         }
     }
 }
