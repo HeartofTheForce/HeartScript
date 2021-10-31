@@ -1,252 +1,237 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
+using System.Reflection.Emit;
+using HeartScript.Ast;
+using HeartScript.Ast.Nodes;
 using HeartScript.Expressions;
-using HeartScript.Parsing;
-using HeartScript.Peg.Patterns;
 
 namespace HeartScript.Compiling
 {
     public static class ExpressionNodeCompiler
     {
-        private delegate Expression CompileExpression(CompilerScope scope, ExpressionNode node);
-
-        private static readonly Dictionary<string, CompileExpression> s_nodeCompilers = new Dictionary<string, CompileExpression>()
-        {
-            ["()"] = CompileRoundBracket,
-            ["$"] = CompileStaticCall(typeof(Math)),
-            ["u+"] = (scope, node) =>
-            {
-                if (node.RightNode == null)
-                    throw new Exception($"{nameof(node.RightNode)} cannot be null");
-
-                return Expression.UnaryPlus(Compile(scope, node.RightNode));
-            },
-            ["u-"] = (scope, node) =>
-            {
-                if (node.RightNode == null)
-                    throw new Exception($"{nameof(node.RightNode)} cannot be null");
-
-                return Expression.Negate(Compile(scope, node.RightNode));
-            },
-            ["~"] = (scope, node) =>
-            {
-                if (node.RightNode == null)
-                    throw new Exception($"{nameof(node.RightNode)} cannot be null");
-
-                return Expression.Not(Compile(scope, node.RightNode));
-            },
-            ["!"] = (scope, node) =>
-            {
-                if (node.LeftNode == null)
-                    throw new Exception($"{nameof(node.LeftNode)} cannot be null");
-
-                return Compile(scope, node.LeftNode);
-            },
-            ["*"] = CompileBinary(Expression.Multiply),
-            ["/"] = CompileBinary(Expression.Divide),
-            ["+"] = CompileBinary(Expression.Add),
-            ["-"] = CompileBinary(Expression.Subtract),
-            ["<="] = CompileBinary(Expression.LessThanOrEqual),
-            [">="] = CompileBinary(Expression.GreaterThanOrEqual),
-            ["<"] = CompileBinary(Expression.LessThan),
-            [">"] = CompileBinary(Expression.GreaterThan),
-            ["=="] = CompileBinary(Expression.Equal),
-            ["!="] = CompileBinary(Expression.NotEqual),
-            ["&"] = CompileBinary(Expression.And),
-            ["^"] = CompileBinary(Expression.ExclusiveOr),
-            ["|"] = CompileBinary(Expression.Or),
-            ["?:"] = CompileTernary,
-            ["real"] = ParseReal,
-            ["integral"] = ParseIntegral,
-            ["boolean"] = ParseBoolean,
-            ["identifier"] = ParseIdentifier,
-        };
-
         public static Func<T> CompileFunction<T>(ExpressionNode node)
         {
-            var scope = CompilerScope.Empty();
+            var scope = AstScope.Empty();
 
-            var compiledExpression = Compile(scope, node);
-            compiledExpression = ConvertIfRequired(compiledExpression, typeof(T));
+            var ast = AstBuilder.Build(scope, node);
+            ast = AstBuilder.ConvertIfRequired(ast, typeof(T));
 
-            return Expression.Lambda<Func<T>>(compiledExpression).Compile();
+            return Compile<Func<T>>(
+                "AssemblyName",
+                "ModuleName",
+                "TypeName",
+                "MethodName",
+                ast,
+                scope,
+                typeof(T),
+                new ParameterNode[0]);
         }
 
         public static Func<TContext, TResult> CompileFunction<TContext, TResult>(ExpressionNode node)
         {
-            var parameters = new ParameterExpression[] { Expression.Parameter(typeof(TContext)) };
-            var scope = CompilerScope.FromMembers(parameters[0]);
+            var parameters = new ParameterNode[] { AstNode.Parameter(0, typeof(TContext)) };
+            var scope = AstScope.FromMembers(parameters[0]);
 
-            var compiledExpression = Compile(scope, node);
-            compiledExpression = ConvertIfRequired(compiledExpression, typeof(TResult));
+            var ast = AstBuilder.Build(scope, node);
+            ast = AstBuilder.ConvertIfRequired(ast, typeof(TResult));
 
-            return Expression.Lambda<Func<TContext, TResult>>(compiledExpression, parameters).Compile();
+            return Compile<Func<TContext, TResult>>(
+                "AssemblyName",
+                "ModuleName",
+                "TypeName",
+                "MethodName",
+                ast,
+                scope,
+                typeof(TResult),
+                parameters);
         }
 
-        static Expression Compile(CompilerScope scope, ExpressionNode node)
+        private static T Compile<T>(
+            string assemblyName,
+            string moduleName,
+            string typeName,
+            string methodName,
+            AstNode ast,
+            AstScope scope,
+            Type returnType,
+            ParameterNode[] parameters)
+            where T : Delegate
         {
-            if (node.Key != null && s_nodeCompilers.TryGetValue(node.Key, out var compiler))
-                return compiler(scope, node);
+            var assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName(assemblyName), AssemblyBuilderAccess.Run);
+            var moduleBuilder = assemblyBuilder.DefineDynamicModule(moduleName);
+            var typeBuilder = moduleBuilder.DefineType(typeName, TypeAttributes.Public);
 
-            throw new ArgumentException($"{node.Key} does not have a matching compiler");
+            var parameterTypes = parameters.Select(x => x.Type).ToArray();
+            var methodBuilder = typeBuilder.DefineMethod(methodName, MethodAttributes.Public | MethodAttributes.Static, returnType, parameterTypes);
+
+            var ilGenerator = methodBuilder.GetILGenerator();
+            Emit(ilGenerator, scope, ast);
+            ilGenerator.Emit(OpCodes.Ret);
+
+            var loadedType = typeBuilder.CreateType();
+            var loadedMethodInfo = loadedType.GetMethod(methodBuilder.Name, parameterTypes);
+
+            return (T)loadedMethodInfo.CreateDelegate(typeof(T));
         }
 
-        static Expression CompileRoundBracket(CompilerScope scope, ExpressionNode node)
+        private static void Emit(ILGenerator ilGenerator, AstScope scope, AstNode node)
         {
-            var sequenceNode = (SequenceNode)node.MidNode;
-            var lookupNode = (LookupNode)sequenceNode.Children[1];
-            return Compile(scope, (ExpressionNode)lookupNode.Node);
-        }
-
-        static Expression ParseReal(CompilerScope scope, ExpressionNode node)
-        {
-            var valueNode = (ValueNode)node.MidNode;
-            if (double.TryParse(valueNode.Value, out double value))
-                return Expression.Constant(value);
-
-            throw new ArgumentException(nameof(node));
-        }
-
-        static Expression ParseIntegral(CompilerScope scope, ExpressionNode node)
-        {
-            var valueNode = (ValueNode)node.MidNode;
-            if (int.TryParse(valueNode.Value, out int value))
-                return Expression.Constant(value);
-
-            throw new ArgumentException(nameof(node));
-        }
-
-        static Expression ParseBoolean(CompilerScope scope, ExpressionNode node)
-        {
-            var choiceNode = (ChoiceNode)node.MidNode;
-            var valueNode = (ValueNode)choiceNode.Node;
-            if (bool.TryParse(valueNode.Value, out bool value))
-                return Expression.Constant(value);
-
-            throw new ArgumentException(nameof(node));
-        }
-
-        static Expression ParseIdentifier(CompilerScope scope, ExpressionNode node)
-        {
-            var valueNode = (ValueNode)node.MidNode;
-            if (scope.TryGetVariable(valueNode.Value, out var variable))
-                return variable;
-
-            throw new ArgumentException(nameof(node));
-        }
-
-        static Expression CompileCall(CompilerScope scope, ExpressionNode callNode, Expression? instance, Type type, BindingFlags bindingFlags)
-        {
-            if (callNode.LeftNode == null)
-                throw new Exception($"{nameof(callNode.LeftNode)} cannot be null");
-
-            if (callNode.LeftNode.Key != "identifier")
-                throw new Exception($"{nameof(callNode.LeftNode)} is not identifier");
-
-            var leftValueNode = (ValueNode)callNode.LeftNode.MidNode;
-            string methodName = leftValueNode.Value;
-            if (methodName == null)
-                throw new Exception($"{nameof(methodName)} cannot be null");
-
-            var parameterNodes = CompilerHelper.GetChildren<ExpressionNode>(callNode.MidNode);
-            var parameters = new Expression[parameterNodes.Count];
-            var parameterTypes = new Type[parameterNodes.Count];
-
-            for (int i = 0; i < parameterNodes.Count; i++)
+            scope.AssertAllowed(node.Type);
+            switch (node)
             {
-                parameters[i] = Compile(scope, parameterNodes[i]);
-                parameterTypes[i] = parameters[i].Type;
+                case ConstantNode constantNode: EmitConstant(ilGenerator, scope, constantNode); break;
+                case BinaryNode binaryNode: EmitBinary(ilGenerator, scope, binaryNode); break;
+                case UnaryNode unaryNode: EmitUnary(ilGenerator, scope, unaryNode); break;
+                case ConditionalNode conditionalNode: EmitConditional(ilGenerator, scope, conditionalNode); break;
+                case CallNode callNode: EmitCall(ilGenerator, scope, callNode); break;
+                case ParameterNode parameterNode: EmitParameter(ilGenerator, scope, parameterNode); break;
+                case MemberNode memberNode: EmitMemberAccess(ilGenerator, scope, memberNode); break;
+                default: throw new NotImplementedException();
+            }
+        }
+
+        private static void EmitConstant(ILGenerator ilGenerator, AstScope scope, ConstantNode node)
+        {
+            if (node.Value == null)
+                throw new ArgumentException(nameof(node.Value));
+
+            if (node.Type == typeof(int))
+            {
+                ilGenerator.Emit(OpCodes.Ldc_I4, (int)node.Value);
+                return;
             }
 
-            var methodInfo = type.GetMethod(methodName, bindingFlags, null, parameterTypes, null);
-            if (methodInfo == null)
-                throw new Exception($"{type.FullName} does not have an overload matching '{methodName}({string.Join(',', parameterTypes.Select(x => x.Name))})'");
-
-            var expectedParameters = methodInfo.GetParameters();
-            for (int i = 0; i < parameterNodes.Count; i++)
+            if (node.Type == typeof(double))
             {
-                parameters[i] = ConvertIfRequired(parameters[i], expectedParameters[i].ParameterType);
+                ilGenerator.Emit(OpCodes.Ldc_R8, (double)node.Value);
+                return;
             }
 
-            return Expression.Call(instance, methodInfo, parameters);
+            if (node.Type == typeof(bool))
+            {
+                ilGenerator.Emit(OpCodes.Ldc_I4, (bool)node.Value ? 1 : 0);
+                return;
+            }
+
+            throw new NotImplementedException();
         }
 
-        static CompileExpression CompileStaticCall(Type type)
+        private static void EmitBinary(ILGenerator ilGenerator, AstScope scope, BinaryNode node)
         {
-            return (scope, node) =>
+            Emit(ilGenerator, scope, node.Left);
+            Emit(ilGenerator, scope, node.Right);
+
+            switch (node.NodeType)
             {
-                var bindingFlags = BindingFlags.Public | BindingFlags.Static | BindingFlags.IgnoreCase;
-                return CompileCall(scope, node, null, type, bindingFlags);
+                case AstType.Multiply: ilGenerator.Emit(OpCodes.Mul); break;
+                case AstType.Divide: ilGenerator.Emit(OpCodes.Div); break;
+                case AstType.Add: ilGenerator.Emit(OpCodes.Add); break;
+                case AstType.Subtract: ilGenerator.Emit(OpCodes.Sub); break;
+                case AstType.LessThanOrEqual:
+                    {
+                        ilGenerator.Emit(OpCodes.Cgt);
+                        ilGenerator.Emit(OpCodes.Ldc_I4, 0);
+                        ilGenerator.Emit(OpCodes.Ceq);
+                    }
+                    break;
+                case AstType.GreaterThanOrEqual:
+                    {
+                        ilGenerator.Emit(OpCodes.Clt);
+                        ilGenerator.Emit(OpCodes.Ldc_I4, 0);
+                        ilGenerator.Emit(OpCodes.Ceq);
+                    }
+                    break;
+                case AstType.LessThan: ilGenerator.Emit(OpCodes.Clt); break;
+                case AstType.GreaterThan: ilGenerator.Emit(OpCodes.Cgt); break;
+                case AstType.Equal: ilGenerator.Emit(OpCodes.Ceq); break;
+                case AstType.NotEqual:
+                    {
+                        ilGenerator.Emit(OpCodes.Ceq);
+                        ilGenerator.Emit(OpCodes.Ldc_I4, 0);
+                        ilGenerator.Emit(OpCodes.Ceq);
+                    }
+                    break;
+                case AstType.And: ilGenerator.Emit(OpCodes.And); break;
+                case AstType.ExclusiveOr: ilGenerator.Emit(OpCodes.Xor); break;
+                case AstType.Or: ilGenerator.Emit(OpCodes.Or); break;
+                default: throw new NotImplementedException();
+            }
+        }
+
+        private static void EmitUnary(ILGenerator ilGenerator, AstScope scope, UnaryNode node)
+        {
+            Emit(ilGenerator, scope, node.Operand);
+
+            switch (node.NodeType)
+            {
+                case AstType.Convert:
+                    {
+                        if (node.Operand.Type != typeof(int) || node.Type != typeof(double))
+                            throw new NotImplementedException();
+
+                        ilGenerator.Emit(OpCodes.Conv_R8);
+                    }
+                    break;
+                case AstType.UnaryPlus: break;
+                case AstType.Negate: ilGenerator.Emit(OpCodes.Neg); break;
+                case AstType.Not: ilGenerator.Emit(OpCodes.Not); break;
+                default: throw new NotImplementedException();
+            }
+        }
+
+        private static void EmitConditional(ILGenerator ilGenerator, AstScope scope, ConditionalNode node)
+        {
+            var ifFalseLabel = ilGenerator.DefineLabel();
+            var endLabel = ilGenerator.DefineLabel();
+
+            Emit(ilGenerator, scope, node.Test);
+            ilGenerator.Emit(OpCodes.Brfalse, ifFalseLabel);
+
+            //true
+            Emit(ilGenerator, scope, node.IfTrue);
+            ilGenerator.Emit(OpCodes.Br, endLabel);
+
+            //false
+            ilGenerator.MarkLabel(ifFalseLabel);
+            Emit(ilGenerator, scope, node.IfFalse);
+
+            ilGenerator.MarkLabel(endLabel);
+        }
+
+        private static void EmitCall(ILGenerator ilGenerator, AstScope scope, CallNode node)
+        {
+            if (node.Instance != null)
+                Emit(ilGenerator, scope, node.Instance);
+            else
+                scope.AssertAllowed(node.MethodInfo.ReflectedType);
+
+            foreach (var parameter in node.Parameters)
+            {
+                Emit(ilGenerator, scope, parameter);
+            }
+
+            ilGenerator.EmitCall(OpCodes.Call, node.MethodInfo, null);
+        }
+
+        private static void EmitMemberAccess(ILGenerator ilGenerator, AstScope scope, MemberNode node)
+        {
+            if (node.Instance != null)
+                Emit(ilGenerator, scope, node.Instance);
+            else
+                scope.AssertAllowed(node.Member.ReflectedType);
+
+            switch (node.Member)
+            {
+                case FieldInfo fieldInfo: ilGenerator.Emit(OpCodes.Ldfld, fieldInfo); break;
+                case PropertyInfo propertyInfo: ilGenerator.EmitCall(OpCodes.Call, propertyInfo.GetMethod, null); break;
+                default: throw new NotImplementedException();
             };
         }
 
-        static CompileExpression CompileBinary(Func<Expression, Expression, Expression> compiler)
+        private static void EmitParameter(ILGenerator ilGenerator, AstScope scope, ParameterNode node)
         {
-            return (scope, node) =>
-            {
-                if (node.LeftNode == null)
-                    throw new Exception($"{nameof(node.LeftNode)} cannot be null");
-                if (node.RightNode == null)
-                    throw new Exception($"{nameof(node.RightNode)} cannot be null");
-
-                var left = Compile(scope, node.LeftNode);
-                var right = Compile(scope, node.RightNode);
-
-                if (IsReal(left.Type) && IsIntegral(right.Type))
-                    right = Expression.Convert(right, left.Type);
-                else if (IsIntegral(left.Type) && IsReal(right.Type))
-                    left = Expression.Convert(left, right.Type);
-
-                return compiler(left, right);
-            };
+            ilGenerator.Emit(OpCodes.Ldarg, node.ParameterIndex);
         }
-
-        static Expression CompileTernary(CompilerScope scope, ExpressionNode node)
-        {
-            if (node.LeftNode == null)
-                throw new Exception($"{nameof(node.LeftNode)} cannot be null");
-            if (node.RightNode == null)
-                throw new Exception($"{nameof(node.RightNode)} cannot be null");
-
-            var left = Compile(scope, node.LeftNode);
-            var right = Compile(scope, node.RightNode);
-
-            var sequenceNode = (SequenceNode)node.MidNode;
-            var lookupNode = (LookupNode)sequenceNode.Children[1];
-            var mid = Compile(scope, (ExpressionNode)lookupNode.Node);
-
-            if (IsIntegral(mid.Type) && IsReal(right.Type))
-                mid = Expression.Convert(mid, right.Type);
-            else if (IsReal(mid.Type) && IsIntegral(right.Type))
-                right = Expression.Convert(right, mid.Type);
-
-            return Expression.Condition(left, mid, right);
-        }
-
-        static Expression ConvertIfRequired(Expression expression, Type expectedType)
-        {
-            if (expression.Type != expectedType)
-                return Expression.Convert(expression, expectedType);
-
-            return expression;
-        }
-
-        static bool IsReal(Type type) =>
-            type == typeof(float) ||
-            type == typeof(double) ||
-            type == typeof(decimal);
-
-        static bool IsIntegral(Type type) =>
-            type == typeof(sbyte) ||
-            type == typeof(byte) ||
-            type == typeof(short) ||
-            type == typeof(int) ||
-            type == typeof(long) ||
-            type == typeof(ushort) ||
-            type == typeof(uint) ||
-            type == typeof(ulong);
     }
 }

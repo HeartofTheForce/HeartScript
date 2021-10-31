@@ -2,12 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using HeartScript.Expressions;
-using HeartScript.Parsing;
 using HeartScript.Peg.Patterns;
 
-namespace HeartScript.Compiling
+namespace HeartScript.Parsing
 {
-    public static class CompilerHelper
+    public static class ParseNodeHelper
     {
         public static List<T> GetChildren<T>(IParseNode node)
         {

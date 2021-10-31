@@ -47,7 +47,7 @@ namespace HeartScript.Compiling
                 if (s_overrideCompilers.TryGetValue(expressionNode.Key, out var compiler))
                     return compiler(expressionNode);
 
-                IEnumerable<IParseNode> children = CompilerHelper.GetChildren<ExpressionNode>(expressionNode);
+                IEnumerable<IParseNode> children = ParseNodeHelper.GetChildren<ExpressionNode>(expressionNode);
 
                 if (children.Count() > 0)
                 {
