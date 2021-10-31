@@ -31,10 +31,10 @@ namespace HeartScript.Expressions
 
             if (!ctx.IsEOF)
             {
-                if (ctx.Exception != null && ctx.Exception.CharIndex > ctx.Offset)
-                    throw ctx.Exception;
-                else
+                if (ctx.Exception == null || ctx.Exception.CharIndex <= ctx.Offset)
                     throw new UnexpectedTokenException(ctx.Offset, "EOF");
+                else
+                    throw ctx.Exception;
             }
 
             return result;
