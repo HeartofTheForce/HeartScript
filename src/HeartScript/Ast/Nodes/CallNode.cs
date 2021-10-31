@@ -12,10 +12,10 @@ namespace HeartScript.Ast.Nodes
         public CallNode(AstNode? instance, MethodInfo methodInfo, AstNode[] parameters) : base(methodInfo.ReturnType, AstType.Call)
         {
             if (methodInfo.IsStatic && instance != null)
-                throw new ArgumentException($"{nameof(instance)} must be null for static member");
+                throw new ArgumentException($"{nameof(instance)} must be null for static method");
 
             if (!methodInfo.IsStatic && instance == null)
-                throw new ArgumentException($"{nameof(instance)} must not be null for instance member");
+                throw new ArgumentException($"{nameof(instance)} must not be null for instance method");
 
             var parameterInfos = methodInfo.GetParameters();
 
