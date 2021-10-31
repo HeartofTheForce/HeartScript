@@ -27,7 +27,7 @@ namespace HeartScript.Peg.Patterns
         {
             for (int i = 0; i < _patterns.Count; i++)
             {
-                var result = parser.TryMatch(_patterns[i], ctx);
+                var result = _patterns[i].TryMatch(parser, ctx);
 
                 if (result != null)
                     return new ChoiceNode(i, result);

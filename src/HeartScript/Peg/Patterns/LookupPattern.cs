@@ -18,7 +18,7 @@ namespace HeartScript.Peg.Patterns
 
         public IParseNode? Match(PatternParser parser, ParserContext ctx)
         {
-            var result = parser.TryMatch(parser.Patterns[_key], ctx);
+            var result = parser.Patterns[_key].TryMatch(parser, ctx);
 
             if (result != null)
                 return new LookupNode(_key, result);

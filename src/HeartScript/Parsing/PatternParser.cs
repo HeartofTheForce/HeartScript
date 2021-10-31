@@ -11,17 +11,6 @@ namespace HeartScript.Parsing
         {
             Patterns = new Dictionary<string, IPattern>();
         }
-
-        public IParseNode? TryMatch(IPattern pattern, ParserContext ctx)
-        {
-            int localOffset = ctx.Offset;
-
-            var result = pattern.Match(this, ctx);
-            if (result == null)
-                ctx.Offset = localOffset;
-
-            return result;
-        }
     }
 
     public class ParserContext
@@ -37,11 +26,6 @@ namespace HeartScript.Parsing
             Offset = 0;
             Exception = null;
         }
-    }
-
-    public interface IPattern
-    {
-        IParseNode? Match(PatternParser parser, ParserContext ctx);
     }
 
     public abstract class PatternException : Exception

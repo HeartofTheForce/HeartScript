@@ -19,7 +19,7 @@ namespace HeartScript.Expressions
 
             var parser = new PatternParser();
             parser.Patterns["expr"] = expressionPattern;
-            var result = parser.TryMatch(expressionPattern, ctx);
+            var result = expressionPattern.TryMatch(parser, ctx);
 
             if (result == null)
             {
@@ -97,7 +97,7 @@ namespace HeartScript.Expressions
                 if (!valid)
                     continue;
 
-                var result = parser.TryMatch(op.Pattern, ctx);
+                var result = op.Pattern.TryMatch(parser, ctx);
                 if (result != null)
                 {
                     if (localOffset == ctx.Offset)

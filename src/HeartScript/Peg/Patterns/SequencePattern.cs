@@ -50,7 +50,7 @@ namespace HeartScript.Peg.Patterns
             var output = new List<IParseNode>();
             foreach (var step in _steps)
             {
-                var result = parser.TryMatch(step.Pattern, ctx);
+                var result = step.Pattern.TryMatch(parser, ctx);
 
                 if (result == null)
                     return null;

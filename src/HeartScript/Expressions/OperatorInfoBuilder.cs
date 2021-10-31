@@ -51,7 +51,7 @@ namespace HeartScript.Expressions
                 .Discard(PegHelper.NonSignificant)
                 .Then(LookupPattern.Create("peg"));
 
-            var result = pegParser.TryMatch(pattern, ctx);
+            var result = pattern.TryMatch(pegParser, ctx);
 
             if (result == null)
                 throw new Exception($"{ctx.Exception}, {lineNumber}");

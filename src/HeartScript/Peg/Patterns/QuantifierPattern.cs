@@ -37,7 +37,7 @@ namespace HeartScript.Peg.Patterns
             var output = new List<IParseNode>();
             while (_max == null || output.Count < _max)
             {
-                var result = parser.TryMatch(_pattern, ctx);
+                var result = _pattern.TryMatch(parser, ctx);
 
                 if (result == null)
                     break;
