@@ -51,9 +51,7 @@ namespace HeartScript.Parsing
                 return new ValueNode(targetGroup.Index, targetGroup.Value);
             }
 
-            if (ctx.Exception == null || ctx.Exception.CharIndex <= ctx.Offset)
-                ctx.Exception = new UnexpectedTokenException(ctx.Offset, this);
-
+            ctx.LogException(new UnexpectedTokenException(ctx.Offset, this));
             return null;
         }
     }

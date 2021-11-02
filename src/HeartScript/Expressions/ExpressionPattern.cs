@@ -52,9 +52,7 @@ namespace HeartScript.Expressions
                 {
                     if (operand == null)
                     {
-                        if (ctx.Exception == null || ctx.Exception.CharIndex <= ctx.Offset)
-                            ctx.Exception = new ExpressionTermException(ctx.Offset);
-
+                        ctx.LogException(new ExpressionTermException(ctx.Offset));
                         return null;
                     }
 
