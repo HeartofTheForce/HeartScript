@@ -45,6 +45,7 @@ namespace HeartScript.Peg.Patterns
 
         public ChoiceNode(int choiceIndex, IParseNode node)
         {
+            CharIndex = node.CharIndex;
             ChoiceIndex = choiceIndex;
             Node = node;
         }

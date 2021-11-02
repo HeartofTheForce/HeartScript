@@ -35,6 +35,7 @@ namespace HeartScript.Peg.Patterns
 
         public LookupNode(string key, IParseNode node)
         {
+            CharIndex = node.CharIndex;
             Key = key;
             Node = node;
         }
