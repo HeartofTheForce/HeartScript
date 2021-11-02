@@ -6,7 +6,7 @@ namespace HeartScript.Expressions
     public class ExpressionNode : IParseNode
     {
         public string Key { get; }
-        public int CharIndex { get; set; }
+        public int TextOffset { get; set; }
 
         public ExpressionNode? LeftNode { get; }
         public IParseNode MidNode { get; }
@@ -21,9 +21,9 @@ namespace HeartScript.Expressions
             RightNode = rightNode;
 
             if (leftNode != null)
-                CharIndex = leftNode.CharIndex;
+                TextOffset = leftNode.TextOffset;
             else
-                CharIndex = midNode.CharIndex;
+                TextOffset = midNode.TextOffset;
         }
 
         public override string ToString()

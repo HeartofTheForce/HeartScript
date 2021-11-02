@@ -57,12 +57,12 @@ namespace HeartScript.Peg.Patterns
 
     public class QuantifierNode : IParseNode
     {
-        public int CharIndex { get; }
+        public int TextOffset { get; }
         public List<IParseNode> Children { get; }
 
-        public QuantifierNode(int charIndex, List<IParseNode> children)
+        public QuantifierNode(int textOffset, List<IParseNode> children)
         {
-            CharIndex = charIndex;
+            TextOffset = textOffset;
             Children = children;
         }
     }

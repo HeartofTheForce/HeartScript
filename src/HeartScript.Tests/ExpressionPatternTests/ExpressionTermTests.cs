@@ -11,49 +11,49 @@ namespace HeartScript.Tests.ExpressionPatternTests
             new ExpressionTermTestCase()
             {
                 Infix = "max(1, 2, )",
-                ExpectedCharIndex = 10,
+                ExpectedTextOffset = 10,
             },
             //Empty Delimiter Delimiter
             new ExpressionTermTestCase()
             {
                 Infix = "max(1, ,3)",
-                ExpectedCharIndex = 7,
+                ExpectedTextOffset = 7,
             },
             //TODO Empty Open Delimiter
             // new ExpressionTermTestCase()
             // {
             //     Infix = "max( , 2, 3)",
-            //     ExpectedCharIndex = 5,
+            //     ExpectedTextOffset = 5,
             // },
             //Empty Delimiter EndOfString
             new ExpressionTermTestCase()
             {
                 Infix = "max(1, 2, ",
-                ExpectedCharIndex = 10,
+                ExpectedTextOffset = 10,
             },
             //Empty Brackets
             new ExpressionTermTestCase()
             {
                 Infix = "()",
-                ExpectedCharIndex = 1,
+                ExpectedTextOffset = 1,
             },
             //Empty Binary Right
             new ExpressionTermTestCase()
             {
                 Infix = "1 +",
-                ExpectedCharIndex = 3,
+                ExpectedTextOffset = 3,
             },
             //Empty Unary Right
             new ExpressionTermTestCase()
             {
                 Infix = "-",
-                ExpectedCharIndex = 1,
+                ExpectedTextOffset = 1,
             },
             //Nested Empty Binary Right
             new ExpressionTermTestCase()
             {
                 Infix = "(1 + ) 2",
-                ExpectedCharIndex = 5,
+                ExpectedTextOffset = 5,
             },
         };
 

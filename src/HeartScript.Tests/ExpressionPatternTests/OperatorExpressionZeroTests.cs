@@ -25,7 +25,7 @@ namespace HeartScript.Tests.ExpressionPatternTests
             new UnexpectedTokenTestCase()
             {
                 Infix = "{x}",
-                ExpectedCharIndex = 1,
+                ExpectedTextOffset = 1,
                 ExpectedPattern = "}",
             },
             //[]
@@ -37,7 +37,7 @@ namespace HeartScript.Tests.ExpressionPatternTests
             new UnexpectedTokenTestCase()
             {
                 Infix = "[x]",
-                ExpectedCharIndex = 1,
+                ExpectedTextOffset = 1,
                 ExpectedPattern = "]",
             },
             //?:
@@ -49,7 +49,7 @@ namespace HeartScript.Tests.ExpressionPatternTests
             new UnexpectedTokenTestCase()
             {
                 Infix = "? x",
-                ExpectedCharIndex = 2,
+                ExpectedTextOffset = 2,
                 ExpectedPattern = "EOF",
             },
             //|
@@ -61,7 +61,7 @@ namespace HeartScript.Tests.ExpressionPatternTests
             new UnexpectedTokenTestCase()
             {
                 Infix = "| x",
-                ExpectedCharIndex = 2,
+                ExpectedTextOffset = 2,
                 ExpectedPattern = "EOF",
             },
             //&*
@@ -73,7 +73,7 @@ namespace HeartScript.Tests.ExpressionPatternTests
             new UnexpectedTokenTestCase()
             {
                 Infix = "& x *",
-                ExpectedCharIndex = 2,
+                ExpectedTextOffset = 2,
                 ExpectedPattern = "*",
             },
         };

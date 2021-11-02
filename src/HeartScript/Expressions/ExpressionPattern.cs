@@ -31,7 +31,7 @@ namespace HeartScript.Expressions
 
             if (!ctx.IsEOF)
             {
-                if (ctx.Exception == null || ctx.Exception.CharIndex <= ctx.Offset)
+                if (ctx.Exception == null || ctx.Exception.TextOffset <= ctx.Offset)
                     throw new UnexpectedTokenException(ctx.Offset, "EOF");
                 else
                     throw ctx.Exception;
@@ -119,7 +119,7 @@ namespace HeartScript.Expressions
 
     public class ExpressionTermException : PatternException
     {
-        public ExpressionTermException(int charIndex) : base(charIndex, $"Invalid Expression Term @ {charIndex}")
+        public ExpressionTermException(int textOffset) : base(textOffset, $"Invalid Expression Term @ {textOffset}")
         {
         }
     }

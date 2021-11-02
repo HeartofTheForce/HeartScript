@@ -77,12 +77,12 @@ namespace HeartScript.Peg.Patterns
 
     public class SequenceNode : IParseNode
     {
-        public int CharIndex { get; }
+        public int TextOffset { get; }
         public List<IParseNode> Children { get; }
 
-        public SequenceNode(int charIndex, List<IParseNode> children)
+        public SequenceNode(int textOffset, List<IParseNode> children)
         {
-            CharIndex = charIndex;
+            TextOffset = textOffset;
             Children = children;
         }
     }

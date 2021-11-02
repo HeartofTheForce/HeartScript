@@ -34,14 +34,14 @@ namespace HeartScript.Tests.ExpressionPatternTests
     public class ExpressionTermTestCase : IExpressionTestCase
     {
         public string Infix { get; set; }
-        public int ExpectedCharIndex { get; set; }
+        public int ExpectedTextOffset { get; set; }
 
         public void Execute(IEnumerable<OperatorInfo> operators)
         {
             var ctx = new ParserContext(Infix);
             var ex = Assert.Throws<ExpressionTermException>(() => ExpressionPattern.Parse(operators, ctx));
 
-            Assert.AreEqual(ExpectedCharIndex, ex.CharIndex);
+            Assert.AreEqual(ExpectedTextOffset, ex.TextOffset);
         }
 
         public override string ToString()
@@ -53,7 +53,7 @@ namespace HeartScript.Tests.ExpressionPatternTests
     public class UnexpectedTokenTestCase : IExpressionTestCase
     {
         public string Infix { get; set; }
-        public int ExpectedCharIndex { get; set; }
+        public int ExpectedTextOffset { get; set; }
         public string ExpectedPattern { get; set; }
 
         public void Execute(IEnumerable<OperatorInfo> operators)
@@ -61,7 +61,7 @@ namespace HeartScript.Tests.ExpressionPatternTests
             var ctx = new ParserContext(Infix);
             var ex = Assert.Throws<UnexpectedTokenException>(() => ExpressionPattern.Parse(operators, ctx));
 
-            Assert.AreEqual(ExpectedCharIndex, ex.CharIndex);
+            Assert.AreEqual(ExpectedTextOffset, ex.TextOffset);
             Assert.AreEqual(ExpectedPattern, ex.ExpectedPattern);
         }
 

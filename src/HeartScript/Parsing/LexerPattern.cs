@@ -58,12 +58,12 @@ namespace HeartScript.Parsing
 
     public class ValueNode : IParseNode
     {
-        public int CharIndex { get; }
+        public int TextOffset { get; }
         public string Value { get; }
 
-        public ValueNode(int charIndex, string value)
+        public ValueNode(int textOffset, string value)
         {
-            CharIndex = charIndex;
+            TextOffset = textOffset;
             Value = value;
         }
     }
@@ -72,12 +72,12 @@ namespace HeartScript.Parsing
     {
         public string ExpectedPattern { get; }
 
-        public UnexpectedTokenException(int charIndex, string expectedPattern) : base(charIndex, $"Unexpected Token @ {charIndex} expected {expectedPattern}")
+        public UnexpectedTokenException(int textOffset, string expectedPattern) : base(textOffset, $"Unexpected Token @ {textOffset} expected {expectedPattern}")
         {
             ExpectedPattern = expectedPattern;
         }
 
-        public UnexpectedTokenException(int charIndex, LexerPattern lexerPattern) : this(charIndex, lexerPattern.ToString())
+        public UnexpectedTokenException(int textOffset, LexerPattern lexerPattern) : this(textOffset, lexerPattern.ToString())
         {
         }
     }

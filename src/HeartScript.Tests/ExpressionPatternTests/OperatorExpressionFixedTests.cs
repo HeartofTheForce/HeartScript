@@ -25,12 +25,12 @@ namespace HeartScript.Tests.ExpressionPatternTests
             new ExpressionTermTestCase()
             {
                 Infix = "{}",
-                ExpectedCharIndex = 1,
+                ExpectedTextOffset = 1,
             },
             new UnexpectedTokenTestCase()
             {
                 Infix = "{x, y, z, w}",
-                ExpectedCharIndex = 8,
+                ExpectedTextOffset = 8,
                 ExpectedPattern = "}",
             },
             //[]
@@ -42,12 +42,12 @@ namespace HeartScript.Tests.ExpressionPatternTests
             new ExpressionTermTestCase()
             {
                 Infix = "[]",
-                ExpectedCharIndex = 1,
+                ExpectedTextOffset = 1,
             },
             new UnexpectedTokenTestCase()
             {
                 Infix = "[x y z w]",
-                ExpectedCharIndex = 7,
+                ExpectedTextOffset = 7,
                 ExpectedPattern = "]",
             },
             //?:
@@ -59,12 +59,12 @@ namespace HeartScript.Tests.ExpressionPatternTests
             new ExpressionTermTestCase()
             {
                 Infix = "?",
-                ExpectedCharIndex = 1,
+                ExpectedTextOffset = 1,
             },
             new UnexpectedTokenTestCase()
             {
                 Infix = "? x : y : z : w",
-                ExpectedCharIndex = 12,
+                ExpectedTextOffset = 12,
                 ExpectedPattern = "EOF",
             },
             //|
@@ -76,12 +76,12 @@ namespace HeartScript.Tests.ExpressionPatternTests
             new ExpressionTermTestCase()
             {
                 Infix = "|",
-                ExpectedCharIndex = 1,
+                ExpectedTextOffset = 1,
             },
             new UnexpectedTokenTestCase()
             {
                 Infix = "| x y z w",
-                ExpectedCharIndex = 8,
+                ExpectedTextOffset = 8,
                 ExpectedPattern = "EOF",
             },
             //&*
@@ -93,12 +93,12 @@ namespace HeartScript.Tests.ExpressionPatternTests
             new ExpressionTermTestCase()
             {
                 Infix = "& *",
-                ExpectedCharIndex = 2,
+                ExpectedTextOffset = 2,
             },
             new UnexpectedTokenTestCase()
             {
                 Infix = "& x * y * z * w *",
-                ExpectedCharIndex = 14,
+                ExpectedTextOffset = 14,
                 ExpectedPattern = "EOF",
             },
         };

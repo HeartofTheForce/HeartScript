@@ -29,13 +29,13 @@ namespace HeartScript.Peg.Patterns
 
     public class LookupNode : IParseNode
     {
-        public int CharIndex { get; }
+        public int TextOffset { get; }
         public string Key { get; }
         public IParseNode Node { get; }
 
         public LookupNode(string key, IParseNode node)
         {
-            CharIndex = node.CharIndex;
+            TextOffset = node.TextOffset;
             Key = key;
             Node = node;
         }

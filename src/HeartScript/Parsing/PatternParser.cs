@@ -34,24 +34,24 @@ namespace HeartScript.Parsing
         {
             _patternExceptions.Add(ex);
 
-            if (Exception == null || Exception.CharIndex <= Offset)
+            if (Exception == null || Exception.TextOffset <= Offset)
                 Exception = ex;
         }
     }
 
     public abstract class PatternException : Exception
     {
-        public int CharIndex { get; }
+        public int TextOffset { get; }
 
-        public PatternException(int charIndex, string message) : base(message)
+        public PatternException(int textOffset, string message) : base(message)
         {
-            CharIndex = charIndex;
+            TextOffset = textOffset;
         }
     }
 
     public class ZeroLengthMatchException : PatternException
     {
-        public ZeroLengthMatchException(int charIndex) : base(charIndex, "Unexpected 0 length match")
+        public ZeroLengthMatchException(int textOffset) : base(textOffset, "Unexpected 0 length match")
         {
         }
     }
