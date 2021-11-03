@@ -2,25 +2,25 @@ using HeartScript.Parsing;
 
 namespace HeartScript.Peg.Patterns
 {
-    public class LookaheadPattern : IPattern
+    public class PredicatePattern : IPattern
     {
         private readonly IPattern _pattern;
         private readonly bool _mode;
 
-        private LookaheadPattern(IPattern pattern, bool mode)
+        private PredicatePattern(IPattern pattern, bool mode)
         {
             _pattern = pattern;
             _mode = mode;
         }
 
-        public static LookaheadPattern Positive(IPattern pattern)
+        public static PredicatePattern Positive(IPattern pattern)
         {
-            return new LookaheadPattern(pattern, true);
+            return new PredicatePattern(pattern, true);
         }
 
-        public static LookaheadPattern Negative(IPattern pattern)
+        public static PredicatePattern Negative(IPattern pattern)
         {
-            return new LookaheadPattern(pattern, false);
+            return new PredicatePattern(pattern, false);
         }
 
         public IParseNode? Match(PatternParser parser, ParserContext ctx)
@@ -31,18 +31,18 @@ namespace HeartScript.Peg.Patterns
 
             bool successful = result != null;
             if (_mode == successful)
-                return new LookaheadNode(ctx.Offset, result);
+                return new PredicateNode(ctx.Offset, result);
 
             return null;
         }
     }
 
-    public class LookaheadNode : IParseNode
+    public class PredicateNode : IParseNode
     {
         public int TextOffset { get; }
         public IParseNode? Node { get; }
 
-        public LookaheadNode(int textOffset, IParseNode? node)
+        public PredicateNode(int textOffset, IParseNode? node)
         {
             TextOffset = textOffset;
             Node = node;

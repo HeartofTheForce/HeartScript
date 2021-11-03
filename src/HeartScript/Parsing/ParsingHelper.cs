@@ -102,8 +102,8 @@ namespace HeartScript.Parsing
                         .Or(LexerPattern.FromPlainText("+").TrimRight())));
 
             parser.Patterns["term"] = SequencePattern.Create()
-                .Discard(LookaheadPattern.Negative(LookupPattern.Create("rule_head")))
-                .Discard(LookaheadPattern.Negative(LookupPattern.Create("expr_head")))
+                .Discard(PredicatePattern.Negative(LookupPattern.Create("rule_head")))
+                .Discard(PredicatePattern.Negative(LookupPattern.Create("expr_head")))
                 .Then(ChoicePattern.Create()
                     .Or(ChoicePattern.Create()
                         .Or(s_regex.TrimRight())
