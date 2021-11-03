@@ -49,7 +49,7 @@ namespace HeartScript.Expressions
                     .Or(s_digits)
                     .Or(s_none))
                 .Discard(PegHelper.NonSignificant)
-                .Then(LookupPattern.Create("peg"));
+                .Then(LookupPattern.Create("choice"));
 
             var result = pattern.TryMatch(pegParser, ctx);
 
@@ -78,7 +78,7 @@ namespace HeartScript.Expressions
             }
 
             var patternNode = sequenceNode.Children[3];
-            var operatorInfo = PegHelper.BuildLookup(patternNode);
+            var operatorInfo = PegHelper.BuildPattern(patternNode);
 
             return new OperatorInfo(key, operatorInfo, leftPrecedence, rightPrecedence);
         }

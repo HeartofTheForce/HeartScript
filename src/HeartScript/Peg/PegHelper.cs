@@ -10,7 +10,6 @@ namespace HeartScript.Peg
     {
         private static readonly Dictionary<string, Func<IParseNode, IPattern>> s_builders = new Dictionary<string, Func<IParseNode, IPattern>>()
         {
-            ["peg"] = BuildPeg,
             ["choice"] = BuildChoice,
             ["sequence"] = BuildSequence,
             ["quantifier"] = BuildQuantifier,
@@ -24,42 +23,6 @@ namespace HeartScript.Peg
         public static PatternParser CreatePegParser()
         {
             var parser = new PatternParser();
-
-            parser.Patterns["peg"] = SequencePattern.Create()
-                .Discard(NonSignificant)
-                .Then(QuantifierPattern.MinOrMore(1, LookupPattern.Create("rule")));
-
-            parser.Patterns["expr_rule"] = SequencePattern.Create()
-                .Discard(NonSignificant)
-                .Then(LexerPattern.FromPlainText("["))
-                .Then(QuantifierPattern.MinOrMore(
-                    0,
-                    SequencePattern.Create()
-                        .Discard(NonSignificant)
-                        .Discard(LexerPattern.FromPlainText("("))
-                        .Discard(NonSignificant)
-                        .Then(ChoicePattern.Create()
-                            .Or(LexerPattern.FromRegex("\\d"))
-                            .Or(LexerPattern.FromPlainText("none")))
-                        .Discard(NonSignificant)
-                        .Then(ChoicePattern.Create()
-                            .Or(LexerPattern.FromRegex("\\d"))
-                            .Or(LexerPattern.FromPlainText("none")))
-                        .Then(LookupPattern.Create("choice"))
-                        .Discard(NonSignificant)
-                        .Discard(LexerPattern.FromPlainText(")"))
-                        .Discard(NonSignificant)
-                        .Discard(LexerPattern.FromPlainText(","))));
-
-            parser.Patterns["rule"] = SequencePattern.Create()
-                .Then(LookupPattern.Create("rule_head"))
-                .Then(LookupPattern.Create("choice"));
-
-            parser.Patterns["rule_head"] = SequencePattern.Create()
-                .Discard(NonSignificant)
-                .Then(LexerPattern.FromRegex("\\w+"))
-                .Discard(NonSignificant)
-                .Then(LexerPattern.FromPlainText("->"));
 
             parser.Patterns["choice"] = SequencePattern.Create()
                 .Then(LookupPattern.Create("sequence"))
@@ -98,10 +61,83 @@ namespace HeartScript.Peg
                         .Discard(LexerPattern.FromPlainText(")")))
                     .Or(LexerPattern.FromRegex("\\w+")));
 
+            parser.Patterns["expr_rule"] = SequencePattern.Create()
+                .Discard(NonSignificant)
+                .Then(LexerPattern.FromPlainText("["))
+                .Then(QuantifierPattern.MinOrMore(
+                    0,
+                    SequencePattern.Create()
+                        .Discard(NonSignificant)
+                        .Discard(LexerPattern.FromPlainText("("))
+                        .Discard(NonSignificant)
+                        .Then(ChoicePattern.Create()
+                            .Or(LexerPattern.FromRegex("\\d"))
+                            .Or(LexerPattern.FromPlainText("none")))
+                        .Discard(NonSignificant)
+                        .Then(ChoicePattern.Create()
+                            .Or(LexerPattern.FromRegex("\\d"))
+                            .Or(LexerPattern.FromPlainText("none")))
+                        .Then(LookupPattern.Create("choice"))
+                        .Discard(NonSignificant)
+                        .Discard(LexerPattern.FromPlainText(")"))
+                        .Discard(NonSignificant)
+                        .Discard(LexerPattern.FromPlainText(","))));
+
             return parser;
         }
 
-        public static IPattern BuildLookup(IParseNode node)
+        public static IPattern BuildPattern(IParseNode node)
+        {
+            return BuildLookup(node);
+        }
+
+        public static PatternParser BuildPatternParser(string input)
+        {
+            var pegParser = CreatePegParser();
+            var ctx = new ParserContext(input);
+
+            var rule = SequencePattern.Create()
+                .Discard(NonSignificant)
+                .Then(LexerPattern.FromRegex("\\w+"))
+                .Discard(NonSignificant)
+                .Discard(LexerPattern.FromPlainText("->"))
+                .Then(ChoicePattern.Create()
+                    .Or(LookupPattern.Create("expr_rule"))
+                    .Or(LookupPattern.Create("choice")));
+
+            var root = SequencePattern.Create()
+                .Discard(NonSignificant)
+                .Then(QuantifierPattern.MinOrMore(1, rule));
+
+            var result = root.Match(pegParser, ctx);
+
+            if (result == null)
+            {
+                if (ctx.Exception != null)
+                    throw ctx.Exception;
+                else
+                    throw new ArgumentException(nameof(ctx.Exception));
+            }
+
+            var output = new PatternParser();
+            var rules = (QuantifierNode)result;
+            foreach (var child in rules.Children)
+            {
+                var sequenceNode = (SequenceNode)child;
+
+                var ruleNameNode = (ValueNode)sequenceNode.Children[0];
+                string ruleName = ruleNameNode.Value;
+
+                var choiceNode = (ChoiceNode)sequenceNode.Children[1];
+                var rulePattern = BuildLookup(choiceNode.Node);
+
+                output.Patterns[ruleName] = rulePattern;
+            }
+
+            return output;
+        }
+
+        static IPattern BuildLookup(IParseNode node)
         {
             var lookupNode = (LookupNode)node;
 
@@ -109,11 +145,6 @@ namespace HeartScript.Peg
                 throw new ArgumentException($"{nameof(LookupNode.Key)} cannot be null");
 
             return s_builders[lookupNode.Key](lookupNode.Node);
-        }
-
-        static IPattern BuildPeg(IParseNode node)
-        {
-            return BuildLookup(node);
         }
 
         static IPattern BuildChoice(IParseNode node)
