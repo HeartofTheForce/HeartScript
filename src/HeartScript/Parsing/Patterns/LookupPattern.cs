@@ -1,5 +1,3 @@
-using HeartScript.Parsing;
-
 namespace HeartScript.Parsing.Patterns
 {
     public class LookupPattern : IPattern

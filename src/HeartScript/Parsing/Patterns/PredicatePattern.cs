@@ -1,4 +1,4 @@
-using HeartScript.Parsing;
+using HeartScript.Parsing.Nodes;
 
 namespace HeartScript.Parsing.Patterns
 {
@@ -34,18 +34,6 @@ namespace HeartScript.Parsing.Patterns
                 return new PredicateNode(ctx.Offset, result);
 
             return null;
-        }
-    }
-
-    public class PredicateNode : IParseNode
-    {
-        public int TextOffset { get; }
-        public IParseNode? Node { get; }
-
-        public PredicateNode(int textOffset, IParseNode? node)
-        {
-            TextOffset = textOffset;
-            Node = node;
         }
     }
 }

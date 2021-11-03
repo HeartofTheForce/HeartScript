@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using HeartScript.Parsing;
+using HeartScript.Parsing.Nodes;
 
 namespace HeartScript.Parsing.Patterns
 {
@@ -54,17 +54,4 @@ namespace HeartScript.Parsing.Patterns
                 return null;
         }
     }
-
-    public class QuantifierNode : IParseNode
-    {
-        public int TextOffset { get; }
-        public List<IParseNode> Children { get; }
-
-        public QuantifierNode(int textOffset, List<IParseNode> children)
-        {
-            TextOffset = textOffset;
-            Children = children;
-        }
-    }
-
 }

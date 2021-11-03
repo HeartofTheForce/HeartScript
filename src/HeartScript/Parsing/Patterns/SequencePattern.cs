@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using HeartScript.Parsing;
+using HeartScript.Parsing.Nodes;
 
 namespace HeartScript.Parsing.Patterns
 {
@@ -72,18 +72,6 @@ namespace HeartScript.Parsing.Patterns
         {
             public IPattern Pattern { get; set; }
             public bool Discard { get; set; }
-        }
-    }
-
-    public class SequenceNode : IParseNode
-    {
-        public int TextOffset { get; }
-        public List<IParseNode> Children { get; }
-
-        public SequenceNode(int textOffset, List<IParseNode> children)
-        {
-            TextOffset = textOffset;
-            Children = children;
         }
     }
 }

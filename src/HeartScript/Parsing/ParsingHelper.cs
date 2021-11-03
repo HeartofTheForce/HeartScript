@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using HeartScript.Expressions;
+using HeartScript.Parsing.Nodes;
 using HeartScript.Parsing.Patterns;
 #pragma warning disable IDE0066
 
