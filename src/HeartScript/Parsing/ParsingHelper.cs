@@ -9,15 +9,6 @@ namespace HeartScript.Parsing
 {
     public static class ParsingHelper
     {
-        private static readonly Dictionary<string, Func<IParseNode, IPattern>> s_builders = new Dictionary<string, Func<IParseNode, IPattern>>()
-        {
-            ["choice"] = BuildChoice,
-            ["sequence"] = BuildSequence,
-            ["quantifier"] = BuildQuantifier,
-            ["term"] = BuildTerm,
-            ["expr"] = BuildExpr,
-        };
-
         private static readonly LexerPattern s_regex = LexerPattern.FromRegex("`(?:``|[^`])*`");
         private static readonly LexerPattern s_plainText = LexerPattern.FromRegex("'(?:''|[^'])*'");
         private static readonly LexerPattern s_identifier = LexerPattern.FromRegex("[_a-zA-Z]\\w*");
