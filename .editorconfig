@@ -9,7 +9,7 @@ indent_style = space
 # (Please don't specify an indent_size here; that has too many unintended consequences.)
 
 # Custom files
-[*.ops]
+[*.peg]
 insert_final_newline = true
 
 # Code files

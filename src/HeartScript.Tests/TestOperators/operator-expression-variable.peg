@@ -17,4 +17,3 @@ expr ->
 
         'identifier' none none `[_a-zA-Z]\w*`
     ]
-
