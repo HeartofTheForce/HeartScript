@@ -17,34 +17,10 @@ namespace HeartScript.Ast
         {
             ["()"] = BuildRoundBracket,
             ["$"] = BuildStaticCall(typeof(Math)),
-            ["u+"] = (scope, node) =>
-            {
-                if (node.RightNode == null)
-                    throw new Exception($"{nameof(node.RightNode)} cannot be null");
-
-                return AstNode.UnaryPlus(BuildExpressionNode(scope, node.RightNode));
-            },
-            ["u-"] = (scope, node) =>
-            {
-                if (node.RightNode == null)
-                    throw new Exception($"{nameof(node.RightNode)} cannot be null");
-
-                return AstNode.Negate(BuildExpressionNode(scope, node.RightNode));
-            },
-            ["~"] = (scope, node) =>
-            {
-                if (node.RightNode == null)
-                    throw new Exception($"{nameof(node.RightNode)} cannot be null");
-
-                return AstNode.Not(BuildExpressionNode(scope, node.RightNode));
-            },
-            ["!"] = (scope, node) =>
-            {
-                if (node.LeftNode == null)
-                    throw new Exception($"{nameof(node.LeftNode)} cannot be null");
-
-                return BuildExpressionNode(scope, node.LeftNode);
-            },
+            ["u+"] = BuildPrefix(AstNode.UnaryPlus),
+            ["u-"] = BuildPrefix(AstNode.Negate),
+            ["~"] = BuildPrefix(AstNode.Not),
+            ["!"] = BuildPostfix((node) => node),
             ["*"] = BuildBinary(AstNode.Multiply),
             ["/"] = BuildBinary(AstNode.Divide),
             ["+"] = BuildBinary(AstNode.Add),
@@ -166,6 +142,32 @@ namespace HeartScript.Ast
             {
                 var bindingFlags = BindingFlags.Public | BindingFlags.Static | BindingFlags.IgnoreCase;
                 return BuildCall(scope, node, null, type, bindingFlags);
+            };
+        }
+
+        static AstNodeBuilder BuildPrefix(Func<AstNode, AstNode> builder)
+        {
+            return (scope, node) =>
+            {
+                if (node.RightNode == null)
+                    throw new Exception($"{nameof(node.RightNode)} cannot be null");
+
+                var right = BuildExpressionNode(scope, node.RightNode);
+
+                return builder(right);
+            };
+        }
+
+        static AstNodeBuilder BuildPostfix(Func<AstNode, AstNode> builder)
+        {
+            return (scope, node) =>
+            {
+                if (node.LeftNode == null)
+                    throw new Exception($"{nameof(node.LeftNode)} cannot be null");
+
+                var left = BuildExpressionNode(scope, node.LeftNode);
+
+                return builder(left);
             };
         }
 
