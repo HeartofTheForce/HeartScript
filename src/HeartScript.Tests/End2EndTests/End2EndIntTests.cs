@@ -30,7 +30,7 @@ namespace HeartScript.Tests.End2EndTests
         [TestCaseSource(nameof(s_testCases))]
         public void TestCases(End2EndTestCase testCase)
         {
-            testCase.Execute(Helper.TestOperators);
+            testCase.Execute(Helper.Parser);
         }
     }
 }

@@ -1,7 +1,7 @@
 root -> method
 
 type -> 'int' / 'double' / 'bool'
-identifier -> `\w+`
+identifier -> `[_a-zA-Z]\w*`
 method -> type name '(' parameters ')'
     '{'
         'return' expr ';'

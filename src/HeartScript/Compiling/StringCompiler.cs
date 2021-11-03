@@ -35,7 +35,8 @@ namespace HeartScript.Compiling
             },
             ["identifier"] = (node) =>
             {
-                var valueNode = (ValueNode)node.MidNode;
+                var lookupNode = (LookupNode)node.MidNode;
+                var valueNode = (ValueNode)lookupNode.Node;
                 return valueNode.Value;
             },
         };

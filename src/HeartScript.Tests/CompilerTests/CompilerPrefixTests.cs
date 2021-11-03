@@ -45,7 +45,7 @@ namespace HeartScript.Tests.CompilerTests
         [TestCaseSource(nameof(s_testCases))]
         public void TestCases(IExpressionCompilerTestCase testCase)
         {
-            testCase.Execute(Helper.TestOperators);
+            testCase.Execute(Helper.Parser);
         }
     }
 }
