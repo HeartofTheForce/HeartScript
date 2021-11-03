@@ -15,7 +15,7 @@ namespace HeartScript.Compiling
             var scope = AstScope.Empty();
 
             var ast = AstBuilder.Build(scope, node);
-            ast = AstBuilder.ConvertIfRequired(ast, typeof(T));
+            ast = ExpressionBuilder.ConvertIfRequired(ast, typeof(T));
 
             return Compile<Func<T>>(
                 "AssemblyName",
@@ -34,7 +34,7 @@ namespace HeartScript.Compiling
             var scope = AstScope.FromMembers(parameters[0]);
 
             var ast = AstBuilder.Build(scope, node);
-            ast = AstBuilder.ConvertIfRequired(ast, typeof(TResult));
+            ast = ExpressionBuilder.ConvertIfRequired(ast, typeof(TResult));
 
             return Compile<Func<TContext, TResult>>(
                 "AssemblyName",
