@@ -1,9 +1,19 @@
 expr ->
     [
-        '{'          none none '{' '}'
-        '['          none none '[' ']'
-        '?'          none none '?'
-        '|'          none none '|'
-        '&'          none none '&' '*'
+        #ZeroExpressions Delimiter Terminator
+        '{' none none '{' '}'
+
+        #ZeroExpressions NoDelimiter Terminator
+        '[' none none '[' ']'
+
+        #ZeroExpressions Delimiter NoTerminator
+        '?' none none '?'
+
+        #ZeroExpressions NoDelimiter NoTerminator
+        '|' none none '|'
+
+        #ZeroExpressions SameDelimiter SameTerminator
+        '&' none none '&' '*'
+
         'identifier' none none `[_a-zA-Z]\w*`
     ]
