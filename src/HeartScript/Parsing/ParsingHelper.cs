@@ -18,15 +18,15 @@ namespace HeartScript.Parsing
             ["expr"] = BuildExpr,
         };
 
-        private static readonly IPattern s_regex = LexerPattern.FromRegex("`(?:``|[^`])*`");
-        private static readonly IPattern s_plainText = LexerPattern.FromRegex("'(?:''|[^'])*'");
-        private static readonly IPattern s_identifier = LexerPattern.FromRegex("[_a-zA-Z]\\w*");
+        private static readonly LexerPattern s_regex = LexerPattern.FromRegex("`(?:``|[^`])*`");
+        private static readonly LexerPattern s_plainText = LexerPattern.FromRegex("'(?:''|[^'])*'");
+        private static readonly LexerPattern s_identifier = LexerPattern.FromRegex("[_a-zA-Z]\\w*");
         private static readonly IPattern s_nonSignificant = QuantifierPattern.MinOrMore(0,
             ChoicePattern.Create()
                 .Or(LexerPattern.FromRegex("#[^(\\r\\n|\\r|\\n)]*"))
                 .Or(LexerPattern.FromRegex("\\s+")));
 
-        public static IPattern TrimRight(this IPattern pattern)
+        public static IPattern TrimRight(this LexerPattern pattern)
         {
             return SequencePattern.Create()
                 .Then(pattern)
