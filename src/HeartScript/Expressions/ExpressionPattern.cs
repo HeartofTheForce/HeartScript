@@ -13,14 +13,9 @@ namespace HeartScript.Expressions
             _operators = operators;
         }
 
-        public static IParseNode Parse(IEnumerable<OperatorInfo> operators, ParserContext ctx)
+        public static IParseNode Parse(PatternParser parser, ParserContext ctx)
         {
-            var expressionPattern = new ExpressionPattern(operators);
-
-            var parser = new PatternParser();
-            parser.Patterns["expr"] = expressionPattern;
-            var result = expressionPattern.TryMatch(parser, ctx);
-
+            var result = parser.Patterns["expr"].TryMatch(parser, ctx);
             if (result == null)
             {
                 if (ctx.Exception != null)

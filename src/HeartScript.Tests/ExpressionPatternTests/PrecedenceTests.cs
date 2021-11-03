@@ -1,5 +1,4 @@
-using System.Collections.Generic;
-using HeartScript.Expressions;
+using HeartScript.Parsing;
 using NUnit.Framework;
 
 namespace HeartScript.Tests.ExpressionPatternTests
@@ -7,11 +6,11 @@ namespace HeartScript.Tests.ExpressionPatternTests
     [TestFixture]
     public class PrecedenceTests
     {
-        private static readonly IEnumerable<OperatorInfo> s_testOperators;
+        private static readonly PatternParser s_parser;
 
         static PrecedenceTests()
         {
-            s_testOperators = OperatorInfoBuilder.Parse("./TestOperators/precedence.ops");
+            s_parser = ParsingHelper.BuildPatternParser("./TestOperators/precedence.peg");
         }
 
         // 8 valid non-nullary operator arrangements, 3^2 - 1(PostPre is invalid)
@@ -154,7 +153,7 @@ namespace HeartScript.Tests.ExpressionPatternTests
         [TestCaseSource(nameof(s_testCases))]
         public void TestCases(ExpressionTestCase testCase)
         {
-            testCase.Execute(s_testOperators);
+            testCase.Execute(s_parser);
         }
     }
 }

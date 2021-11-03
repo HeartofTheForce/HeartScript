@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using HeartScript.Compiling;
 using HeartScript.Expressions;
 using HeartScript.Parsing;
@@ -21,7 +20,7 @@ namespace HeartScript.Tests.CompilerTests
 
     public interface IExpressionCompilerTestCase
     {
-        void Execute(IEnumerable<OperatorInfo> operators);
+        void Execute(PatternParser parser);
     }
 
     public class ExpressionCompilerTestCase<T> : IExpressionCompilerTestCase
@@ -30,11 +29,11 @@ namespace HeartScript.Tests.CompilerTests
         public string ExpectedString { get; set; }
         public Func<T> ExpectedExpression { get; set; }
 
-        public void Execute(IEnumerable<OperatorInfo> operators)
+        public void Execute(PatternParser parser)
         {
             var ctx = new ParserContext(Infix);
 
-            var node = ExpressionPattern.Parse(operators, ctx);
+            var node = ExpressionPattern.Parse(parser, ctx);
             Assert.AreEqual(ExpectedString, node.ToString());
 
             var expectedResult = ExpectedExpression();
@@ -56,11 +55,11 @@ namespace HeartScript.Tests.CompilerTests
         public string ExpectedString { get; set; }
         public Func<TIn, TOut> ExpectedExpression { get; set; }
 
-        public void Execute(IEnumerable<OperatorInfo> operators)
+        public void Execute(PatternParser parser)
         {
             var ctx = new ParserContext(Infix);
 
-            var node = ExpressionPattern.Parse(operators, ctx);
+            var node = ExpressionPattern.Parse(parser, ctx);
             Assert.AreEqual(ExpectedString, node.ToString());
 
             var expectedResult = ExpectedExpression(Input);

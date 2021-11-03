@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using HeartScript.Expressions;
 using HeartScript.Parsing;
 using NUnit.Framework;
@@ -9,7 +8,7 @@ namespace HeartScript.Tests.ExpressionPatternTests
 {
     public interface IExpressionTestCase
     {
-        void Execute(IEnumerable<OperatorInfo> operators);
+        void Execute(PatternParser parser);
     }
 
     public class ExpressionTestCase : IExpressionTestCase
@@ -17,11 +16,11 @@ namespace HeartScript.Tests.ExpressionPatternTests
         public string Infix { get; set; }
         public string ExpectedOutput { get; set; }
 
-        public void Execute(IEnumerable<OperatorInfo> operators)
+        public void Execute(PatternParser parser)
         {
             var ctx = new ParserContext(Infix);
 
-            var node = ExpressionPattern.Parse(operators, ctx);
+            var node = ExpressionPattern.Parse(parser, ctx);
             Assert.AreEqual(ExpectedOutput, node.ToString());
         }
 
@@ -36,10 +35,10 @@ namespace HeartScript.Tests.ExpressionPatternTests
         public string Infix { get; set; }
         public int ExpectedTextOffset { get; set; }
 
-        public void Execute(IEnumerable<OperatorInfo> operators)
+        public void Execute(PatternParser parser)
         {
             var ctx = new ParserContext(Infix);
-            var ex = Assert.Throws<ExpressionTermException>(() => ExpressionPattern.Parse(operators, ctx));
+            var ex = Assert.Throws<ExpressionTermException>(() => ExpressionPattern.Parse(parser, ctx));
 
             Assert.AreEqual(ExpectedTextOffset, ex.TextOffset);
         }
@@ -56,10 +55,10 @@ namespace HeartScript.Tests.ExpressionPatternTests
         public int ExpectedTextOffset { get; set; }
         public string ExpectedPattern { get; set; }
 
-        public void Execute(IEnumerable<OperatorInfo> operators)
+        public void Execute(PatternParser parser)
         {
             var ctx = new ParserContext(Infix);
-            var ex = Assert.Throws<UnexpectedTokenException>(() => ExpressionPattern.Parse(operators, ctx));
+            var ex = Assert.Throws<UnexpectedTokenException>(() => ExpressionPattern.Parse(parser, ctx));
 
             Assert.AreEqual(ExpectedTextOffset, ex.TextOffset);
             Assert.AreEqual(ExpectedPattern, ex.ExpectedPattern);

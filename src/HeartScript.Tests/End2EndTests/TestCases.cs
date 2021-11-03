@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using HeartScript.Expressions;
 using HeartScript.Parsing;
 using NUnit.Framework;
@@ -12,11 +11,11 @@ namespace HeartScript.Tests.End2EndTests
         public string Infix { get; set; }
         public string ExpectedNodeString { get; set; }
 
-        public void Execute(IEnumerable<OperatorInfo> operators)
+        public void Execute(PatternParser parser)
         {
             var ctx = new ParserContext(Infix);
 
-            var node = ExpressionPattern.Parse(operators, ctx);
+            var node = ExpressionPattern.Parse(parser, ctx);
             Assert.AreEqual(ExpectedNodeString, node.ToString());
         }
 

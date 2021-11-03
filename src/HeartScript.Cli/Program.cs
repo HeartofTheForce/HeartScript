@@ -11,15 +11,14 @@ namespace HeartScript.Cli
         {
             try
             {
-                var operators = OperatorInfoBuilder.Parse("./src/test.ops");
-
                 string infix = string.Join(' ', args);
 
                 Console.WriteLine("Input");
                 Console.WriteLine(infix);
 
                 var ctx = new ParserContext(infix);
-                var node = ExpressionPattern.Parse(operators, ctx);
+                var parser = ParsingHelper.BuildPatternParser("./src/test.peg");
+                var node = ExpressionPattern.Parse(parser, ctx);
 
                 if (node == null)
                 {

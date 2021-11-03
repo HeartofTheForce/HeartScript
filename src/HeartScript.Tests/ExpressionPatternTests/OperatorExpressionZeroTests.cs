@@ -1,5 +1,4 @@
-using System.Collections.Generic;
-using HeartScript.Expressions;
+using HeartScript.Parsing;
 using NUnit.Framework;
 
 namespace HeartScript.Tests.ExpressionPatternTests
@@ -7,11 +6,11 @@ namespace HeartScript.Tests.ExpressionPatternTests
     [TestFixture]
     public class OperatorExpressionZeroTests
     {
-        private static readonly IEnumerable<OperatorInfo> s_testOperators;
+        private static readonly PatternParser s_parser;
 
         static OperatorExpressionZeroTests()
         {
-            s_testOperators = OperatorInfoBuilder.Parse("./TestOperators/operator-expression-zero.ops");
+            s_parser = ParsingHelper.BuildPatternParser("./TestOperators/operator-expression-zero.peg");
         }
 
         static readonly IExpressionTestCase[] s_testCases = new IExpressionTestCase[]
@@ -81,7 +80,7 @@ namespace HeartScript.Tests.ExpressionPatternTests
         [TestCaseSource(nameof(s_testCases))]
         public void TestCases(IExpressionTestCase testCase)
         {
-            testCase.Execute(s_testOperators);
+            testCase.Execute(s_parser);
         }
     }
 }
