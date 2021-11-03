@@ -118,8 +118,7 @@ namespace HeartScript.Ast
 
         static AstNode ParseIdentifier(AstScope scope, ExpressionNode node)
         {
-            var lookupNode = (LookupNode)node.MidNode;
-            var valueNode = (ValueNode)lookupNode.Node;
+            var valueNode = (ValueNode)node.MidNode;
             if (scope.TryGetVariable(valueNode.Value, out var variable))
                 return variable;
 
@@ -134,8 +133,7 @@ namespace HeartScript.Ast
             if (callNode.LeftNode.Key != "identifier")
                 throw new Exception($"{nameof(callNode.LeftNode)} is not identifier");
 
-            var leftLookupNode = (LookupNode)callNode.LeftNode.MidNode;
-            var leftValueNode = (ValueNode)leftLookupNode.Node;
+            var leftValueNode = (ValueNode)callNode.LeftNode.MidNode;
             string methodName = leftValueNode.Value;
             if (methodName == null)
                 throw new Exception($"{nameof(methodName)} cannot be null");

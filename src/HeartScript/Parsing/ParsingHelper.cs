@@ -30,7 +30,9 @@ namespace HeartScript.Parsing
             var pegParser = CreatePegParser();
             var ctx = new ParserContext(input);
 
-            var root = QuantifierPattern.MinOrMore(1, LookupPattern.Create("rule"));
+            var root = QuantifierPattern.MinOrMore(1, SequencePattern.Create()
+                .Discard(s_nonSignificant)
+                .Then(LookupPattern.Create("rule")));
 
             var result = root.Match(pegParser, ctx);
 
@@ -67,7 +69,6 @@ namespace HeartScript.Parsing
             var parser = new PatternParser();
 
             parser.Patterns["rule"] = SequencePattern.Create()
-                .Discard(s_nonSignificant)
                 .Then(LookupPattern.Create("rule_head"))
                 .Discard(s_nonSignificant)
                 .Then(ChoicePattern.Create()
@@ -104,6 +105,7 @@ namespace HeartScript.Parsing
             parser.Patterns["term"] = SequencePattern.Create()
                 .Discard(s_nonSignificant)
                 .Discard(LookaheadPattern.Negative(LookupPattern.Create("rule_head")))
+                .Discard(LookaheadPattern.Negative(LookupPattern.Create("expr_head")))
                 .Then(ChoicePattern.Create()
                     .Or(ChoicePattern.Create()
                         .Or(s_regex)
@@ -116,31 +118,27 @@ namespace HeartScript.Parsing
                         .Discard(LexerPattern.FromPlainText(")")))
                     .Or(s_identifier));
 
+            parser.Patterns["expr_head"] = SequencePattern.Create()
+                .Then(s_plainText)
+                .Discard(s_nonSignificant)
+                .Then(ChoicePattern.Create()
+                    .Or(LexerPattern.FromRegex("\\d+"))
+                    .Or(LexerPattern.FromPlainText("none")))
+                .Discard(s_nonSignificant)
+                .Then(ChoicePattern.Create()
+                    .Or(LexerPattern.FromRegex("\\d+"))
+                    .Or(LexerPattern.FromPlainText("none")));
+
             parser.Patterns["expr"] = SequencePattern.Create()
                 .Discard(s_nonSignificant)
                 .Discard(LexerPattern.FromPlainText("["))
-                .Discard(s_nonSignificant)
                 .Then(QuantifierPattern.MinOrMore(
                     0,
                     SequencePattern.Create()
                         .Discard(s_nonSignificant)
-                        .Discard(LexerPattern.FromPlainText("("))
+                        .Then(LookupPattern.Create("expr_head"))
                         .Discard(s_nonSignificant)
-                        .Then(s_plainText)
-                        .Discard(s_nonSignificant)
-                        .Then(ChoicePattern.Create()
-                            .Or(LexerPattern.FromRegex("\\d+"))
-                            .Or(LexerPattern.FromPlainText("none")))
-                        .Discard(s_nonSignificant)
-                        .Then(ChoicePattern.Create()
-                            .Or(LexerPattern.FromRegex("\\d+"))
-                            .Or(LexerPattern.FromPlainText("none")))
-                        .Discard(s_nonSignificant)
-                        .Then(LookupPattern.Create("choice"))
-                        .Discard(s_nonSignificant)
-                        .Discard(LexerPattern.FromPlainText(")"))
-                        .Discard(s_nonSignificant)
-                        .Discard(LexerPattern.FromPlainText(","))))
+                        .Then(LookupPattern.Create("choice"))))
                 .Discard(s_nonSignificant)
                 .Discard(LexerPattern.FromPlainText("]"));
 
@@ -262,10 +260,12 @@ namespace HeartScript.Parsing
             {
                 var sequenceNode = (SequenceNode)child;
 
-                var keyNode = (ValueNode)sequenceNode.Children[0];
+                var headLookupNode = (LookupNode)sequenceNode.Children[0];
+                var headNode = (SequenceNode)headLookupNode.Node;
+                var keyNode = (ValueNode)headNode.Children[0];
                 string key = keyNode.Value[1..^1];
 
-                var leftNode = (ChoiceNode)sequenceNode.Children[1];
+                var leftNode = (ChoiceNode)headNode.Children[1];
                 uint? leftPrecedence = null;
                 if (leftNode.ChoiceIndex == 0)
                 {
@@ -273,7 +273,7 @@ namespace HeartScript.Parsing
                     leftPrecedence = uint.Parse(valueNode.Value);
                 }
 
-                var rightNode = (ChoiceNode)sequenceNode.Children[2];
+                var rightNode = (ChoiceNode)headNode.Children[2];
                 uint? rightPrecedence = null;
                 if (rightNode.ChoiceIndex == 0)
                 {
@@ -281,7 +281,7 @@ namespace HeartScript.Parsing
                     rightPrecedence = uint.Parse(valueNode.Value);
                 }
 
-                var patternNode = sequenceNode.Children[3];
+                var patternNode = sequenceNode.Children[1];
                 var pattern = BuildLookup(patternNode);
 
                 var operatorInfo = new OperatorInfo(key, pattern, leftPrecedence, rightPrecedence);

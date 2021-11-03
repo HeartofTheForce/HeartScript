@@ -1,10 +1,9 @@
-identifier -> `[_a-zA-Z]\w*`
 expr ->
     [
-        ('{'          none none '{' '}'),
-        ('['          none none '[' ']'),
-        ('?'          none none '?'),
-        ('|'          none none '|'),
-        ('&'          none none '&' '*'),
-        ('identifier' none none identifier),
+        '{'          none none '{' '}'
+        '['          none none '[' ']'
+        '?'          none none '?'
+        '|'          none none '|'
+        '&'          none none '&' '*'
+        'identifier' none none `[_a-zA-Z]\w*`
     ]

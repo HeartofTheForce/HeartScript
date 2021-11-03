@@ -1,7 +1,7 @@
 root -> method
 
 type -> 'int' / 'double' / 'bool'
-identifier -> `[_a-zA-Z]\w*`
+name -> `[_a-zA-Z]\w*`
 method -> type name '(' parameters ')'
     '{'
         'return' expr ';'
@@ -10,29 +10,29 @@ parameters -> (type name (',' type name)*)?
 
 expr ->
     [
-        ('()'         none none '(' expr ')'),
-        ('u+'         none 1    '+'),
-        ('u-'         none 1    '-'),
-        ('~'          none 1    '~'),
-        ('real'       none none `\d+\.\d+`),
-        ('integral'   none none `\d+`),
-        ('boolean'    none none 'true' / 'false'),
-        ('identifier' none none identifier),
+        '()'         none none '(' expr ')'
+        'u+'         none 1    '+'
+        'u-'         none 1    '-'
+        '~'          none 1    '~'
+        'real'       none none `\d+\.\d+`
+        'integral'   none none `\d+`
+        'boolean'    none none 'true' / 'false'
+        'identifier' none none `[_a-zA-Z]\w*`
 
-        ('$'          0    none '(' (expr (',' expr)*)? ')'),
-        ('*'          3    3    '*'),
-        ('/'          3    3    '/'),
-        ('+'          4    4    '+'),
-        ('-'          4    4    '-'),
-        ('<='         5    5    '<='),
-        ('>='         5    5    '>='),
-        ('<'          5    5    '<'),
-        ('>'          5    5    '>'),
-        ('=='         6    6    '=='),
-        ('!='         6    6    '!='),
-        ('&'          7    7    '&'),
-        ('^'          8    8    '^'),
-        ('|'          9    9    '|'),
-        ('?:'         10   99    '?' expr ':'),
-        ('!'          2    none '!'),
+        '$'          0    none '(' (expr (',' expr)*)? ')'
+        '*'          3    3    '*'
+        '/'          3    3    '/'
+        '+'          4    4    '+'
+        '-'          4    4    '-'
+        '<='         5    5    '<='
+        '>='         5    5    '>='
+        '<'          5    5    '<'
+        '>'          5    5    '>'
+        '=='         6    6    '=='
+        '!='         6    6    '!='
+        '&'          7    7    '&'
+        '^'          8    8    '^'
+        '|'          9    9    '|'
+        '?:'         10   99   '?' expr ':'
+        '!'          2    none '!'
     ]
