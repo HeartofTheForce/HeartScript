@@ -24,14 +24,7 @@ namespace HeartScript.Expressions
                     throw new ArgumentException(nameof(ctx.Exception));
             }
 
-            if (!ctx.IsEOF)
-            {
-                if (ctx.Exception == null || ctx.Exception.TextOffset <= ctx.Offset)
-                    throw new UnexpectedTokenException(ctx.Offset, "EOF");
-                else
-                    throw ctx.Exception;
-            }
-
+            ctx.AssertEOF();
             return result;
         }
 
