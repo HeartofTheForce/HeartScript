@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using HeartScript.Expressions;
 using HeartScript.Parsing;
-using HeartScript.Peg.Patterns;
+using HeartScript.Parsing.Patterns;
 
 namespace HeartScript.Compiling
 {

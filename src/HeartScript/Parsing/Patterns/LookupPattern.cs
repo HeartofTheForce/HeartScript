@@ -1,6 +1,6 @@
 using HeartScript.Parsing;
 
-namespace HeartScript.Peg.Patterns
+namespace HeartScript.Parsing.Patterns
 {
     public class LookupPattern : IPattern
     {

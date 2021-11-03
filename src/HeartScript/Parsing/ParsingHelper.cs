@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using HeartScript.Expressions;
-using HeartScript.Peg.Patterns;
+using HeartScript.Parsing.Patterns;
 #pragma warning disable IDE0066
 
 namespace HeartScript.Parsing
