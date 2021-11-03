@@ -16,15 +16,11 @@ namespace HeartScript.Expressions
         public static IParseNode Parse(PatternParser parser, ParserContext ctx)
         {
             var result = parser.Patterns["expr"].TryMatch(parser, ctx);
-            if (result == null)
-            {
-                if (ctx.Exception != null)
-                    throw ctx.Exception;
-                else
-                    throw new ArgumentException(nameof(ctx.Exception));
-            }
 
-            ctx.AssertEOF();
+            ctx.AssertComplete();
+            if (result == null)
+                throw new ArgumentException(nameof(ctx.Exception));
+
             return result;
         }
 

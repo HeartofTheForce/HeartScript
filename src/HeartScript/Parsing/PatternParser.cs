@@ -38,7 +38,7 @@ namespace HeartScript.Parsing
                 Exception = ex;
         }
 
-        public void AssertEOF()
+        public void AssertComplete()
         {
             if (Offset != Input.Length)
             {
