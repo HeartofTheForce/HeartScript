@@ -14,8 +14,7 @@ namespace HeartScript.Compiling
             ["()"] = (node) =>
             {
                 var sequenceNode = (SequenceNode)node.MidNode;
-                var lookupNode = (LookupNode)sequenceNode.Children[1];
-                return Compile(lookupNode.Node);
+                return Compile(sequenceNode.Children[1]);
             },
             ["real"] = (node) =>
             {

@@ -44,8 +44,6 @@ namespace HeartScript.Parsing
                     return Enumerable.Empty<IParseNode>();
                 case ChoiceNode choiceNode:
                     return Enumerable.Repeat(choiceNode.Node, 1);
-                case LookupNode lookupNode:
-                    return Enumerable.Repeat(lookupNode.Node, 1);
                 case SequenceNode sequenceNode:
                     return sequenceNode.Children;
                 case QuantifierNode quantifierNode:

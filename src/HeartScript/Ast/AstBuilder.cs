@@ -84,8 +84,7 @@ namespace HeartScript.Ast
         static AstNode BuildRoundBracket(AstScope scope, ExpressionNode node)
         {
             var sequenceNode = (SequenceNode)node.MidNode;
-            var lookupNode = (LookupNode)sequenceNode.Children[1];
-            return BuildExpressionNode(scope, (ExpressionNode)lookupNode.Node);
+            return Build(scope, sequenceNode.Children[1]);
         }
 
         static AstNode ParseReal(AstScope scope, ExpressionNode node)
@@ -202,8 +201,7 @@ namespace HeartScript.Ast
             var right = BuildExpressionNode(scope, node.RightNode);
 
             var sequenceNode = (SequenceNode)node.MidNode;
-            var lookupNode = (LookupNode)sequenceNode.Children[1];
-            var mid = BuildExpressionNode(scope, (ExpressionNode)lookupNode.Node);
+            var mid = Build(scope, sequenceNode.Children[1]);
 
             if (IsIntegral(mid.Type) && IsReal(right.Type))
                 mid = AstNode.Convert(mid, right.Type);

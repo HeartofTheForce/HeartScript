@@ -51,15 +51,19 @@ namespace HeartScript.Parsing
             var rules = (QuantifierNode)result;
             foreach (var child in rules.Children)
             {
-                var ruleNode = (LookupNode)child;
-                var sequenceNode = (SequenceNode)ruleNode.Node;
+                var sequenceNode = (SequenceNode)child;
 
-                var ruleHeadNode = (LookupNode)sequenceNode.Children[0];
-                var ruleNameNode = (ValueNode)ruleHeadNode.Node;
+                var ruleNameNode = (ValueNode)sequenceNode.Children[0];
                 string ruleName = ruleNameNode.Value;
 
                 var choiceNode = (ChoiceNode)sequenceNode.Children[1];
-                var rulePattern = BuildLookup(choiceNode.Node);
+                IPattern rulePattern;
+                switch (choiceNode.ChoiceIndex)
+                {
+                    case 0: rulePattern = BuildExpr(choiceNode.Node); break;
+                    case 1: rulePattern = BuildChoice(choiceNode.Node); break;
+                    default: throw new NotImplementedException();
+                }
 
                 output.Patterns[ruleName] = rulePattern;
             }
@@ -148,20 +152,10 @@ namespace HeartScript.Parsing
             return parser;
         }
 
-        static IPattern BuildLookup(IParseNode node)
-        {
-            var lookupNode = (LookupNode)node;
-
-            if (lookupNode.Key == null)
-                throw new ArgumentException($"{nameof(LookupNode.Key)} cannot be null");
-
-            return s_builders[lookupNode.Key](lookupNode.Node);
-        }
-
         static IPattern BuildChoice(IParseNode node)
         {
             var sequenceNode = (SequenceNode)node;
-            var leftNode = BuildLookup(sequenceNode.Children[0]);
+            var leftNode = BuildSequence(sequenceNode.Children[0]);
             var minOrMoreNode = (QuantifierNode)sequenceNode.Children[1];
 
             if (minOrMoreNode.Children.Count == 0)
@@ -172,7 +166,7 @@ namespace HeartScript.Parsing
 
             foreach (var child in minOrMoreNode.Children)
             {
-                output.Or(BuildLookup(child));
+                output.Or(BuildSequence(child));
             }
 
             return output;
@@ -182,12 +176,12 @@ namespace HeartScript.Parsing
         {
             var quantifierNode = (QuantifierNode)node;
             if (quantifierNode.Children.Count == 1)
-                return BuildLookup(quantifierNode.Children[0]);
+                return BuildQuantifier(quantifierNode.Children[0]);
 
             var output = SequencePattern.Create();
             foreach (var child in quantifierNode.Children)
             {
-                output.Then(BuildLookup(child));
+                output.Then(BuildQuantifier(child));
             }
 
             return output;
@@ -196,7 +190,7 @@ namespace HeartScript.Parsing
         static IPattern BuildQuantifier(IParseNode node)
         {
             var sequenceNode = (SequenceNode)node;
-            var pattern = BuildLookup(sequenceNode.Children[0]);
+            var pattern = BuildTerm(sequenceNode.Children[0]);
             var optional = (QuantifierNode)sequenceNode.Children[1];
 
             if (optional.Children.Count == 0)
@@ -208,7 +202,7 @@ namespace HeartScript.Parsing
                 case 0: return QuantifierPattern.Optional(pattern);
                 case 1: return QuantifierPattern.MinOrMore(0, pattern);
                 case 2: return QuantifierPattern.MinOrMore(1, pattern);
-                default: throw new Exception();
+                default: throw new NotImplementedException();
             };
         }
 
@@ -239,18 +233,17 @@ namespace HeartScript.Parsing
                                         .Then(LexerPattern.FromPlainText(pattern))
                                         .Discard(s_nonSignificant);
                                 }
-                            default: throw new Exception();
+                            default: throw new NotImplementedException();
                         }
                     };
                 case 1:
-                    return BuildLookup(root.Node);
+                    return BuildChoice(root.Node);
                 case 2:
                     {
                         var valueNode = (ValueNode)root.Node;
                         return LookupPattern.Create(valueNode.Value);
                     }
-                default:
-                    throw new Exception();
+                default: throw new NotImplementedException();
             }
         }
 
@@ -263,8 +256,7 @@ namespace HeartScript.Parsing
             {
                 var sequenceNode = (SequenceNode)child;
 
-                var headLookupNode = (LookupNode)sequenceNode.Children[0];
-                var headNode = (SequenceNode)headLookupNode.Node;
+                var headNode = (SequenceNode)sequenceNode.Children[0];
                 var keyNode = (ValueNode)headNode.Children[0];
                 string key = keyNode.Value[1..^1];
 
@@ -285,7 +277,7 @@ namespace HeartScript.Parsing
                 }
 
                 var patternNode = sequenceNode.Children[1];
-                var pattern = BuildLookup(patternNode);
+                var pattern = BuildChoice(patternNode);
 
                 var operatorInfo = new OperatorInfo(key, pattern, leftPrecedence, rightPrecedence);
                 operatorInfos.Add(operatorInfo);
