@@ -26,6 +26,13 @@ namespace HeartScript.Parsing
                 .Or(LexerPattern.FromRegex("#[^(\\r\\n|\\r|\\n)]*"))
                 .Or(LexerPattern.FromRegex("\\s+")));
 
+        public static IPattern TrimRight(this IPattern pattern)
+        {
+            return SequencePattern.Create()
+                .Then(pattern)
+                .Discard(s_nonSignificant);
+        }
+
         public static PatternParser BuildPatternParser(string path)
         {
             string input = File.ReadAllText(path);
@@ -33,19 +40,17 @@ namespace HeartScript.Parsing
             var pegParser = CreatePegParser();
             var ctx = new ParserContext(input);
 
-            var root = QuantifierPattern.MinOrMore(1, SequencePattern.Create()
-                .Discard(s_nonSignificant)
-                .Then(LookupPattern.Create("rule")));
+            var root = SequencePattern.Create()
+                .Then(QuantifierPattern.MinOrMore(1, SequencePattern.Create()
+                    .Discard(s_nonSignificant)
+                    .Then(LookupPattern.Create("rule"))))
+                .Discard(s_nonSignificant);
 
             var result = root.Match(pegParser, ctx);
 
+            ctx.AssertComplete();
             if (result == null)
-            {
-                if (ctx.Exception != null)
-                    throw ctx.Exception;
-                else
-                    throw new ArgumentException(nameof(ctx.Exception));
-            }
+                throw new ArgumentException(nameof(ctx.Exception));
 
             var output = new PatternParser();
             var rules = (QuantifierNode)result;
@@ -77,77 +82,66 @@ namespace HeartScript.Parsing
 
             parser.Patterns["rule"] = SequencePattern.Create()
                 .Then(LookupPattern.Create("rule_head"))
-                .Discard(s_nonSignificant)
                 .Then(ChoicePattern.Create()
                     .Or(LookupPattern.Create("expr"))
                     .Or(LookupPattern.Create("choice")));
 
             parser.Patterns["rule_head"] = SequencePattern.Create()
-                .Then(s_identifier)
-                .Discard(s_nonSignificant)
-                .Discard(LexerPattern.FromPlainText("->"));
+                .Then(s_identifier.TrimRight())
+                .Discard(LexerPattern.FromPlainText("->").TrimRight());
 
             parser.Patterns["choice"] = SequencePattern.Create()
                 .Then(LookupPattern.Create("sequence"))
                 .Then(QuantifierPattern.MinOrMore(
                     0,
                     SequencePattern.Create()
-                        .Discard(s_nonSignificant)
-                        .Discard(LexerPattern.FromPlainText("/"))
+                        .Discard(LexerPattern.FromPlainText("/").TrimRight())
                         .Then(LookupPattern.Create("sequence"))));
 
             parser.Patterns["sequence"] = QuantifierPattern.MinOrMore(
                 1,
-                LookupPattern.Create("quantifier"));
+               LookupPattern.Create("quantifier"));
 
             parser.Patterns["quantifier"] = SequencePattern.Create()
                 .Then(LookupPattern.Create("term"))
-                .Discard(s_nonSignificant)
                 .Then(QuantifierPattern.Optional(
                     ChoicePattern.Create()
-                        .Or(LexerPattern.FromPlainText("?"))
-                        .Or(LexerPattern.FromPlainText("*"))
-                        .Or(LexerPattern.FromPlainText("+"))));
+                        .Or(LexerPattern.FromPlainText("?").TrimRight())
+                        .Or(LexerPattern.FromPlainText("*").TrimRight())
+                        .Or(LexerPattern.FromPlainText("+").TrimRight())));
 
             parser.Patterns["term"] = SequencePattern.Create()
-                .Discard(s_nonSignificant)
                 .Discard(LookaheadPattern.Negative(LookupPattern.Create("rule_head")))
                 .Discard(LookaheadPattern.Negative(LookupPattern.Create("expr_head")))
                 .Then(ChoicePattern.Create()
                     .Or(ChoicePattern.Create()
-                        .Or(s_regex)
-                        .Or(s_plainText))
+                        .Or(s_regex.TrimRight())
+                        .Or(s_plainText.TrimRight()))
                     .Or(SequencePattern.Create()
-                        .Discard(LexerPattern.FromPlainText("("))
-                        .Discard(s_nonSignificant)
+                        .Discard(LexerPattern.FromPlainText("(").TrimRight())
                         .Then(LookupPattern.Create("choice"))
-                        .Discard(s_nonSignificant)
-                        .Discard(LexerPattern.FromPlainText(")")))
-                    .Or(s_identifier));
+                        .Discard(LexerPattern.FromPlainText(")").TrimRight()))
+                    .Or(s_identifier.TrimRight()));
 
+            var digits = LexerPattern.FromRegex("\\d+");
+            var none = LexerPattern.FromPlainText("none");
             parser.Patterns["expr_head"] = SequencePattern.Create()
-                .Then(s_plainText)
-                .Discard(s_nonSignificant)
+                .Then(s_plainText.TrimRight())
                 .Then(ChoicePattern.Create()
-                    .Or(LexerPattern.FromRegex("\\d+"))
-                    .Or(LexerPattern.FromPlainText("none")))
-                .Discard(s_nonSignificant)
+                    .Or(digits.TrimRight())
+                    .Or(none.TrimRight()))
                 .Then(ChoicePattern.Create()
-                    .Or(LexerPattern.FromRegex("\\d+"))
-                    .Or(LexerPattern.FromPlainText("none")));
+                    .Or(digits.TrimRight())
+                    .Or(none.TrimRight()));
 
             parser.Patterns["expr"] = SequencePattern.Create()
-                .Discard(s_nonSignificant)
-                .Discard(LexerPattern.FromPlainText("["))
+                .Discard(LexerPattern.FromPlainText("[").TrimRight())
                 .Then(QuantifierPattern.MinOrMore(
                     0,
                     SequencePattern.Create()
-                        .Discard(s_nonSignificant)
                         .Then(LookupPattern.Create("expr_head"))
-                        .Discard(s_nonSignificant)
                         .Then(LookupPattern.Create("choice"))))
-                .Discard(s_nonSignificant)
-                .Discard(LexerPattern.FromPlainText("]"));
+                .Discard(LexerPattern.FromPlainText("]").TrimRight());
 
             return parser;
         }
@@ -222,16 +216,12 @@ namespace HeartScript.Parsing
                             case 0:
                                 {
                                     string? pattern = valueNode.Value[1..^1].Replace("``", "`");
-                                    return SequencePattern.Create()
-                                        .Then(LexerPattern.FromRegex(pattern))
-                                        .Discard(s_nonSignificant);
+                                    return LexerPattern.FromRegex(pattern).TrimRight();
                                 }
                             case 1:
                                 {
                                     string? pattern = valueNode.Value[1..^1].Replace("''", "'");
-                                    return SequencePattern.Create()
-                                        .Then(LexerPattern.FromPlainText(pattern))
-                                        .Discard(s_nonSignificant);
+                                    return LexerPattern.FromPlainText(pattern).TrimRight();
                                 }
                             default: throw new NotImplementedException();
                         }
