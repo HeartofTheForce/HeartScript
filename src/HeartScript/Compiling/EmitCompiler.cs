@@ -12,7 +12,10 @@ namespace HeartScript.Compiling
     {
         public static Func<T> CompileFunction<T>(IParseNode node)
         {
-            var scope = AstScope.Empty();
+            var scope = new AstScope();
+            scope.AllowType(typeof(int));
+            scope.AllowType(typeof(double));
+            scope.AllowType(typeof(bool));
 
             var ast = AstBuilder.Build(scope, node);
             ast = AstBuilder.ConvertIfRequired(ast, typeof(T));
@@ -32,6 +35,9 @@ namespace HeartScript.Compiling
         {
             var parameters = new ParameterNode[] { AstNode.Parameter(0, typeof(TContext)) };
             var scope = AstScope.FromMembers(parameters[0]);
+            scope.AllowType(typeof(int));
+            scope.AllowType(typeof(double));
+            scope.AllowType(typeof(bool));
 
             var ast = AstBuilder.Build(scope, node);
             ast = AstBuilder.ConvertIfRequired(ast, typeof(TResult));

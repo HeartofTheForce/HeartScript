@@ -86,7 +86,7 @@ namespace HeartScript.Ast
         static AstNode ParseIdentifier(AstScope scope, ExpressionNode node)
         {
             var valueNode = (ValueNode)node.MidNode;
-            if (scope.TryGetVariable(valueNode.Value, out var variable))
+            if (scope.TryGetMember(valueNode.Value, out var variable))
                 return variable;
 
             throw new ArgumentException(nameof(node));
@@ -132,6 +132,7 @@ namespace HeartScript.Ast
         {
             return (scope, node) =>
             {
+                scope.AllowType(type);
                 var bindingFlags = BindingFlags.Public | BindingFlags.Static | BindingFlags.IgnoreCase;
                 return BuildCall(scope, node, null, type, bindingFlags);
             };
