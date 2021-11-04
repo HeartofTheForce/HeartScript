@@ -26,7 +26,7 @@ namespace HeartScript.Ast
         static AstNode BuildMethod(AstScope scope, LabelNode node)
         {
             var sequenceNode = (SequenceNode)node.Node;
-            var expressionNode = sequenceNode.Children[7];
+            var expressionNode = sequenceNode.Children[6];
 
             return AstBuilder.Build(scope, expressionNode);
         }

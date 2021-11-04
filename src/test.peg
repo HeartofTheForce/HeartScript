@@ -2,10 +2,7 @@ root -> 'method':method
 
 type -> 'int' / 'double' / 'bool'
 name -> `[_a-zA-Z]\w*`
-method -> type name '(' parameters ')'
-    '{'
-        'return' expr ';'
-    '}'
+method -> type name '(' parameters ')' '=>' expr
 parameters -> (type name (',' type name)*)?
 
 expr ->
