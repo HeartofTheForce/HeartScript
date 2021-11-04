@@ -189,8 +189,10 @@ namespace HeartScript.Peg
             if (optional.Children.Count == 0)
                 return pattern;
 
-            var labelNode = (ValueNode)optional.Children[0];
-            return LabelPattern.Create(labelNode.Value, pattern);
+            var valueNode = (ValueNode)optional.Children[0];
+            string label = valueNode.Value[1..^1].Replace("''", "'");
+
+            return LabelPattern.Create(label, pattern);
         }
 
         static IPattern BuildQuantifier(IParseNode node)
@@ -227,12 +229,12 @@ namespace HeartScript.Peg
                         {
                             case 0:
                                 {
-                                    string? pattern = valueNode.Value[1..^1].Replace("``", "`");
+                                    string pattern = valueNode.Value[1..^1].Replace("``", "`");
                                     return LexerPattern.FromRegex(pattern).TrimRight();
                                 }
                             case 1:
                                 {
-                                    string? pattern = valueNode.Value[1..^1].Replace("''", "'");
+                                    string pattern = valueNode.Value[1..^1].Replace("''", "'");
                                     return LexerPattern.FromPlainText(pattern).TrimRight();
                                 }
                             default: throw new NotImplementedException();

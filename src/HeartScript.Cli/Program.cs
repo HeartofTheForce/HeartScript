@@ -19,7 +19,7 @@ namespace HeartScript.Cli
 
                 var ctx = new ParserContext(infix);
                 var parser = PegHelper.BuildPatternParser("./src/test.peg");
-                var node = ExpressionPattern.Parse(parser, ctx);
+                var node = parser.Patterns["root"].TryMatch(parser, ctx);
 
                 if (node == null)
                 {
@@ -30,7 +30,7 @@ namespace HeartScript.Cli
                 }
 
                 Console.WriteLine("Output");
-                Console.WriteLine(node);
+                Console.WriteLine(StringCompiler.Compile(node));
 
                 var compiledFunction = EmitCompiler.CompileFunction<TestContext<double>, double>(node);
                 var testContext = new TestContext<double>()

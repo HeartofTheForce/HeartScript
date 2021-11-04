@@ -41,20 +41,32 @@ namespace HeartScript.Compiling
 
         public static string Compile(IParseNode node)
         {
-            if (node is ExpressionNode expressionNode)
+            switch (node)
             {
-                if (s_overrideCompilers.TryGetValue(expressionNode.Key, out var compiler))
-                    return compiler(expressionNode);
+                case ExpressionNode expressionNode:
+                    {
+                        if (s_overrideCompilers.TryGetValue(expressionNode.Key, out var compiler))
+                            return compiler(expressionNode);
 
-                IEnumerable<IParseNode> children = ParseNodeHelper.GetChildren<ExpressionNode>(expressionNode);
+                        IEnumerable<ExpressionNode> children = ParseNodeHelper.GetChildrenRecursive<ExpressionNode>(expressionNode);
 
-                if (children.Count() > 0)
-                {
-                    string parameters = string.Join(' ', children);
-                    return $"({expressionNode.Key} {parameters})";
-                }
+                        if (children.Count() > 0)
+                        {
+                            string parameters = string.Join(' ', children);
+                            return $"({expressionNode.Key} {parameters})";
+                        }
 
-                return $"({expressionNode.Key})";
+                        return $"({expressionNode.Key})";
+                    }
+                case ValueNode valueNode:
+                    {
+                        return valueNode.Value;
+                    }
+                default:
+                    {
+                        var children = ParseNodeHelper.GetChildren(node).Select(x => Compile(x));
+                        return string.Join(' ', children);
+                    }
             }
 
             throw new NotImplementedException();

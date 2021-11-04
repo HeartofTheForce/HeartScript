@@ -1,4 +1,4 @@
-root -> method
+root -> 'method':method
 
 type -> 'int' / 'double' / 'bool'
 name -> `[_a-zA-Z]\w*`

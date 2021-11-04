@@ -105,7 +105,7 @@ namespace HeartScript.Ast
             if (methodName == null)
                 throw new Exception($"{nameof(methodName)} cannot be null");
 
-            var parameterNodes = ParseNodeHelper.GetChildren<ExpressionNode>(callNode.MidNode);
+            var parameterNodes = ParseNodeHelper.GetChildrenRecursive<ExpressionNode>(callNode.MidNode);
             var parameters = new AstNode[parameterNodes.Count];
             var parameterTypes = new Type[parameterNodes.Count];
 
@@ -122,7 +122,7 @@ namespace HeartScript.Ast
             var expectedParameters = methodInfo.GetParameters();
             for (int i = 0; i < parameterNodes.Count; i++)
             {
-                parameters[i] = ConvertIfRequired(parameters[i], expectedParameters[i].ParameterType);
+                parameters[i] = AstBuilder.ConvertIfRequired(parameters[i], expectedParameters[i].ParameterType);
             }
 
             return AstNode.Call(instance, methodInfo, parameters);
@@ -203,14 +203,6 @@ namespace HeartScript.Ast
                 right = AstNode.Convert(right, mid.Type);
 
             return new ConditionalNode(left, mid, right);
-        }
-
-        public static AstNode ConvertIfRequired(AstNode expression, Type expectedType)
-        {
-            if (expression.Type != expectedType)
-                return AstNode.Convert(expression, expectedType);
-
-            return expression;
         }
 
         static bool IsReal(Type type) =>
