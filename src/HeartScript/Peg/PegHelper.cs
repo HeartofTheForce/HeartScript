@@ -92,7 +92,14 @@ namespace HeartScript.Peg
 
             parser.Patterns["sequence"] = QuantifierPattern.MinOrMore(
                 1,
-               LookupPattern.Create("quantifier"));
+               LookupPattern.Create("label"));
+
+            parser.Patterns["label"] = SequencePattern.Create()
+                .Then(QuantifierPattern.Optional(
+                        SequencePattern.Create()
+                            .Then(s_plainText.TrimRight())
+                            .Discard(LexerPattern.FromPlainText(":").TrimRight())))
+                .Then(LookupPattern.Create("quantifier"));
 
             parser.Patterns["quantifier"] = SequencePattern.Create()
                 .Then(LookupPattern.Create("term"))
@@ -162,32 +169,45 @@ namespace HeartScript.Peg
         {
             var quantifierNode = (QuantifierNode)node;
             if (quantifierNode.Children.Count == 1)
-                return BuildQuantifier(quantifierNode.Children[0]);
+                return BuildLabel(quantifierNode.Children[0]);
 
             var output = SequencePattern.Create();
             foreach (var child in quantifierNode.Children)
             {
-                output.Then(BuildQuantifier(child));
+                output.Then(BuildLabel(child));
             }
 
             return output;
         }
 
-        static IPattern BuildQuantifier(IParseNode node)
+        static IPattern BuildLabel(IParseNode node)
         {
             var sequenceNode = (SequenceNode)node;
-            var pattern = BuildTerm(sequenceNode.Children[0]);
-            var optional = (QuantifierNode)sequenceNode.Children[1];
+            var optional = (QuantifierNode)sequenceNode.Children[0];
+            var pattern = BuildQuantifier(sequenceNode.Children[1]);
 
             if (optional.Children.Count == 0)
                 return pattern;
 
+            var labelNode = (ValueNode)optional.Children[0];
+            return LabelPattern.Create(labelNode.Value, pattern);
+        }
+
+        static IPattern BuildQuantifier(IParseNode node)
+        {
+            var sequenceNode = (SequenceNode)node;
+            var term = BuildTerm(sequenceNode.Children[0]);
+            var optional = (QuantifierNode)sequenceNode.Children[1];
+
+            if (optional.Children.Count == 0)
+                return term;
+
             var choice = (ChoiceNode)optional.Children[0];
             switch (choice.ChoiceIndex)
             {
-                case 0: return QuantifierPattern.Optional(pattern);
-                case 1: return QuantifierPattern.MinOrMore(0, pattern);
-                case 2: return QuantifierPattern.MinOrMore(1, pattern);
+                case 0: return QuantifierPattern.Optional(term);
+                case 1: return QuantifierPattern.MinOrMore(0, term);
+                case 2: return QuantifierPattern.MinOrMore(1, term);
                 default: throw new NotImplementedException();
             };
         }
