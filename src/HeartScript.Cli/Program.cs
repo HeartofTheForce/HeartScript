@@ -2,6 +2,7 @@
 using HeartScript.Compiling;
 using HeartScript.Expressions;
 using HeartScript.Parsing;
+using HeartScript.Peg;
 
 namespace HeartScript.Cli
 {
@@ -17,7 +18,7 @@ namespace HeartScript.Cli
                 Console.WriteLine(infix);
 
                 var ctx = new ParserContext(infix);
-                var parser = ParsingHelper.BuildPatternParser("./src/test.peg");
+                var parser = PegHelper.BuildPatternParser("./src/test.peg");
                 var node = ExpressionPattern.Parse(parser, ctx);
 
                 if (node == null)

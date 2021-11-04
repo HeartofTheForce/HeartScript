@@ -1,5 +1,4 @@
 ﻿using System.Text.RegularExpressions;
-using HeartScript.Parsing.Nodes;
 
 namespace HeartScript.Parsing
 {
@@ -54,6 +53,18 @@ namespace HeartScript.Parsing
 
             ctx.LogException(new UnexpectedTokenException(ctx.Offset, this));
             return null;
+        }
+    }
+
+    public class ValueNode : IParseNode
+    {
+        public int TextOffset { get; }
+        public string Value { get; }
+
+        public ValueNode(int textOffset, string value)
+        {
+            TextOffset = textOffset;
+            Value = value;
         }
     }
 

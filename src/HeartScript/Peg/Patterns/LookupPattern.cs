@@ -1,4 +1,6 @@
-namespace HeartScript.Parsing.Patterns
+using HeartScript.Parsing;
+
+namespace HeartScript.Peg.Patterns
 {
     public class LookupPattern : IPattern
     {

@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using HeartScript.Parsing.Nodes;
+using HeartScript.Parsing;
 
-namespace HeartScript.Parsing.Patterns
+namespace HeartScript.Peg.Patterns
 {
     public class SequencePattern : IPattern
     {
@@ -72,6 +72,18 @@ namespace HeartScript.Parsing.Patterns
         {
             public IPattern Pattern { get; set; }
             public bool Discard { get; set; }
+        }
+    }
+
+    public class SequenceNode : IParseNode
+    {
+        public int TextOffset { get; }
+        public List<IParseNode> Children { get; }
+
+        public SequenceNode(int textOffset, List<IParseNode> children)
+        {
+            TextOffset = textOffset;
+            Children = children;
         }
     }
 }

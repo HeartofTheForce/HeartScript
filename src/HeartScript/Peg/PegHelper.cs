@@ -2,13 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using HeartScript.Expressions;
-using HeartScript.Parsing.Nodes;
-using HeartScript.Parsing.Patterns;
+using HeartScript.Parsing;
+using HeartScript.Peg.Patterns;
 #pragma warning disable IDE0066
 
-namespace HeartScript.Parsing
+namespace HeartScript.Peg
 {
-    public static class ParsingHelper
+    public static class PegHelper
     {
         private static readonly LexerPattern s_regex = LexerPattern.FromRegex("`(?:``|[^`])*`");
         private static readonly LexerPattern s_plainText = LexerPattern.FromRegex("'(?:''|[^'])*'");

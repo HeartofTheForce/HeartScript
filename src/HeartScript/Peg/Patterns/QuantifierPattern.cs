@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using HeartScript.Parsing.Nodes;
+using HeartScript.Parsing;
 
-namespace HeartScript.Parsing.Patterns
+namespace HeartScript.Peg.Patterns
 {
     public class QuantifierPattern : IPattern
     {
@@ -52,6 +52,18 @@ namespace HeartScript.Parsing.Patterns
                 return new QuantifierNode(localOffset, output);
             else
                 return null;
+        }
+    }
+
+    public class QuantifierNode : IParseNode
+    {
+        public int TextOffset { get; }
+        public List<IParseNode> Children { get; }
+
+        public QuantifierNode(int textOffset, List<IParseNode> children)
+        {
+            TextOffset = textOffset;
+            Children = children;
         }
     }
 }

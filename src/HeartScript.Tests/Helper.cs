@@ -1,4 +1,5 @@
 using HeartScript.Parsing;
+using HeartScript.Peg;
 
 namespace HeartScript.Tests
 {
@@ -8,7 +9,7 @@ namespace HeartScript.Tests
 
         static Helper()
         {
-            Parser = ParsingHelper.BuildPatternParser("./test.peg");
+            Parser = PegHelper.BuildPatternParser("./test.peg");
         }
     }
 }

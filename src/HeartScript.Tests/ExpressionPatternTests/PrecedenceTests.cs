@@ -1,4 +1,5 @@
 using HeartScript.Parsing;
+using HeartScript.Peg;
 using NUnit.Framework;
 
 namespace HeartScript.Tests.ExpressionPatternTests
@@ -10,7 +11,7 @@ namespace HeartScript.Tests.ExpressionPatternTests
 
         static PrecedenceTests()
         {
-            s_parser = ParsingHelper.BuildPatternParser("./TestOperators/precedence.peg");
+            s_parser = PegHelper.BuildPatternParser("./TestOperators/precedence.peg");
         }
 
         // 8 valid non-nullary operator arrangements, 3^2 - 1(PostPre is invalid)

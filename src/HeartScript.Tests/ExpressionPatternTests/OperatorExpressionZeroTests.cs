@@ -1,4 +1,5 @@
 using HeartScript.Parsing;
+using HeartScript.Peg;
 using NUnit.Framework;
 
 namespace HeartScript.Tests.ExpressionPatternTests
@@ -10,7 +11,7 @@ namespace HeartScript.Tests.ExpressionPatternTests
 
         static OperatorExpressionZeroTests()
         {
-            s_parser = ParsingHelper.BuildPatternParser("./TestOperators/operator-expression-zero.peg");
+            s_parser = PegHelper.BuildPatternParser("./TestOperators/operator-expression-zero.peg");
         }
 
         static readonly IExpressionTestCase[] s_testCases = new IExpressionTestCase[]

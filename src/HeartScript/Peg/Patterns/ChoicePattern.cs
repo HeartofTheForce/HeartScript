@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using HeartScript.Parsing.Nodes;
+using HeartScript.Parsing;
 
-namespace HeartScript.Parsing.Patterns
+namespace HeartScript.Peg.Patterns
 {
     public class ChoicePattern : IPattern
     {
@@ -34,6 +34,20 @@ namespace HeartScript.Parsing.Patterns
             }
 
             return null;
+        }
+    }
+
+    public class ChoiceNode : IParseNode
+    {
+        public int TextOffset { get; }
+        public int ChoiceIndex { get; }
+        public IParseNode Node { get; }
+
+        public ChoiceNode(int choiceIndex, IParseNode node)
+        {
+            TextOffset = node.TextOffset;
+            ChoiceIndex = choiceIndex;
+            Node = node;
         }
     }
 }

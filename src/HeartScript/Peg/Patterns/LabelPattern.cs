@@ -1,6 +1,6 @@
-using HeartScript.Parsing.Nodes;
+using HeartScript.Parsing;
 
-namespace HeartScript.Parsing
+namespace HeartScript.Peg.Patterns
 {
     public class LabelPattern : IPattern
     {
@@ -26,6 +26,20 @@ namespace HeartScript.Parsing
                 return new LabelNode(_label, result);
 
             return null;
+        }
+    }
+
+    public class LabelNode : IParseNode
+    {
+        public int TextOffset { get; }
+        public string Label { get; }
+        public IParseNode Node { get; }
+
+        public LabelNode(string label, IParseNode node)
+        {
+            TextOffset = node.TextOffset;
+            Label = label;
+            Node = node;
         }
     }
 }

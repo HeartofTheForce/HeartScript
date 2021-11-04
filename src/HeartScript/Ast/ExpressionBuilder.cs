@@ -5,7 +5,7 @@ using System.Reflection;
 using HeartScript.Ast.Nodes;
 using HeartScript.Expressions;
 using HeartScript.Parsing;
-using HeartScript.Parsing.Nodes;
+using HeartScript.Peg.Patterns;
 
 namespace HeartScript.Ast
 {

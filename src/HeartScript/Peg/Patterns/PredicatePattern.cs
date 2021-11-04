@@ -1,6 +1,6 @@
-using HeartScript.Parsing.Nodes;
+using HeartScript.Parsing;
 
-namespace HeartScript.Parsing.Patterns
+namespace HeartScript.Peg.Patterns
 {
     public class PredicatePattern : IPattern
     {
@@ -34,6 +34,18 @@ namespace HeartScript.Parsing.Patterns
                 return new PredicateNode(ctx.Offset, result);
 
             return null;
+        }
+    }
+
+    public class PredicateNode : IParseNode
+    {
+        public int TextOffset { get; }
+        public IParseNode? Node { get; }
+
+        public PredicateNode(int textOffset, IParseNode? node)
+        {
+            TextOffset = textOffset;
+            Node = node;
         }
     }
 }
