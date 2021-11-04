@@ -49,7 +49,6 @@ namespace HeartScript.Ast
             throw new ArgumentException($"{node.Key} does not have a matching builder");
         }
 
-
         static AstNode BuildRoundBracket(AstScope scope, ExpressionNode node)
         {
             var sequenceNode = (SequenceNode)node.MidNode;
