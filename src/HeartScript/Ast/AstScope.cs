@@ -66,7 +66,7 @@ namespace HeartScript.Ast
             var current = this;
             while (current != null)
             {
-                if (_typeWhitelist.Contains(type))
+                if (current._typeWhitelist.Contains(type))
                     return;
 
                 current = _parent;
