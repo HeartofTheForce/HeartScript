@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using HeartScript.Ast.Nodes;
+using HeartScript.Parsing;
 using HeartScript.Peg.Patterns;
 #pragma warning disable IDE0066
 
@@ -25,10 +26,61 @@ namespace HeartScript.Ast
 
         static AstNode BuildMethod(AstScope scope, LabelNode node)
         {
-            var sequenceNode = (SequenceNode)node.Node;
-            var expressionNode = sequenceNode.Children[6];
+            var methodSequence = (SequenceNode)node.Node;
 
-            return AstBuilder.Build(scope, expressionNode);
+            string methodName = ((ValueNode)methodSequence.Children[1]).Value;
+            var methodType = GetType(methodSequence.Children[0]);
+
+            var parameterValues = new List<(ChoiceNode, ValueNode)>();
+            var parameterMatch = (QuantifierNode)methodSequence.Children[3];
+            if (parameterMatch.Children.Count > 0)
+            {
+                var head = (SequenceNode)parameterMatch.Children[0];
+                var paramTypeNode = (ChoiceNode)head.Children[0];
+                var paramNameNode = (ValueNode)head.Children[1];
+                parameterValues.Add((paramTypeNode, paramNameNode));
+
+                var tail = (QuantifierNode)head.Children[2];
+                foreach (var tailChild in tail.Children)
+                {
+                    var tailSequence = (SequenceNode)tailChild;
+                    paramTypeNode = (ChoiceNode)tailSequence.Children[1];
+                    paramNameNode = (ValueNode)tailSequence.Children[2];
+                    parameterValues.Add((paramTypeNode, paramNameNode));
+                }
+            }
+
+            var methodScope = new AstScope(scope);
+
+            var parameters = new Type[parameterValues.Count];
+            for (int i = 0; i < parameters.Length; i++)
+            {
+                var paramType = GetType(parameterValues[i].Item1);
+                string paramName = parameterValues[i].Item2.Value;
+
+                var parameterNode = new ParameterNode(i, paramType);
+
+                parameters[i] = parameterNode.Type;
+                methodScope.SetMember(paramName, parameterNode, true);
+            }
+
+            var expressionNode = methodSequence.Children[6];
+            var body = AstBuilder.ConvertIfRequired(AstBuilder.Build(methodScope, expressionNode), methodType);
+
+            return new MethodNode(methodName, parameters, body);
+        }
+
+        static Type GetType(IParseNode typeNode)
+        {
+            var choiceNode = (ChoiceNode)typeNode;
+            var valueNode = (ValueNode)choiceNode.Node;
+            switch (valueNode.Value)
+            {
+                case "int": return typeof(int);
+                case "double": return typeof(double);
+                case "bool": return typeof(bool);
+                default: throw new NotImplementedException();
+            }
         }
     }
 }

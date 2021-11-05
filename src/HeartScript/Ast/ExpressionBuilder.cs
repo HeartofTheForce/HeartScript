@@ -89,7 +89,7 @@ namespace HeartScript.Ast
             if (scope.TryGetMember(valueNode.Value, out var variable))
                 return variable;
 
-            throw new ArgumentException(nameof(node));
+            throw new ArgumentException($"Missing member {valueNode.Value}");
         }
 
         static AstNode BuildCall(AstScope scope, ExpressionNode callNode, AstNode? instance, Type type, BindingFlags bindingFlags)
@@ -132,7 +132,6 @@ namespace HeartScript.Ast
         {
             return (scope, node) =>
             {
-                scope.AllowType(type);
                 var bindingFlags = BindingFlags.Public | BindingFlags.Static | BindingFlags.IgnoreCase;
                 return BuildCall(scope, node, null, type, bindingFlags);
             };

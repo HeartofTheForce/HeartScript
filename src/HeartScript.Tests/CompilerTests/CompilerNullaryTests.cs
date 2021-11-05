@@ -42,35 +42,32 @@ namespace HeartScript.Tests.CompilerTests
                 ExpectedExpression = () => false,
             },
             //identifier
-            new ExpressionCompilerTestCase<DemoContext, bool>()
+            new ExpressionCompilerTestCase()
             {
-                Infix = "BoolA",
-                Input = new DemoContext()
+                Method = "bool main(bool BoolA) => BoolA",
+                Paramaters = new object[]
                 {
-                    BoolA = true,
+                    true,
                 },
-                ExpectedString = "BoolA",
-                ExpectedExpression = (ctx) => ctx.BoolA,
+                ExpectedResult = true,
             },
-            new ExpressionCompilerTestCase<DemoContext, int>()
+            new ExpressionCompilerTestCase()
             {
-                Infix = "IntA",
-                Input = new DemoContext()
+                Method = "int main(int IntA) => IntA",
+                 Paramaters = new object[]
                 {
-                    IntA = 1,
+                    1,
                 },
-                ExpectedString = "IntA",
-                ExpectedExpression = (ctx) => ctx.IntA,
+                ExpectedResult = 1,
             },
-            new ExpressionCompilerTestCase<DemoContext, double>()
+            new ExpressionCompilerTestCase()
             {
-                Infix = "DoubleA",
-                Input = new DemoContext()
+                Method = "double main(double DoubleA) => DoubleA",
+                Paramaters = new object[]
                 {
-                    DoubleA = 1.5,
+                    1.5,
                 },
-                ExpectedString = "DoubleA",
-                ExpectedExpression = (ctx) => ctx.DoubleA,
+                ExpectedResult = 1.5,
             },
         };
 

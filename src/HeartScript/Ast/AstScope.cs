@@ -7,15 +7,26 @@ namespace HeartScript.Ast
 {
     public class AstScope
     {
+        private class Member
+        {
+            public AstNode Node { get; }
+            public bool IsPrivate { get; }
+
+            public Member(AstNode node, bool isPrivate)
+            {
+                Node = node;
+                IsPrivate = isPrivate;
+            }
+        }
         private readonly AstScope? _parent;
         private readonly HashSet<Type> _typeWhitelist;
-        private readonly Dictionary<string, AstNode> _members;
+        private readonly Dictionary<string, Member> _members;
 
         public AstScope(AstScope? parent)
         {
             _parent = parent;
             _typeWhitelist = new HashSet<Type>();
-            _members = new Dictionary<string, AstNode>(StringComparer.OrdinalIgnoreCase);
+            _members = new Dictionary<string, Member>(StringComparer.OrdinalIgnoreCase);
         }
 
         public AstScope() : this(null)
@@ -29,13 +40,13 @@ namespace HeartScript.Ast
             var propertyInfos = node.Type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
             foreach (var propertyInfo in propertyInfos)
             {
-                scope.SetMember(propertyInfo.Name, AstNode.Property(node, propertyInfo));
+                scope.SetMember(propertyInfo.Name, AstNode.Property(node, propertyInfo), true);
             }
 
             var fieldInfos = node.Type.GetFields(BindingFlags.Public | BindingFlags.Instance);
             foreach (var fieldInfo in fieldInfos)
             {
-                scope.SetMember(fieldInfo.Name, AstNode.Field(node, fieldInfo));
+                scope.SetMember(fieldInfo.Name, AstNode.Field(node, fieldInfo), true);
             }
 
             scope.AllowType(node.Type);
@@ -45,22 +56,36 @@ namespace HeartScript.Ast
 
         public bool TryGetMember(string name, out AstNode expression)
         {
+            Member? member = null;
+
             var current = this;
             while (current != null)
             {
-                if (_members.TryGetValue(name, out expression))
-                    return true;
+                if (current._members.TryGetValue(name, out member))
+                    break;
 
                 current = _parent;
             }
 
-            expression = null!;
-            return false;
+            if (member == null)
+            {
+                expression = null!;
+                return false;
+            }
+
+            if (member.IsPrivate && current != this)
+            {
+                expression = null!;
+                return false;
+            }
+
+            expression = member.Node;
+            return true;
         }
 
-        public void SetMember(string name, AstNode expression)
+        public void SetMember(string name, AstNode expression, bool isPrivate)
         {
-            _members[name] = expression;
+            _members[name] = new Member(expression, isPrivate);
         }
 
         public void AllowType(Type type)
@@ -70,8 +95,16 @@ namespace HeartScript.Ast
 
         public void AssertAllowed(Type type)
         {
-            if (!_typeWhitelist.Contains(type))
-                throw new Exception($"{type} is not allowed");
+            var current = this;
+            while (current != null)
+            {
+                if (_typeWhitelist.Contains(type))
+                    return;
+
+                current = _parent;
+            }
+
+            throw new Exception($"{type} is not allowed");
         }
     }
 }

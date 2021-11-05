@@ -1,84 +1,20 @@
 using System;
-using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using HeartScript.Ast;
 using HeartScript.Ast.Nodes;
-using HeartScript.Parsing;
 
-namespace HeartScript.Compiling
+namespace HeartScript.Compiling.Emit
 {
-    public static class EmitCompiler
+    public static class MethodCompiler
     {
-        public static Func<T> CompileFunction<T>(IParseNode node)
+        public static void EmitMethod(TypeBuilder typeBuilder, AstScope scope, MethodNode node)
         {
-            var scope = new AstScope();
-            scope.AllowType(typeof(int));
-            scope.AllowType(typeof(double));
-            scope.AllowType(typeof(bool));
-
-            var ast = AstBuilder.Build(scope, node);
-            ast = AstBuilder.ConvertIfRequired(ast, typeof(T));
-
-            return Compile<Func<T>>(
-                "AssemblyName",
-                "ModuleName",
-                "TypeName",
-                "MethodName",
-                ast,
-                scope,
-                typeof(T),
-                new ParameterNode[0]);
-        }
-
-        public static Func<TContext, TResult> CompileFunction<TContext, TResult>(IParseNode node)
-        {
-            var parameters = new ParameterNode[] { AstNode.Parameter(0, typeof(TContext)) };
-            var scope = AstScope.FromMembers(parameters[0]);
-            scope.AllowType(typeof(int));
-            scope.AllowType(typeof(double));
-            scope.AllowType(typeof(bool));
-
-            var ast = AstBuilder.Build(scope, node);
-            ast = AstBuilder.ConvertIfRequired(ast, typeof(TResult));
-
-            return Compile<Func<TContext, TResult>>(
-                "AssemblyName",
-                "ModuleName",
-                "TypeName",
-                "MethodName",
-                ast,
-                scope,
-                typeof(TResult),
-                parameters);
-        }
-
-        private static T Compile<T>(
-            string assemblyName,
-            string moduleName,
-            string typeName,
-            string methodName,
-            AstNode ast,
-            AstScope scope,
-            Type returnType,
-            ParameterNode[] parameters)
-            where T : Delegate
-        {
-            var assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName(assemblyName), AssemblyBuilderAccess.Run);
-            var moduleBuilder = assemblyBuilder.DefineDynamicModule(moduleName);
-            var typeBuilder = moduleBuilder.DefineType(typeName, TypeAttributes.Public);
-
-            var parameterTypes = parameters.Select(x => x.Type).ToArray();
-            var methodBuilder = typeBuilder.DefineMethod(methodName, MethodAttributes.Public | MethodAttributes.Static, returnType, parameterTypes);
-
+            var methodBuilder = typeBuilder.DefineMethod(node.Name, MethodAttributes.Public | MethodAttributes.Static, node.ReturnType, node.ParameterTypes);
             var ilGenerator = methodBuilder.GetILGenerator();
-            Emit(ilGenerator, scope, ast);
+
+            Emit(ilGenerator, scope, node.Body);
             ilGenerator.Emit(OpCodes.Ret);
-
-            var loadedType = typeBuilder.CreateType();
-            var loadedMethodInfo = loadedType.GetMethod(methodBuilder.Name, parameterTypes);
-
-            return (T)loadedMethodInfo.CreateDelegate(typeof(T));
         }
 
         private static void Emit(ILGenerator ilGenerator, AstScope scope, AstNode node)
@@ -86,18 +22,18 @@ namespace HeartScript.Compiling
             scope.AssertAllowed(node.Type);
             switch (node)
             {
-                case ConstantNode constantNode: EmitConstant(ilGenerator, scope, constantNode); break;
+                case ConstantNode constantNode: EmitConstant(ilGenerator, constantNode); break;
                 case BinaryNode binaryNode: EmitBinary(ilGenerator, scope, binaryNode); break;
                 case UnaryNode unaryNode: EmitUnary(ilGenerator, scope, unaryNode); break;
                 case ConditionalNode conditionalNode: EmitConditional(ilGenerator, scope, conditionalNode); break;
                 case CallNode callNode: EmitCall(ilGenerator, scope, callNode); break;
-                case ParameterNode parameterNode: EmitParameter(ilGenerator, scope, parameterNode); break;
+                case ParameterNode parameterNode: EmitParameter(ilGenerator, parameterNode); break;
                 case MemberNode memberNode: EmitMemberAccess(ilGenerator, scope, memberNode); break;
                 default: throw new NotImplementedException();
             }
         }
 
-        private static void EmitConstant(ILGenerator ilGenerator, AstScope scope, ConstantNode node)
+        private static void EmitConstant(ILGenerator ilGenerator, ConstantNode node)
         {
             if (node.Value == null)
                 throw new ArgumentException(nameof(node.Value));
@@ -235,7 +171,7 @@ namespace HeartScript.Compiling
             };
         }
 
-        private static void EmitParameter(ILGenerator ilGenerator, AstScope scope, ParameterNode node)
+        private static void EmitParameter(ILGenerator ilGenerator, ParameterNode node)
         {
             ilGenerator.Emit(OpCodes.Ldarg, node.ParameterIndex);
         }
