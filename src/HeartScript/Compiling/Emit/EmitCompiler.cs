@@ -62,14 +62,15 @@ namespace HeartScript.Compiling
             scope.AssertAllowed(node.Type);
             switch (node)
             {
-                case MethodInfoNode methodInfoNode: MethodCompiler.EmitMethod(typeBuilder, scope, methodInfoNode); break;
+                case MethodInfoNode methodInfoNode: MethodCompiler.EmitMethod(typeBuilder, methodInfoNode); break;
                 default: EmitWrap(typeBuilder, scope, node); break;
             }
         }
 
         private static void EmitWrap(TypeBuilder typeBuilder, AstScope scope, AstNode node)
         {
-            var methodNode = new MethodInfoNode("main", new Type[] { }, node);
+            var blockNode = AstNode.Block(new AstNode[] { AstNode.Return(node) }, node.Type);
+            var methodNode = new MethodInfoNode("main", new Type[] { }, blockNode);
             Emit(typeBuilder, scope, methodNode);
         }
     }

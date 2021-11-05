@@ -3,12 +3,12 @@ using System.Reflection;
 
 namespace HeartScript.Ast.Nodes
 {
-    public class MemberNode : AstNode
+    public class MemberAccessNode : AstNode
     {
         public AstNode? Instance { get; }
         public MemberInfo Member { get; }
 
-        public MemberNode(AstNode? instance, MemberInfo member) : base(GetUnderlyingType(member), AstType.MemberAccess)
+        public MemberAccessNode(AstNode? instance, MemberInfo member) : base(GetUnderlyingType(member), AstType.MemberAccess)
         {
             if (IsStatic(member) && instance != null)
                 throw new ArgumentException($"{nameof(instance)} must be null for static member");
@@ -43,7 +43,7 @@ namespace HeartScript.Ast.Nodes
 
     public partial class AstNode
     {
-        public static MemberNode Field(AstNode? instance, FieldInfo fieldInfo) => new MemberNode(instance, fieldInfo);
-        public static MemberNode Property(AstNode? instance, PropertyInfo propertyInfo) => new MemberNode(instance, propertyInfo);
+        public static MemberAccessNode Field(AstNode? instance, FieldInfo fieldInfo) => new MemberAccessNode(instance, fieldInfo);
+        public static MemberAccessNode Property(AstNode? instance, PropertyInfo propertyInfo) => new MemberAccessNode(instance, propertyInfo);
     }
 }

@@ -2,6 +2,7 @@ namespace HeartScript.Ast
 {
     public enum AstType
     {
+        Default,
         UnaryPlus,
         Negate,
         Not,
@@ -24,6 +25,5 @@ namespace HeartScript.Ast
         Conditional,
         Convert,
         Parameter,
-        MethodDeclaration,
     }
 }

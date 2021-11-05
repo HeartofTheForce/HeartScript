@@ -69,24 +69,38 @@ namespace HeartScript.Ast
             return new MethodInfoNode(methodName, parameters, body);
         }
 
-        static AstNode BuildMethodBody(AstScope scope, Type returnType, IParseNode body)
+        static BlockNode BuildMethodBody(AstScope scope, Type returnType, IParseNode body)
         {
             var choiceNode = (ChoiceNode)body;
             var labelNode = (LabelNode)choiceNode.Node;
             var sequenceNode = (SequenceNode)labelNode.Node;
+
+            var statements = new List<AstNode>();
             switch (labelNode.Label)
             {
-                case "standard": return null;
+                case "standard":
+                    {
+                        var quantifierNode = (QuantifierNode)sequenceNode.Children[1];
+                        foreach (var child in quantifierNode.Children)
+                        {
+                            var returnSequence = (SequenceNode)child;
+                            var expressionNode = returnSequence.Children[1];
+                            var expression = AstBuilder.ConvertIfRequired(AstBuilder.Build(scope, expressionNode), returnType);
+                            statements.Add(AstNode.Return(expression));
+                        }
+                    }
+                    break;
                 case "lambda":
                     {
                         var expressionNode = sequenceNode.Children[1];
                         var expression = AstBuilder.ConvertIfRequired(AstBuilder.Build(scope, expressionNode), returnType);
-                        return expression;
+                        statements.Add(AstNode.Return(expression));
                     }
+                    break;
                 default: throw new NotImplementedException();
             }
 
-
+            return AstNode.Block(statements.ToArray(), returnType);
         }
 
         static Type GetType(IParseNode typeNode)

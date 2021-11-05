@@ -7,9 +7,9 @@ namespace HeartScript.Ast.Nodes
         public string Name { get; }
         public Type ReturnType { get; }
         public Type[] ParameterTypes { get; }
-        public AstNode Body { get; }
+        public BlockNode Body { get; }
 
-        public MethodInfoNode(string name, Type[] parameterTypes, AstNode body) : base(typeof(void), AstType.MethodDeclaration)
+        public MethodInfoNode(string name, Type[] parameterTypes, BlockNode body) : base(typeof(void), AstType.Default)
         {
             Name = name;
             ReturnType = body.Type;
