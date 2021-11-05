@@ -41,6 +41,23 @@ namespace HeartScript.Compiling.Emit
             }
         }
 
+        private static void EmitBlock(ILGenerator ilGenerator, PathScope scope, BlockNode node)
+        {
+            foreach (var statement in node.Nodes)
+            {
+                EmitStatement(ilGenerator, scope, statement);
+            }
+        }
+
+        private static void EmitReturn(ILGenerator ilGenerator, PathScope scope, ReturnNode node)
+        {
+            if (node.Node != null)
+                EmitExpression(ilGenerator, node.Node);
+
+            ilGenerator.Emit(OpCodes.Ret);
+            scope.Return = true;
+        }
+
         private static void EmitExpression(ILGenerator ilGenerator, AstNode node)
         {
             switch (node)
@@ -194,23 +211,6 @@ namespace HeartScript.Compiling.Emit
                 case PropertyInfo propertyInfo: ilGenerator.EmitCall(OpCodes.Call, propertyInfo.GetMethod, null); break;
                 default: throw new NotImplementedException();
             };
-        }
-
-        private static void EmitBlock(ILGenerator ilGenerator, PathScope scope, BlockNode node)
-        {
-            foreach (var statement in node.Nodes)
-            {
-                EmitStatement(ilGenerator, scope, statement);
-            }
-        }
-
-        private static void EmitReturn(ILGenerator ilGenerator, PathScope scope, ReturnNode node)
-        {
-            if (node.Node != null)
-                EmitExpression(ilGenerator, node.Node);
-
-            ilGenerator.Emit(OpCodes.Ret);
-            scope.Return = true;
         }
     }
 }
