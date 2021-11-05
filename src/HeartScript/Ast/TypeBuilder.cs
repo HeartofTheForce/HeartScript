@@ -61,7 +61,7 @@ namespace HeartScript.Ast
                 var parameterNode = new ParameterNode(i, paramType);
 
                 parameters[i] = parameterNode.Type;
-                methodScope.SetMember(paramName, parameterNode, true);
+                methodScope.SetMember(paramName, parameterNode, false);
             }
 
             var body = BuildMethodBody(methodScope, returnType, methodSequence.Children[5]);

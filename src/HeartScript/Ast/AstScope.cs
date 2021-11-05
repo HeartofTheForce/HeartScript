@@ -29,31 +29,28 @@ namespace HeartScript.Ast
             var current = this;
             while (current != null)
             {
-                if (current._members.TryGetValue(name, out member))
-                    break;
+                if (current._members.TryGetValue(name, out var tempMember))
+                {
+                    if (tempMember.IsPublic || current == this)
+                        member = tempMember;
+                }
 
                 current = current._parent;
             }
 
-            if (member == null)
+            if (member != null)
             {
-                expression = null!;
-                return false;
+                expression = member.Node;
+                return true;
             }
 
-            if (member.IsPrivate && current != this)
-            {
-                expression = null!;
-                return false;
-            }
-
-            expression = member.Node;
-            return true;
+            expression = null!;
+            return false;
         }
 
-        public void SetMember(string name, AstNode expression, bool isPrivate)
+        public void SetMember(string name, AstNode expression, bool isPublic)
         {
-            _members[name] = new Member(expression, isPrivate);
+            _members[name] = new Member(expression, isPublic);
         }
 
         public void AllowType(Type type)
@@ -78,12 +75,12 @@ namespace HeartScript.Ast
         private class Member
         {
             public AstNode Node { get; }
-            public bool IsPrivate { get; }
+            public bool IsPublic { get; }
 
-            public Member(AstNode node, bool isPrivate)
+            public Member(AstNode node, bool isPublic)
             {
                 Node = node;
-                IsPrivate = isPrivate;
+                IsPublic = isPublic;
             }
         }
     }
