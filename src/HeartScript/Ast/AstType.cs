@@ -2,6 +2,7 @@ namespace HeartScript.Ast
 {
     public enum AstType
     {
+        Default,
         UnaryPlus,
         Negate,
         Not,

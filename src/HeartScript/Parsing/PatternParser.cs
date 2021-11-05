@@ -37,6 +37,17 @@ namespace HeartScript.Parsing
             if (Exception == null || Exception.TextOffset <= Offset)
                 Exception = ex;
         }
+
+        public void AssertComplete()
+        {
+            if (Offset != Input.Length)
+            {
+                if (Exception == null || Exception.TextOffset <= Offset)
+                    throw new UnexpectedTokenException(Offset, "EOF");
+                else
+                    throw Exception;
+            }
+        }
     }
 
     public abstract class PatternException : Exception

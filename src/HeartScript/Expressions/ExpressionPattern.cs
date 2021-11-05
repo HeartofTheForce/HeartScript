@@ -13,29 +13,13 @@ namespace HeartScript.Expressions
             _operators = operators;
         }
 
-        public static IParseNode Parse(IEnumerable<OperatorInfo> operators, ParserContext ctx)
+        public static IParseNode Parse(PatternParser parser, ParserContext ctx)
         {
-            var expressionPattern = new ExpressionPattern(operators);
+            var result = parser.Patterns["expr"].TryMatch(parser, ctx);
 
-            var parser = new PatternParser();
-            parser.Patterns["expr"] = expressionPattern;
-            var result = expressionPattern.TryMatch(parser, ctx);
-
+            ctx.AssertComplete();
             if (result == null)
-            {
-                if (ctx.Exception != null)
-                    throw ctx.Exception;
-                else
-                    throw new ArgumentException(nameof(ctx.Exception));
-            }
-
-            if (!ctx.IsEOF)
-            {
-                if (ctx.Exception == null || ctx.Exception.TextOffset <= ctx.Offset)
-                    throw new UnexpectedTokenException(ctx.Offset, "EOF");
-                else
-                    throw ctx.Exception;
-            }
+                throw new ArgumentException(nameof(ctx.Exception));
 
             return result;
         }

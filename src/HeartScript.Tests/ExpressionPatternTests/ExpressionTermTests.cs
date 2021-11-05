@@ -60,7 +60,7 @@ namespace HeartScript.Tests.ExpressionPatternTests
         [TestCaseSource(nameof(s_testCases))]
         public void TestCases(ExpressionTermTestCase testCase)
         {
-            testCase.Execute(Helper.TestOperators);
+            testCase.Execute(Helper.Parser);
         }
     }
 }

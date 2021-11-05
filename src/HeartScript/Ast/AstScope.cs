@@ -7,59 +7,84 @@ namespace HeartScript.Ast
 {
     public class AstScope
     {
+        private readonly AstScope? _parent;
         private readonly HashSet<Type> _typeWhitelist;
-        private readonly Dictionary<string, AstNode> _variables;
+        private readonly Dictionary<string, Member> _members;
 
-        private AstScope(Dictionary<string, AstNode> variables)
+        public AstScope(AstScope? parent)
         {
-            _typeWhitelist = new HashSet<Type>()
-            {
-                typeof(int),
-                typeof(double),
-                typeof(bool),
-                typeof(Math),
-            };
-
-            _variables = variables;
+            _parent = parent;
+            _typeWhitelist = new HashSet<Type>();
+            _members = new Dictionary<string, Member>(StringComparer.OrdinalIgnoreCase);
         }
 
-        public static AstScope Empty()
+        public AstScope() : this(null)
         {
-            var variables = new Dictionary<string, AstNode>();
-            return new AstScope(variables);
         }
 
-        public static AstScope FromMembers(AstNode node)
+        public bool TryGetMember(string name, out AstNode expression)
         {
-            var variables = new Dictionary<string, AstNode>(StringComparer.OrdinalIgnoreCase);
+            Member? member = null;
 
-            var propertyInfos = node.Type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-            foreach (var propertyInfo in propertyInfos)
+            var current = this;
+            while (current != null)
             {
-                variables[propertyInfo.Name] = AstNode.Property(node, propertyInfo);
+                if (current._members.TryGetValue(name, out var candidate))
+                {
+                    if (candidate.IsPublic || current == this)
+                    {
+                        member = candidate;
+                        break;
+                    }
+                }
+
+                current = current._parent;
             }
 
-            var fieldInfos = node.Type.GetFields(BindingFlags.Public | BindingFlags.Instance);
-            foreach (var fieldInfo in fieldInfos)
+            if (member != null)
             {
-                variables[fieldInfo.Name] = AstNode.Field(node, fieldInfo);
+                expression = member.Node;
+                return true;
             }
 
-            var scope = new AstScope(variables);
-            scope._typeWhitelist.Add(node.Type);
-
-            return scope;
+            expression = null!;
+            return false;
         }
 
-        public bool TryGetVariable(string name, out AstNode expression)
+        public void SetMember(string name, AstNode expression, bool isPublic)
         {
-            return _variables.TryGetValue(name, out expression);
+            _members[name] = new Member(expression, isPublic);
+        }
+
+        public void AllowType(Type type)
+        {
+            _typeWhitelist.Add(type);
         }
 
         public void AssertAllowed(Type type)
         {
-            if (!_typeWhitelist.Contains(type))
-                throw new Exception($"{type} is not allowed");
+            var current = this;
+            while (current != null)
+            {
+                if (current._typeWhitelist.Contains(type))
+                    return;
+
+                current = _parent;
+            }
+
+            throw new Exception($"{type} is not allowed");
+        }
+
+        private class Member
+        {
+            public AstNode Node { get; }
+            public bool IsPublic { get; }
+
+            public Member(AstNode node, bool isPublic)
+            {
+                Node = node;
+                IsPublic = isPublic;
+            }
         }
     }
 }

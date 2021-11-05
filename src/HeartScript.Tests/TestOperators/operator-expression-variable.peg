@@ -1,0 +1,19 @@
+expr ->
+    [
+        #VariableExpressions Delimiter Terminator
+        '{' none none '{' (expr (',' expr)*)? '}'
+
+        #VariableExpressions NoDelimiter Terminator
+        '[' none none '[' expr* ']'
+
+        #VariableExpressions Delimiter NoTerminator
+        '?' none none '?' ((expr ':')* expr)?
+
+        #VariableExpressions NoDelimiter NoTerminator
+        '|' none none '|' expr*
+
+        #VariableExpressions SameDelimiter SameTerminator
+        '&' none none '&' (expr ('*' expr)*)? '*'
+
+        'identifier' none none `[_a-zA-Z]\w*`
+    ]

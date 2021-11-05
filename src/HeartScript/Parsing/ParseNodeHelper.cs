@@ -8,7 +8,7 @@ namespace HeartScript.Parsing
 {
     public static class ParseNodeHelper
     {
-        public static List<T> GetChildren<T>(IParseNode node)
+        public static List<T> GetChildrenRecursive<T>(IParseNode node)
         {
             var output = new List<T>();
 
@@ -36,7 +36,7 @@ namespace HeartScript.Parsing
             return output;
         }
 
-        private static IEnumerable<IParseNode> GetChildren(IParseNode node)
+        public static IEnumerable<IParseNode> GetChildren(IParseNode node)
         {
             switch (node)
             {
@@ -44,8 +44,8 @@ namespace HeartScript.Parsing
                     return Enumerable.Empty<IParseNode>();
                 case ChoiceNode choiceNode:
                     return Enumerable.Repeat(choiceNode.Node, 1);
-                case LookupNode lookupNode:
-                    return Enumerable.Repeat(lookupNode.Node, 1);
+                case LabelNode labelNode:
+                    return Enumerable.Repeat(labelNode.Node, 1);
                 case SequenceNode sequenceNode:
                     return sequenceNode.Children;
                 case QuantifierNode quantifierNode:

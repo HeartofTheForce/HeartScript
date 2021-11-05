@@ -12,44 +12,37 @@ namespace HeartScript.Tests.CompilerTests
             new ExpressionCompilerTestCase<double>()
             {
                 Infix = "Sin(1)",
-                ExpectedString = "($ Sin 1)",
                 ExpectedExpression = () => Math.Sin(1),
             },
             new ExpressionCompilerTestCase<int>()
             {
                 Infix = "Max(0, 1)",
-                ExpectedString = "($ Max 0 1)",
                 ExpectedExpression = () => Math.Max(0, 1),
             },
             new ExpressionCompilerTestCase<double>()
             {
                 Infix = "Max(0.5, 1.5)",
-                ExpectedString = "($ Max 0.5 1.5)",
                 ExpectedExpression = () => Math.Max(0.5, 1.5),
             },
             new ExpressionCompilerTestCase<double>()
             {
                 Infix = "Max(0.5, 1)",
-                ExpectedString = "($ Max 0.5 1)",
                 ExpectedExpression = () => Math.Max(0.5, 1),
             },
             new ExpressionCompilerTestCase<double>()
             {
                 Infix = "Max(0, 1.5)",
-                ExpectedString = "($ Max 0 1.5)",
                 ExpectedExpression = () => Math.Max(0, 1.5),
             },
             //!
             new ExpressionCompilerTestCase<double>()
             {
                 Infix = "1.5!",
-                ExpectedString = "(! 1.5)",
                 ExpectedExpression = () => 1.5,
             },
             new ExpressionCompilerTestCase<int>()
             {
                 Infix = "1!",
-                ExpectedString = "(! 1)",
                 ExpectedExpression = () => 1,
             },
         };
@@ -57,7 +50,7 @@ namespace HeartScript.Tests.CompilerTests
         [TestCaseSource(nameof(s_testCases))]
         public void TestCases(IExpressionCompilerTestCase testCase)
         {
-            testCase.Execute(Helper.TestOperators);
+            testCase.Execute();
         }
     }
 }

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using HeartScript.Compiling;
-using HeartScript.Expressions;
 using HeartScript.Parsing;
 using NUnit.Framework;
 #pragma warning disable CS8618
@@ -9,36 +8,38 @@ using NUnit.Framework;
 
 namespace HeartScript.Tests.CompilerTests
 {
-    public class DemoContext
-    {
-        public int IntA { get; set; }
-        public int IntB { get; set; }
-        public bool BoolA { get; set; }
-        public bool BoolB { get; set; }
-        public double DoubleA { get; set; }
-        public double DoubleB { get; set; }
-    }
-
     public interface IExpressionCompilerTestCase
     {
-        void Execute(IEnumerable<OperatorInfo> operators);
+        void Execute();
     }
 
     public class ExpressionCompilerTestCase<T> : IExpressionCompilerTestCase
     {
+        private static readonly Dictionary<Type, string> s_typeLookup = new()
+        {
+            [typeof(int)] = "int",
+            [typeof(double)] = "double",
+            [typeof(bool)] = "bool",
+        };
+
         public string Infix { get; set; }
-        public string ExpectedString { get; set; }
         public Func<T> ExpectedExpression { get; set; }
 
-        public void Execute(IEnumerable<OperatorInfo> operators)
+        public void Execute()
         {
-            var ctx = new ParserContext(Infix);
+            string source = $"{s_typeLookup[typeof(T)]} main() => {Infix};";
+            var ctx = new ParserContext(source);
 
-            var node = ExpressionPattern.Parse(operators, ctx);
-            Assert.AreEqual(ExpectedString, node.ToString());
+            var pattern = Helper.Parser.Patterns["root"];
+            var node = pattern.TryMatch(Helper.Parser, ctx);
+
+            ctx.AssertComplete();
+            if (node == null)
+                throw new ArgumentException(nameof(ctx.Exception));
+
+            var compiledExpression = EmitCompiler.CompileFunction<Func<T>>(node);
 
             var expectedResult = ExpectedExpression();
-            var compiledExpression = EmitCompiler.CompileFunction<T>(node);
             var actualResult = compiledExpression();
             Assert.AreEqual(expectedResult, actualResult);
         }
@@ -49,29 +50,31 @@ namespace HeartScript.Tests.CompilerTests
         }
     }
 
-    public class ExpressionCompilerTestCase<TIn, TOut> : IExpressionCompilerTestCase
+    public class ExpressionCompilerTestCase : IExpressionCompilerTestCase
     {
-        public string Infix { get; set; }
-        public TIn Input { get; set; }
-        public string ExpectedString { get; set; }
-        public Func<TIn, TOut> ExpectedExpression { get; set; }
+        public string Method { get; set; }
+        public object[] Paramaters { get; set; }
+        public object? ExpectedResult { get; set; }
 
-        public void Execute(IEnumerable<OperatorInfo> operators)
+        public void Execute()
         {
-            var ctx = new ParserContext(Infix);
+            var ctx = new ParserContext(Method);
+            var pattern = Helper.Parser.Patterns["root"];
+            var node = pattern.TryMatch(Helper.Parser, ctx);
 
-            var node = ExpressionPattern.Parse(operators, ctx);
-            Assert.AreEqual(ExpectedString, node.ToString());
+            ctx.AssertComplete();
+            if (node == null)
+                throw new ArgumentException(nameof(ctx.Exception));
 
-            var expectedResult = ExpectedExpression(Input);
-            var compiledExpression = EmitCompiler.CompileFunction<TIn, TOut>(node);
-            var actualResult = compiledExpression(Input);
-            Assert.AreEqual(expectedResult, actualResult);
+            var compiledMethodInfo = EmitCompiler.CompileFunction(node);
+
+            object? actualResult = compiledMethodInfo.Invoke(null, Paramaters);
+            Assert.AreEqual(ExpectedResult, actualResult);
         }
 
         public override string ToString()
         {
-            return $"\"{Infix}\"";
+            return $"\"{Method}\"";
         }
     }
 }

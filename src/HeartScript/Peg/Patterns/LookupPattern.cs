@@ -19,25 +19,7 @@ namespace HeartScript.Peg.Patterns
         public IParseNode? Match(PatternParser parser, ParserContext ctx)
         {
             var result = parser.Patterns[_key].TryMatch(parser, ctx);
-
-            if (result != null)
-                return new LookupNode(_key, result);
-
-            return null;
-        }
-    }
-
-    public class LookupNode : IParseNode
-    {
-        public int TextOffset { get; }
-        public string Key { get; }
-        public IParseNode Node { get; }
-
-        public LookupNode(string key, IParseNode node)
-        {
-            TextOffset = node.TextOffset;
-            Key = key;
-            Node = node;
+            return result;
         }
     }
 }

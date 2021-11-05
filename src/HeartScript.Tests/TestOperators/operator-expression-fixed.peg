@@ -1,0 +1,19 @@
+expr ->
+    [
+        #FixedExpressions Delimiter Terminator
+        '{' none none '{' expr ',' expr ',' expr '}'
+
+        #FixedExpressions NoDelimiter Terminator
+        '[' none none '[' expr expr expr ']'
+
+        #FixedExpressions Delimiter NoTerminator
+        '?' none none '?' expr ':' expr ':' expr
+
+        #FixedExpressions NoDelimiter NoTerminator
+        '|' none none '|' expr expr expr
+
+        #FixedExpressions SameDelimiter SameTerminator
+        '&' none none '&' expr '*' expr '*' expr '*'
+
+        'identifier' none none `[_a-zA-Z]\w*`
+    ]

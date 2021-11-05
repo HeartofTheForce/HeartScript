@@ -1,15 +1,10 @@
-using System.Collections.Generic;
-using HeartScript.Expressions;
+using HeartScript.Parsing;
+using HeartScript.Peg;
 
 namespace HeartScript.Tests
 {
     public static class Helper
     {
-        public static readonly IEnumerable<OperatorInfo> TestOperators;
-
-        static Helper()
-        {
-            TestOperators = OperatorInfoBuilder.Parse("./test.ops");
-        }
+        public static readonly PatternParser Parser = PegHelper.BuildPatternParser("./test.peg");
     }
 }

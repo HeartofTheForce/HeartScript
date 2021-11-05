@@ -66,5 +66,4 @@ namespace HeartScript.Peg.Patterns
             Children = children;
         }
     }
-
 }
