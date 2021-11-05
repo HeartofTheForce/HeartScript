@@ -7,17 +7,6 @@ namespace HeartScript.Ast
 {
     public class AstScope
     {
-        private class Member
-        {
-            public AstNode Node { get; }
-            public bool IsPrivate { get; }
-
-            public Member(AstNode node, bool isPrivate)
-            {
-                Node = node;
-                IsPrivate = isPrivate;
-            }
-        }
         private readonly AstScope? _parent;
         private readonly HashSet<Type> _typeWhitelist;
         private readonly Dictionary<string, Member> _members;
@@ -84,6 +73,18 @@ namespace HeartScript.Ast
             }
 
             throw new Exception($"{type} is not allowed");
+        }
+
+        private class Member
+        {
+            public AstNode Node { get; }
+            public bool IsPrivate { get; }
+
+            public Member(AstNode node, bool isPrivate)
+            {
+                Node = node;
+                IsPrivate = isPrivate;
+            }
         }
     }
 }
