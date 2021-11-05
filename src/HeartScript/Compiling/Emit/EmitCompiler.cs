@@ -13,23 +13,7 @@ namespace HeartScript.Compiling
         public static T CompileFunction<T>(IParseNode node)
             where T : Delegate
         {
-            var scope = new AstScope();
-            scope.AllowType(typeof(void));
-            scope.AllowType(typeof(int));
-            scope.AllowType(typeof(double));
-            scope.AllowType(typeof(bool));
-            scope.AllowType(typeof(Math));
-
-            var ast = AstBuilder.Build(scope, node);
-
-            var methodInfo = Compile(
-                "AssemblyName",
-                "ModuleName",
-                "TypeName",
-                "main",
-                ast,
-                scope);
-
+            var methodInfo = CompileFunction(node);
             return (T)methodInfo.CreateDelegate(typeof(T));
         }
 
@@ -78,14 +62,14 @@ namespace HeartScript.Compiling
             scope.AssertAllowed(node.Type);
             switch (node)
             {
-                case MethodNode methodNode: MethodCompiler.EmitMethod(typeBuilder, scope, methodNode); break;
+                case MethodInfoNode methodInfoNode: MethodCompiler.EmitMethod(typeBuilder, scope, methodInfoNode); break;
                 default: EmitWrap(typeBuilder, scope, node); break;
             }
         }
 
         private static void EmitWrap(TypeBuilder typeBuilder, AstScope scope, AstNode node)
         {
-            var methodNode = new MethodNode("main", new Type[] { }, node);
+            var methodNode = new MethodInfoNode("main", new Type[] { }, node);
             Emit(typeBuilder, scope, methodNode);
         }
     }

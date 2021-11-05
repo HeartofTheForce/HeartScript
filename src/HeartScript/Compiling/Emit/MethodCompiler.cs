@@ -8,7 +8,7 @@ namespace HeartScript.Compiling.Emit
 {
     public static class MethodCompiler
     {
-        public static void EmitMethod(TypeBuilder typeBuilder, AstScope scope, MethodNode node)
+        public static void EmitMethod(TypeBuilder typeBuilder, AstScope scope, MethodInfoNode node)
         {
             var methodBuilder = typeBuilder.DefineMethod(node.Name, MethodAttributes.Public | MethodAttributes.Static, node.ReturnType, node.ParameterTypes);
             var ilGenerator = methodBuilder.GetILGenerator();

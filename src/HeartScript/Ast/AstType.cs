@@ -24,6 +24,6 @@ namespace HeartScript.Ast
         Conditional,
         Convert,
         Parameter,
-        Method,
+        MethodDeclaration,
     }
 }

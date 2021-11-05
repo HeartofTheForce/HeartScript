@@ -67,7 +67,7 @@ namespace HeartScript.Ast
             var expressionNode = methodSequence.Children[6];
             var body = AstBuilder.ConvertIfRequired(AstBuilder.Build(methodScope, expressionNode), methodType);
 
-            return new MethodNode(methodName, parameters, body);
+            return new MethodInfoNode(methodName, parameters, body);
         }
 
         static Type GetType(IParseNode typeNode)
