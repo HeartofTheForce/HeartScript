@@ -35,7 +35,7 @@ namespace HeartScript.Compiling.Emit
         {
             switch (node)
             {
-                case BlockNode blockNode: EmitBlock(ilGenerator, scope, blockNode); break; ;
+                case BlockNode blockNode: EmitBlock(ilGenerator, scope, blockNode); break;
                 case ReturnNode returnNode: EmitReturn(ilGenerator, scope, returnNode); break;
                 default: throw new NotImplementedException();
             }
