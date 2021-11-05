@@ -20,12 +20,6 @@ namespace HeartScript.Compiling
         public static MethodInfo CompileFunction(IParseNode node)
         {
             var scope = new AstScope();
-            scope.AllowType(typeof(void));
-            scope.AllowType(typeof(int));
-            scope.AllowType(typeof(double));
-            scope.AllowType(typeof(bool));
-            scope.AllowType(typeof(Math));
-
             var ast = AstBuilder.Build(scope, node);
 
             return Compile(
@@ -59,7 +53,6 @@ namespace HeartScript.Compiling
 
         private static void Emit(TypeBuilder typeBuilder, AstScope scope, AstNode node)
         {
-            scope.AssertAllowed(node.Type);
             switch (node)
             {
                 case MethodInfoNode methodInfoNode: MethodCompiler.EmitMethod(typeBuilder, methodInfoNode); break;

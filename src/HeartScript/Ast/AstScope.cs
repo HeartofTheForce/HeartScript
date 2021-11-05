@@ -33,27 +33,6 @@ namespace HeartScript.Ast
         {
         }
 
-        public static AstScope FromMembers(AstNode node)
-        {
-            var scope = new AstScope();
-
-            var propertyInfos = node.Type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-            foreach (var propertyInfo in propertyInfos)
-            {
-                scope.SetMember(propertyInfo.Name, AstNode.Property(node, propertyInfo), true);
-            }
-
-            var fieldInfos = node.Type.GetFields(BindingFlags.Public | BindingFlags.Instance);
-            foreach (var fieldInfo in fieldInfos)
-            {
-                scope.SetMember(fieldInfo.Name, AstNode.Field(node, fieldInfo), true);
-            }
-
-            scope.AllowType(node.Type);
-
-            return scope;
-        }
-
         public bool TryGetMember(string name, out AstNode expression)
         {
             Member? member = null;

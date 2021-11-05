@@ -17,10 +17,6 @@ namespace HeartScript.Compiling.Emit
                 if (source.Return)
                     Return = true;
             }
-
-            public void AssertAllowed(Type type)
-            {
-            }
         }
 
         public static void EmitMethod(TypeBuilder typeBuilder, MethodInfoNode node)
@@ -37,7 +33,6 @@ namespace HeartScript.Compiling.Emit
 
         private static void Emit(ILGenerator ilGenerator, PathScope scope, AstNode node)
         {
-            scope.AssertAllowed(node.Type);
             switch (node)
             {
                 case ConstantNode constantNode: EmitConstant(ilGenerator, constantNode); break;
@@ -165,8 +160,6 @@ namespace HeartScript.Compiling.Emit
         {
             if (node.Instance != null)
                 Emit(ilGenerator, scope, node.Instance);
-            else
-                scope.AssertAllowed(node.MethodInfo.ReflectedType);
 
             foreach (var parameter in node.Parameters)
             {
@@ -186,8 +179,6 @@ namespace HeartScript.Compiling.Emit
         {
             if (node.Instance != null)
                 Emit(ilGenerator, scope, node.Instance);
-            else
-                scope.AssertAllowed(node.Member.ReflectedType);
 
             switch (node.Member)
             {
