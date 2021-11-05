@@ -64,7 +64,7 @@ namespace HeartScript.Ast
                 if (current._members.TryGetValue(name, out member))
                     break;
 
-                current = _parent;
+                current = current._parent;
             }
 
             if (member == null)
