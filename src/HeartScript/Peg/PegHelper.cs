@@ -148,14 +148,14 @@ namespace HeartScript.Peg
         static IPattern BuildChoice(IParseNode node)
         {
             var sequenceNode = (SequenceNode)node;
-            var leftNode = BuildSequence(sequenceNode.Children[0]);
-            var minOrMoreNode = (QuantifierNode)sequenceNode.Children[1];
+            var leftPattern = BuildSequence(sequenceNode.Children[0]);
 
+            var minOrMoreNode = (QuantifierNode)sequenceNode.Children[1];
             if (minOrMoreNode.Children.Count == 0)
-                return leftNode;
+                return leftPattern;
 
             var output = ChoicePattern.Create()
-               .Or(leftNode);
+               .Or(leftPattern);
 
             foreach (var child in minOrMoreNode.Children)
             {
@@ -198,18 +198,18 @@ namespace HeartScript.Peg
         static IPattern BuildQuantifier(IParseNode node)
         {
             var sequenceNode = (SequenceNode)node;
-            var term = BuildTerm(sequenceNode.Children[0]);
+            var pattern = BuildTerm(sequenceNode.Children[0]);
             var optional = (QuantifierNode)sequenceNode.Children[1];
 
             if (optional.Children.Count == 0)
-                return term;
+                return pattern;
 
             var choice = (ChoiceNode)optional.Children[0];
             switch (choice.ChoiceIndex)
             {
-                case 0: return QuantifierPattern.Optional(term);
-                case 1: return QuantifierPattern.MinOrMore(0, term);
-                case 2: return QuantifierPattern.MinOrMore(1, term);
+                case 0: return QuantifierPattern.Optional(pattern);
+                case 1: return QuantifierPattern.MinOrMore(0, pattern);
+                case 2: return QuantifierPattern.MinOrMore(1, pattern);
                 default: throw new NotImplementedException();
             };
         }
