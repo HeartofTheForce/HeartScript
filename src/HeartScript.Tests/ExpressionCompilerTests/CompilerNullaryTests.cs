@@ -11,34 +11,29 @@ namespace HeartScript.Tests.CompilerTests
             new ExpressionCompilerTestCase<int>()
             {
                 Infix = "(1)",
-                ExpectedString = "1",
                 ExpectedExpression = () => 1,
             },
             //real
             new ExpressionCompilerTestCase<double>()
             {
                 Infix = "1.5",
-                ExpectedString = "1.5",
                 ExpectedExpression = () => 1.5,
             },
             //integral
             new ExpressionCompilerTestCase<int>()
             {
                 Infix = "1",
-                ExpectedString = "1",
                 ExpectedExpression = () => 1,
             },
             //boolean
             new ExpressionCompilerTestCase<bool>()
             {
                 Infix = "true",
-                ExpectedString = "true",
                 ExpectedExpression = () => true,
             },
             new ExpressionCompilerTestCase<bool>()
             {
                 Infix = "false",
-                ExpectedString = "false",
                 ExpectedExpression = () => false,
             },
             //identifier
@@ -101,7 +96,7 @@ namespace HeartScript.Tests.CompilerTests
         [TestCaseSource(nameof(s_testCases))]
         public void TestCases(IExpressionCompilerTestCase testCase)
         {
-            testCase.Execute(Helper.Parser);
+            testCase.Execute();
         }
     }
 }

@@ -7,12 +7,7 @@ namespace HeartScript.Tests.ExpressionPatternTests
     [TestFixture]
     public class PrecedenceTests
     {
-        private static readonly PatternParser s_parser;
-
-        static PrecedenceTests()
-        {
-            s_parser = PegHelper.BuildPatternParser("./TestOperators/precedence.peg");
-        }
+        private static readonly PatternParser s_parser = PegHelper.BuildPatternParser("./TestOperators/precedence.peg");
 
         // 8 valid non-nullary operator arrangements, 3^2 - 1(PostPre is invalid)
         // 3 cases per arrangement

@@ -1,6 +1,6 @@
 using System;
+using System.Collections.Generic;
 using HeartScript.Compiling;
-using HeartScript.Expressions;
 using HeartScript.Parsing;
 using NUnit.Framework;
 #pragma warning disable CS8618
@@ -10,24 +10,36 @@ namespace HeartScript.Tests.CompilerTests
 {
     public interface IExpressionCompilerTestCase
     {
-        void Execute(PatternParser parser);
+        void Execute();
     }
 
     public class ExpressionCompilerTestCase<T> : IExpressionCompilerTestCase
     {
+        private static Dictionary<Type, string> s_typeLookup = new()
+        {
+            [typeof(int)] = "int",
+            [typeof(double)] = "double",
+            [typeof(bool)] = "bool",
+        };
+
         public string Infix { get; set; }
-        public string ExpectedString { get; set; }
         public Func<T> ExpectedExpression { get; set; }
 
-        public void Execute(PatternParser parser)
+        public void Execute()
         {
-            var ctx = new ParserContext(Infix);
+            string source = $"{s_typeLookup[typeof(T)]} main() => {Infix};";
+            var ctx = new ParserContext(source);
 
-            var node = ExpressionPattern.Parse(parser, ctx);
-            Assert.AreEqual(ExpectedString, node.ToString());
+            var pattern = Helper.Parser.Patterns["root"];
+            var node = pattern.TryMatch(Helper.Parser, ctx);
+
+            ctx.AssertComplete();
+            if (node == null)
+                throw new ArgumentException(nameof(ctx.Exception));
+
+            var compiledExpression = EmitCompiler.CompileFunction<Func<T>>(node);
 
             var expectedResult = ExpectedExpression();
-            var compiledExpression = EmitCompiler.CompileFunction<Func<T>>(node);
             var actualResult = compiledExpression();
             Assert.AreEqual(expectedResult, actualResult);
         }
@@ -44,18 +56,19 @@ namespace HeartScript.Tests.CompilerTests
         public object[] Paramaters { get; set; }
         public object? ExpectedResult { get; set; }
 
-        public void Execute(PatternParser parser)
+        public void Execute()
         {
             var ctx = new ParserContext(Method);
-            var node = parser.Patterns["root"].TryMatch(parser, ctx);
+            var pattern = Helper.Parser.Patterns["root"];
+            var node = pattern.TryMatch(Helper.Parser, ctx);
 
             ctx.AssertComplete();
             if (node == null)
                 throw new ArgumentException(nameof(ctx.Exception));
 
             var compiledMethodInfo = EmitCompiler.CompileFunction(node);
-            object? actualResult = compiledMethodInfo.Invoke(null, Paramaters);
 
+            object? actualResult = compiledMethodInfo.Invoke(null, Paramaters);
             Assert.AreEqual(ExpectedResult, actualResult);
         }
 

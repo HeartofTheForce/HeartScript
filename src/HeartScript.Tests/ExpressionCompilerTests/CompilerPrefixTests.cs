@@ -11,33 +11,28 @@ namespace HeartScript.Tests.CompilerTests
             new ExpressionCompilerTestCase<int>()
             {
                 Infix = "+1",
-                ExpectedString = "(u+ 1)",
                 ExpectedExpression = () => +1,
             },
             new ExpressionCompilerTestCase<double>()
             {
                 Infix = "+1.5",
-                ExpectedString = "(u+ 1.5)",
                 ExpectedExpression = () => +1.5,
             },
             //u-
             new ExpressionCompilerTestCase<int>()
             {
                 Infix = "-1",
-                ExpectedString = "(u- 1)",
                 ExpectedExpression = () => -1,
             },
             new ExpressionCompilerTestCase<double>()
             {
                 Infix = "-1.5",
-                ExpectedString = "(u- 1.5)",
                 ExpectedExpression = () => -1.5,
             },
             //~
             new ExpressionCompilerTestCase<int>()
             {
                 Infix = "~1",
-                ExpectedString = "(~ 1)",
                 ExpectedExpression = () => ~1,
             },
         };
@@ -45,7 +40,7 @@ namespace HeartScript.Tests.CompilerTests
         [TestCaseSource(nameof(s_testCases))]
         public void TestCases(IExpressionCompilerTestCase testCase)
         {
-            testCase.Execute(Helper.Parser);
+            testCase.Execute();
         }
     }
 }

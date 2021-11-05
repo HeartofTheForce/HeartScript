@@ -7,12 +7,7 @@ namespace HeartScript.Tests.ExpressionPatternTests
     [TestFixture]
     public class OperatorExpressionVariableTests
     {
-        private static readonly PatternParser s_parser;
-
-        static OperatorExpressionVariableTests()
-        {
-            s_parser = PegHelper.BuildPatternParser("./TestOperators/operator-expression-variable.peg");
-        }
+        private static readonly PatternParser s_parser = PegHelper.BuildPatternParser("./TestOperators/operator-expression-variable.peg");
 
         static readonly IExpressionTestCase[] s_testCases = new IExpressionTestCase[]
         {

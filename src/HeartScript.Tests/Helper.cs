@@ -5,11 +5,6 @@ namespace HeartScript.Tests
 {
     public static class Helper
     {
-        public static readonly PatternParser Parser;
-
-        static Helper()
-        {
-            Parser = PegHelper.BuildPatternParser("./test.peg");
-        }
+        public static readonly PatternParser Parser = PegHelper.BuildPatternParser("./test.peg");
     }
 }

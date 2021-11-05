@@ -7,12 +7,7 @@ namespace HeartScript.Tests.ExpressionPatternTests
     [TestFixture]
     public class OperatorExpressionZeroTests
     {
-        private static readonly PatternParser s_parser;
-
-        static OperatorExpressionZeroTests()
-        {
-            s_parser = PegHelper.BuildPatternParser("./TestOperators/operator-expression-zero.peg");
-        }
+        private static readonly PatternParser s_parser= PegHelper.BuildPatternParser("./TestOperators/operator-expression-zero.peg");
 
         static readonly IExpressionTestCase[] s_testCases = new IExpressionTestCase[]
         {
