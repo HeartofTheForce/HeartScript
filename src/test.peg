@@ -10,6 +10,7 @@ parameters -> (type name (',' type name)*)?
 
 expr ->
     [
+        #WantOperand (Nullary, Prefix)
         '()'         none none '(' expr ')'
         'u+'         none 1    '+'
         'u-'         none 1    '-'
@@ -19,6 +20,7 @@ expr ->
         'boolean'    none none 'true' / 'false'
         'identifier' none none `[_a-zA-Z]\w*`
 
+        #HaveOperand (Postfix, Infix)
         '$'          0    none '(' (expr (',' expr)*)? ')'
         '*'          3    3    '*'
         '/'          3    3    '/'
