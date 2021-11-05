@@ -35,23 +35,23 @@ namespace HeartScript.Compiling.Emit
         {
             switch (node)
             {
-                case BlockNode blockNode: EmitBlock(ilGenerator, scope, blockNode); break;;
+                case BlockNode blockNode: EmitBlock(ilGenerator, scope, blockNode); break; ;
                 case ReturnNode returnNode: EmitReturn(ilGenerator, scope, returnNode); break;
                 default: throw new NotImplementedException();
             }
         }
 
-        private static void EmitExpression(ILGenerator ilGenerator, PathScope scope, AstNode node)
+        private static void EmitExpression(ILGenerator ilGenerator, AstNode node)
         {
             switch (node)
             {
                 case ConstantNode constantNode: EmitConstant(ilGenerator, constantNode); break;
-                case BinaryNode binaryNode: EmitBinary(ilGenerator, scope, binaryNode); break;
-                case UnaryNode unaryNode: EmitUnary(ilGenerator, scope, unaryNode); break;
-                case ConditionalNode conditionalNode: EmitConditional(ilGenerator, scope, conditionalNode); break;
-                case CallNode callNode: EmitCall(ilGenerator, scope, callNode); break;
+                case BinaryNode binaryNode: EmitBinary(ilGenerator, binaryNode); break;
+                case UnaryNode unaryNode: EmitUnary(ilGenerator, unaryNode); break;
+                case ConditionalNode conditionalNode: EmitConditional(ilGenerator, conditionalNode); break;
+                case CallNode callNode: EmitCall(ilGenerator, callNode); break;
                 case ParameterNode parameterNode: EmitParameter(ilGenerator, parameterNode); break;
-                case MemberAccessNode memberAccessNode: EmitMemberAccess(ilGenerator, scope, memberAccessNode); break;
+                case MemberAccessNode memberAccessNode: EmitMemberAccess(ilGenerator, memberAccessNode); break;
                 default: throw new NotImplementedException();
             }
         }
@@ -82,10 +82,10 @@ namespace HeartScript.Compiling.Emit
             throw new NotImplementedException();
         }
 
-        private static void EmitBinary(ILGenerator ilGenerator, PathScope scope, BinaryNode node)
+        private static void EmitBinary(ILGenerator ilGenerator, BinaryNode node)
         {
-            EmitExpression(ilGenerator, scope, node.Left);
-            EmitExpression(ilGenerator, scope, node.Right);
+            EmitExpression(ilGenerator, node.Left);
+            EmitExpression(ilGenerator, node.Right);
 
             switch (node.NodeType)
             {
@@ -124,9 +124,9 @@ namespace HeartScript.Compiling.Emit
             }
         }
 
-        private static void EmitUnary(ILGenerator ilGenerator, PathScope scope, UnaryNode node)
+        private static void EmitUnary(ILGenerator ilGenerator, UnaryNode node)
         {
-            EmitExpression(ilGenerator, scope, node.Operand);
+            EmitExpression(ilGenerator, node.Operand);
 
             switch (node.NodeType)
             {
@@ -145,33 +145,33 @@ namespace HeartScript.Compiling.Emit
             }
         }
 
-        private static void EmitConditional(ILGenerator ilGenerator, PathScope scope, ConditionalNode node)
+        private static void EmitConditional(ILGenerator ilGenerator, ConditionalNode node)
         {
             var ifFalseLabel = ilGenerator.DefineLabel();
             var endLabel = ilGenerator.DefineLabel();
 
-            EmitExpression(ilGenerator, scope, node.Test);
+            EmitExpression(ilGenerator, node.Test);
             ilGenerator.Emit(OpCodes.Brfalse, ifFalseLabel);
 
             //true
-            EmitExpression(ilGenerator, scope, node.IfTrue);
+            EmitExpression(ilGenerator, node.IfTrue);
             ilGenerator.Emit(OpCodes.Br, endLabel);
 
             //false
             ilGenerator.MarkLabel(ifFalseLabel);
-            EmitExpression(ilGenerator, scope, node.IfFalse);
+            EmitExpression(ilGenerator, node.IfFalse);
 
             ilGenerator.MarkLabel(endLabel);
         }
 
-        private static void EmitCall(ILGenerator ilGenerator, PathScope scope, CallNode node)
+        private static void EmitCall(ILGenerator ilGenerator, CallNode node)
         {
             if (node.Instance != null)
-                EmitExpression(ilGenerator, scope, node.Instance);
+                EmitExpression(ilGenerator, node.Instance);
 
             foreach (var parameter in node.Parameters)
             {
-                EmitExpression(ilGenerator, scope, parameter);
+                EmitExpression(ilGenerator, parameter);
             }
 
             ilGenerator.EmitCall(OpCodes.Call, node.MethodInfo, null);
@@ -183,10 +183,10 @@ namespace HeartScript.Compiling.Emit
             ilGenerator.Emit(OpCodes.Ldarg, node.ParameterIndex);
         }
 
-        private static void EmitMemberAccess(ILGenerator ilGenerator, PathScope scope, MemberAccessNode node)
+        private static void EmitMemberAccess(ILGenerator ilGenerator, MemberAccessNode node)
         {
             if (node.Instance != null)
-                EmitExpression(ilGenerator, scope, node.Instance);
+                EmitExpression(ilGenerator, node.Instance);
 
             switch (node.Member)
             {
@@ -207,7 +207,7 @@ namespace HeartScript.Compiling.Emit
         private static void EmitReturn(ILGenerator ilGenerator, PathScope scope, ReturnNode node)
         {
             if (node.Node != null)
-                EmitExpression(ilGenerator, scope, node.Node);
+                EmitExpression(ilGenerator, node.Node);
 
             ilGenerator.Emit(OpCodes.Ret);
             scope.Return = true;
