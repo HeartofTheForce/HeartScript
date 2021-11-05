@@ -29,10 +29,13 @@ namespace HeartScript.Ast
             var current = this;
             while (current != null)
             {
-                if (current._members.TryGetValue(name, out var tempMember))
+                if (current._members.TryGetValue(name, out var candidate))
                 {
-                    if (tempMember.IsPublic || current == this)
-                        member = tempMember;
+                    if (candidate.IsPublic || current == this)
+                    {
+                        member = candidate;
+                        break;
+                    }
                 }
 
                 current = current._parent;
