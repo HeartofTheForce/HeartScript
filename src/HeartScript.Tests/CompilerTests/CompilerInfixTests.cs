@@ -168,7 +168,6 @@ namespace HeartScript.Tests.CompilerTests
             new ExpressionCompilerTestCase<bool>()
             {
                 Infix = "2.5 > 2",
-
                 ExpectedExpression = () => 2.5 > 2,
             },
             new ExpressionCompilerTestCase<bool>()
