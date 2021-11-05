@@ -15,7 +15,7 @@ namespace HeartScript.Tests.CompilerTests
 
     public class ExpressionCompilerTestCase<T> : IExpressionCompilerTestCase
     {
-        private static Dictionary<Type, string> s_typeLookup = new()
+        private static readonly Dictionary<Type, string> s_typeLookup = new()
         {
             [typeof(int)] = "int",
             [typeof(double)] = "double",
