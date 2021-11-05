@@ -51,7 +51,7 @@ namespace HeartScript.Compiling
             return loadedMethodInfo;
         }
 
-        private static void Emit(TypeBuilder typeBuilder, AstScope scope, AstNode node)
+        private static void Emit(System.Reflection.Emit.TypeBuilder typeBuilder, AstScope scope, AstNode node)
         {
             switch (node)
             {
@@ -60,7 +60,7 @@ namespace HeartScript.Compiling
             }
         }
 
-        private static void EmitWrap(TypeBuilder typeBuilder, AstScope scope, AstNode node)
+        private static void EmitWrap(System.Reflection.Emit.TypeBuilder typeBuilder, AstScope scope, AstNode node)
         {
             var blockNode = AstNode.Block(new AstNode[] { AstNode.Return(node) }, node.Type);
             var methodNode = new MethodInfoNode("main", new Type[] { }, blockNode);

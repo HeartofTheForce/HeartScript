@@ -14,7 +14,7 @@ namespace HeartScript.Ast
             switch (node)
             {
                 case ExpressionNode expressionNode: return ExpressionBuilder.Build(scope, expressionNode);
-                case LabelNode labelNode: return LabelBuilder.Build(scope, labelNode);
+                case LabelNode labelNode: return TypeBuilder.Build(scope, labelNode);
                 default: throw new NotImplementedException();
             }
         }

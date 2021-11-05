@@ -7,7 +7,7 @@ using HeartScript.Peg.Patterns;
 
 namespace HeartScript.Ast
 {
-    public static class LabelBuilder
+    public static class TypeBuilder
     {
         private delegate AstNode AstNodeBuilder(AstScope scope, LabelNode node);
 

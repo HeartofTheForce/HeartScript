@@ -19,7 +19,7 @@ namespace HeartScript.Compiling.Emit
             }
         }
 
-        public static void EmitMethod(TypeBuilder typeBuilder, MethodInfoNode node)
+        public static void EmitMethod(System.Reflection.Emit.TypeBuilder typeBuilder, MethodInfoNode node)
         {
             var methodBuilder = typeBuilder.DefineMethod(node.Name, MethodAttributes.Public | MethodAttributes.Static, node.ReturnType, node.ParameterTypes);
             var ilGenerator = methodBuilder.GetILGenerator();
