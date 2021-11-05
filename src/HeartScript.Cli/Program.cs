@@ -27,10 +27,16 @@ namespace HeartScript.Cli
                 Console.WriteLine("Output");
                 Console.WriteLine(StringCompiler.Compile(node));
 
-                var compiledFunction = EmitCompiler.CompileFunction<Func<double, double, double, double>>(node);
+                object[]? parameters = new object[]
+                {
+                    1.1,
+                    2.2,
+                    3.3,
+                };
+                var compiledMethodInfo = EmitCompiler.CompileFunction(node);
 
                 Console.WriteLine("Result");
-                Console.WriteLine(compiledFunction(1.1, 2.2, 3.3));
+                Console.WriteLine(compiledMethodInfo.Invoke(null, parameters));
             }
             catch (Exception ex)
             {
