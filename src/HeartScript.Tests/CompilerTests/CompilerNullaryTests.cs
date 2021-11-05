@@ -44,7 +44,7 @@ namespace HeartScript.Tests.CompilerTests
             //identifier
             new ExpressionCompilerTestCase()
             {
-                Method = "bool main(bool BoolA) => BoolA",
+                Method = "bool main(bool BoolA) => BoolA;",
                 Paramaters = new object[]
                 {
                     true,
@@ -53,7 +53,7 @@ namespace HeartScript.Tests.CompilerTests
             },
             new ExpressionCompilerTestCase()
             {
-                Method = "int main(int IntA) => IntA",
+                Method = "int main(int IntA) => IntA;",
                  Paramaters = new object[]
                 {
                     1,
@@ -62,7 +62,7 @@ namespace HeartScript.Tests.CompilerTests
             },
             new ExpressionCompilerTestCase()
             {
-                Method = "double main(double DoubleA) => DoubleA",
+                Method = "double main(double DoubleA) => DoubleA;",
                 Paramaters = new object[]
                 {
                     1.5,
