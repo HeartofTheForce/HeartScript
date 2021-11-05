@@ -83,7 +83,8 @@ namespace HeartScript.Ast
                         var quantifierNode = (QuantifierNode)sequenceNode.Children[1];
                         foreach (var child in quantifierNode.Children)
                         {
-                            var returnSequence = (SequenceNode)child;
+                            var statementSequence = (SequenceNode)child;
+                            var returnSequence = (SequenceNode)statementSequence.Children[0];
                             var expressionNode = returnSequence.Children[1];
                             var expression = AstBuilder.ConvertIfRequired(AstBuilder.Build(scope, expressionNode), returnType);
                             statements.Add(AstNode.Return(expression));

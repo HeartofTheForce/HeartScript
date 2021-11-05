@@ -69,6 +69,33 @@ namespace HeartScript.Tests.CompilerTests
                 },
                 ExpectedResult = 1.5,
             },
+            new ExpressionCompilerTestCase()
+            {
+                Method = "bool main(bool BoolA) { return BoolA; }",
+                Paramaters = new object[]
+                {
+                    true,
+                },
+                ExpectedResult = true,
+            },
+            new ExpressionCompilerTestCase()
+            {
+                Method = "int main(int IntA) { return IntA; }",
+                 Paramaters = new object[]
+                {
+                    1,
+                },
+                ExpectedResult = 1,
+            },
+            new ExpressionCompilerTestCase()
+            {
+                Method = "double main(double DoubleA) { return DoubleA; }",
+                Paramaters = new object[]
+                {
+                    1.5,
+                },
+                ExpectedResult = 1.5,
+            },
         };
 
         [TestCaseSource(nameof(s_testCases))]
