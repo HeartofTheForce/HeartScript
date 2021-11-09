@@ -8,15 +8,9 @@ namespace HeartScript.Compiling.Emit
 {
     public static class MethodCompiler
     {
-        private class PathScope
+        private class BasicBlock
         {
             public bool Return { get; set; }
-
-            public void Merge(PathScope source)
-            {
-                if (source.Return)
-                    Return = true;
-            }
         }
 
         public static void EmitMethod(System.Reflection.Emit.TypeBuilder typeBuilder, MethodInfoNode node)
@@ -24,38 +18,38 @@ namespace HeartScript.Compiling.Emit
             var methodBuilder = typeBuilder.DefineMethod(node.Name, MethodAttributes.Public | MethodAttributes.Static, node.ReturnType, node.ParameterTypes);
             var ilGenerator = methodBuilder.GetILGenerator();
 
-            var scope = new PathScope();
-            EmitStatement(ilGenerator, scope, node.Body);
+            var basicBlock = new BasicBlock();
+            EmitStatement(ilGenerator, basicBlock, node.Body);
 
-            if (!scope.Return)
+            if (!basicBlock.Return)
                 throw new Exception("Not all code paths return a value");
         }
 
-        private static void EmitStatement(ILGenerator ilGenerator, PathScope scope, AstNode node)
+        private static void EmitStatement(ILGenerator ilGenerator, BasicBlock basicBlock, AstNode node)
         {
             switch (node)
             {
-                case BlockNode blockNode: EmitBlock(ilGenerator, scope, blockNode); break;
-                case ReturnNode returnNode: EmitReturn(ilGenerator, scope, returnNode); break;
+                case BlockNode blockNode: EmitBlock(ilGenerator, basicBlock, blockNode); break;
+                case ReturnNode returnNode: EmitReturn(ilGenerator, basicBlock, returnNode); break;
                 default: throw new NotImplementedException();
             }
         }
 
-        private static void EmitBlock(ILGenerator ilGenerator, PathScope scope, BlockNode node)
+        private static void EmitBlock(ILGenerator ilGenerator, BasicBlock basicBlock, BlockNode node)
         {
             foreach (var statement in node.Nodes)
             {
-                EmitStatement(ilGenerator, scope, statement);
+                EmitStatement(ilGenerator, basicBlock, statement);
             }
         }
 
-        private static void EmitReturn(ILGenerator ilGenerator, PathScope scope, ReturnNode node)
+        private static void EmitReturn(ILGenerator ilGenerator, BasicBlock basicBlock, ReturnNode node)
         {
             if (node.Node != null)
                 EmitExpression(ilGenerator, node.Node);
 
             ilGenerator.Emit(OpCodes.Ret);
-            scope.Return = true;
+            basicBlock.Return = true;
         }
 
         private static void EmitExpression(ILGenerator ilGenerator, AstNode node)
