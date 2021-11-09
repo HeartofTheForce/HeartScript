@@ -27,8 +27,7 @@ namespace HeartScript.Compiling
                 "ModuleName",
                 "TypeName",
                 "main",
-                ast,
-                scope);
+                ast);
         }
 
         private static MethodInfo Compile(
@@ -36,14 +35,13 @@ namespace HeartScript.Compiling
             string moduleName,
             string typeName,
             string methodName,
-            AstNode ast,
-            AstScope scope)
+            AstNode ast)
         {
             var assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName(assemblyName), AssemblyBuilderAccess.Run);
             var moduleBuilder = assemblyBuilder.DefineDynamicModule(moduleName);
             var typeBuilder = moduleBuilder.DefineType(typeName, TypeAttributes.Public);
 
-            Emit(typeBuilder, scope, ast);
+            Emit(typeBuilder, ast);
 
             var loadedType = typeBuilder.CreateType();
             var loadedMethodInfo = loadedType.GetMethod(methodName);
@@ -51,20 +49,20 @@ namespace HeartScript.Compiling
             return loadedMethodInfo;
         }
 
-        private static void Emit(System.Reflection.Emit.TypeBuilder typeBuilder, AstScope scope, AstNode node)
+        private static void Emit(System.Reflection.Emit.TypeBuilder typeBuilder, AstNode node)
         {
             switch (node)
             {
                 case MethodInfoNode methodInfoNode: MethodCompiler.EmitMethod(typeBuilder, methodInfoNode); break;
-                default: EmitWrap(typeBuilder, scope, node); break;
+                default: EmitWrap(typeBuilder, node); break;
             }
         }
 
-        private static void EmitWrap(System.Reflection.Emit.TypeBuilder typeBuilder, AstScope scope, AstNode node)
+        private static void EmitWrap(System.Reflection.Emit.TypeBuilder typeBuilder, AstNode node)
         {
             var blockNode = AstNode.Block(new AstNode[] { AstNode.Return(node) }, node.Type);
             var methodNode = new MethodInfoNode("main", new Type[] { }, blockNode);
-            Emit(typeBuilder, scope, methodNode);
+            Emit(typeBuilder, methodNode);
         }
     }
 }
