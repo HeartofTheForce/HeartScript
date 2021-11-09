@@ -1,12 +1,11 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace HeartScript.Ast.Nodes
 {
     public class BlockNode : AstNode
     {
         public AstNode[] Nodes { get; }
+
         public BlockNode(AstNode[] nodes, Type returnType) : base(returnType, AstType.Default)
         {
             Nodes = nodes;
