@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using HeartScript.Compiling;
+using HeartScript.Compiling.Emit;
 using HeartScript.Parsing;
 using NUnit.Framework;
 #pragma warning disable CS8618

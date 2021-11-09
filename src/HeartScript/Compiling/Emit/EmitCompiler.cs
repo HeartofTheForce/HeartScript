@@ -3,10 +3,9 @@ using System.Reflection;
 using System.Reflection.Emit;
 using HeartScript.Ast;
 using HeartScript.Ast.Nodes;
-using HeartScript.Compiling.Emit;
 using HeartScript.Parsing;
 
-namespace HeartScript.Compiling
+namespace HeartScript.Compiling.Emit
 {
     public static class EmitCompiler
     {

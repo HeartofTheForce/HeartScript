@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using HeartScript.Compiling;
+using HeartScript.Compiling.Emit;
 using HeartScript.Parsing;
 using HeartScript.Peg;
 
