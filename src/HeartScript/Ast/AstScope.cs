@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using HeartScript.Ast.Nodes;
 
 namespace HeartScript.Ast
