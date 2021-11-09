@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using HeartScript.Compiling;
 using HeartScript.Parsing;
 using HeartScript.Peg;
@@ -11,12 +12,12 @@ namespace HeartScript.Cli
         {
             try
             {
-                string infix = string.Join(' ', args);
+                string source = File.ReadAllText(args[0]);
 
                 Console.WriteLine("Input");
-                Console.WriteLine(infix);
+                Console.WriteLine(source);
 
-                var ctx = new ParserContext(infix);
+                var ctx = new ParserContext(source);
                 var parser = PegHelper.BuildPatternParser("./src/test.peg");
                 var node = parser.Patterns["root"].TryMatch(parser, ctx);
 
