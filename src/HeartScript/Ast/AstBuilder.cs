@@ -3,7 +3,6 @@ using HeartScript.Ast.Nodes;
 using HeartScript.Expressions;
 using HeartScript.Parsing;
 using HeartScript.Peg.Patterns;
-#pragma warning disable IDE0066
 
 namespace HeartScript.Ast
 {
