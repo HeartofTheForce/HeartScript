@@ -34,10 +34,13 @@ namespace HeartScript.Peg.Patterns
         {
             int localOffset = ctx.Offset;
 
+            var nonSignificantHelper = new NonSignificantHelper();
             var output = new List<IParseNode>();
             while (_max == null || output.Count < _max)
             {
+                nonSignificantHelper.PreMatch(parser, ctx);
                 var result = _pattern.TryMatch(parser, ctx);
+                nonSignificantHelper.PostMatch(result != null, ctx);
 
                 if (result == null)
                     break;

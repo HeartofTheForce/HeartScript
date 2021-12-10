@@ -1,3 +1,4 @@
+_ -> `\s*`
 expr ->
     [
         #VariableExpressions Delimiter Terminator

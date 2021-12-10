@@ -1,3 +1,5 @@
+using HeartScript.Peg.Patterns;
+
 namespace HeartScript.Parsing
 {
     public interface IPattern
@@ -16,6 +18,14 @@ namespace HeartScript.Parsing
                 ctx.Offset = localOffset;
 
             return result;
+        }
+
+        public static IPattern Trim(this IPattern pattern, IPattern trimPattern)
+        {
+            return SequencePattern.Create()
+                .Discard(trimPattern)
+                .Then(pattern)
+                .Discard(trimPattern);
         }
     }
 }

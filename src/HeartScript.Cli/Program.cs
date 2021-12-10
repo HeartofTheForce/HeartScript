@@ -20,7 +20,8 @@ namespace HeartScript.Cli
 
                 var ctx = new ParserContext(source);
                 var parser = PegHelper.BuildPatternParser("./src/test.peg");
-                var node = parser.Patterns["root"].TryMatch(parser, ctx);
+                var pattern = parser.Patterns["root"].Trim(parser.Patterns["_"]);
+                var node = pattern.TryMatch(parser, ctx);
 
                 ctx.AssertComplete();
                 if (node == null)

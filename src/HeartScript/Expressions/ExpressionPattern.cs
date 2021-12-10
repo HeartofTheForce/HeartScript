@@ -15,7 +15,8 @@ namespace HeartScript.Expressions
 
         public static IParseNode Parse(PatternParser parser, ParserContext ctx)
         {
-            var result = parser.Patterns["expr"].TryMatch(parser, ctx);
+            var pattern = parser.Patterns["expr"].Trim(parser.Patterns["_"]);
+            var result = pattern.TryMatch(parser, ctx);
 
             ctx.AssertComplete();
             if (result == null)
@@ -29,16 +30,16 @@ namespace HeartScript.Expressions
             var nodeBuilders = new Stack<ExpressionNodeBuilder>();
             ExpressionNode? operand = null;
 
+            var nonSignificantHelper = new NonSignificantHelper();
             while (true)
             {
+                nonSignificantHelper.PreMatch(parser, ctx);
                 var right = TryGetNodeBuilder(operand == null, parser, ctx);
+                nonSignificantHelper.PostMatch(right != null, ctx);
                 if (right == null)
                 {
                     if (operand == null)
-                    {
-                        ctx.LogException(new ExpressionTermException(ctx.Offset));
                         return null;
-                    }
 
                     while (nodeBuilders.Count > 0)
                     {
@@ -88,6 +89,9 @@ namespace HeartScript.Expressions
                     return new ExpressionNodeBuilder(op, result);
                 }
             }
+
+            if (wantOperand)
+                ctx.LogException(new ExpressionTermException(ctx.Offset));
 
             return null;
         }
