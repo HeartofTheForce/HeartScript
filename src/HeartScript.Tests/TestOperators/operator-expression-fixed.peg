@@ -1,4 +1,4 @@
-_ -> (`#.*` / `\s+`)*
+_ -> `\s*`
 expr ->
     [
         #FixedExpressions Delimiter Terminator
