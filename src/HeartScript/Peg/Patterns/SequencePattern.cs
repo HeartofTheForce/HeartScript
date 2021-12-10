@@ -47,10 +47,13 @@ namespace HeartScript.Peg.Patterns
 
             int localOffset = ctx.Offset;
 
+            var nonSignificantHelper = new NonSignificantHelper();
             var output = new List<IParseNode>();
             foreach (var step in _steps)
             {
+                nonSignificantHelper.PreMatch(parser, ctx);
                 var result = step.Pattern.TryMatch(parser, ctx);
+                nonSignificantHelper.PostMatch(result != null, ctx);
 
                 if (result == null)
                     return null;

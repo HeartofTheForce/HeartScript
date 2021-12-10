@@ -17,13 +17,6 @@ namespace HeartScript.Peg
                 .Or(LexerPattern.FromRegex("#.*"))
                 .Or(LexerPattern.FromRegex("\\s+")));
 
-        public static IPattern TrimRight(this LexerPattern pattern)
-        {
-            return SequencePattern.Create()
-                .Then(pattern)
-                .Discard(s_nonSignificant);
-        }
-
         public static PatternParser BuildPatternParser(string path)
         {
             string input = File.ReadAllText(path);
@@ -31,13 +24,12 @@ namespace HeartScript.Peg
             var pegParser = CreatePegParser();
             var ctx = new ParserContext(input);
 
-            var root = QuantifierPattern.MinOrMore(
-                1,
-                SequencePattern.Create()
-                    .Discard(s_nonSignificant)
-                    .Then(LookupPattern.Create("rule")));
+            var pattern = SequencePattern.Create()
+                .Discard(s_nonSignificant)
+                .Then(QuantifierPattern.MinOrMore(1, LookupPattern.Create("rule")))
+                .Discard(s_nonSignificant);
 
-            var result = root.Match(pegParser, ctx);
+            var result = pattern.Match(pegParser, ctx);
 
             ctx.AssertComplete();
             if (result == null)
@@ -71,6 +63,8 @@ namespace HeartScript.Peg
         {
             var parser = new PatternParser();
 
+            parser.Patterns["_"] = s_nonSignificant;
+
             parser.Patterns["rule"] = SequencePattern.Create()
                 .Then(LookupPattern.Create("rule_head"))
                 .Then(ChoicePattern.Create()
@@ -78,15 +72,15 @@ namespace HeartScript.Peg
                     .Or(LookupPattern.Create("choice")));
 
             parser.Patterns["rule_head"] = SequencePattern.Create()
-                .Then(s_identifier.TrimRight())
-                .Discard(LexerPattern.FromPlainText("->").TrimRight());
+                .Then(s_identifier)
+                .Discard(LexerPattern.FromPlainText("->"));
 
             parser.Patterns["choice"] = SequencePattern.Create()
                 .Then(LookupPattern.Create("sequence"))
                 .Then(QuantifierPattern.MinOrMore(
                     0,
                     SequencePattern.Create()
-                        .Discard(LexerPattern.FromPlainText("/").TrimRight())
+                        .Discard(LexerPattern.FromPlainText("/"))
                         .Then(LookupPattern.Create("sequence"))));
 
             parser.Patterns["sequence"] = QuantifierPattern.MinOrMore(
@@ -96,50 +90,50 @@ namespace HeartScript.Peg
             parser.Patterns["label"] = SequencePattern.Create()
                 .Then(QuantifierPattern.Optional(
                         SequencePattern.Create()
-                            .Then(s_plainText.TrimRight())
-                            .Discard(LexerPattern.FromPlainText(":").TrimRight())))
+                            .Then(s_plainText)
+                            .Discard(LexerPattern.FromPlainText(":"))))
                 .Then(LookupPattern.Create("quantifier"));
 
             parser.Patterns["quantifier"] = SequencePattern.Create()
                 .Then(LookupPattern.Create("term"))
                 .Then(QuantifierPattern.Optional(
                     ChoicePattern.Create()
-                        .Or(LexerPattern.FromPlainText("?").TrimRight())
-                        .Or(LexerPattern.FromPlainText("*").TrimRight())
-                        .Or(LexerPattern.FromPlainText("+").TrimRight())));
+                        .Or(LexerPattern.FromPlainText("?"))
+                        .Or(LexerPattern.FromPlainText("*"))
+                        .Or(LexerPattern.FromPlainText("+"))));
 
             parser.Patterns["term"] = SequencePattern.Create()
                 .Discard(PredicatePattern.Negative(LookupPattern.Create("rule_head")))
                 .Discard(PredicatePattern.Negative(LookupPattern.Create("expr_head")))
                 .Then(ChoicePattern.Create()
                     .Or(ChoicePattern.Create()
-                        .Or(s_regex.TrimRight())
-                        .Or(s_plainText.TrimRight()))
+                        .Or(s_regex)
+                        .Or(s_plainText))
                     .Or(SequencePattern.Create()
-                        .Discard(LexerPattern.FromPlainText("(").TrimRight())
+                        .Discard(LexerPattern.FromPlainText("("))
                         .Then(LookupPattern.Create("choice"))
-                        .Discard(LexerPattern.FromPlainText(")").TrimRight()))
-                    .Or(s_identifier.TrimRight()));
+                        .Discard(LexerPattern.FromPlainText(")")))
+                    .Or(s_identifier));
 
             var digits = LexerPattern.FromRegex("\\d+");
             var none = LexerPattern.FromPlainText("none");
             parser.Patterns["expr_head"] = SequencePattern.Create()
-                .Then(s_plainText.TrimRight())
+                .Then(s_plainText)
                 .Then(ChoicePattern.Create()
-                    .Or(digits.TrimRight())
-                    .Or(none.TrimRight()))
+                    .Or(digits)
+                    .Or(none))
                 .Then(ChoicePattern.Create()
-                    .Or(digits.TrimRight())
-                    .Or(none.TrimRight()));
+                    .Or(digits)
+                    .Or(none));
 
             parser.Patterns["expr"] = SequencePattern.Create()
-                .Discard(LexerPattern.FromPlainText("[").TrimRight())
+                .Discard(LexerPattern.FromPlainText("["))
                 .Then(QuantifierPattern.MinOrMore(
                     0,
                     SequencePattern.Create()
                         .Then(LookupPattern.Create("expr_head"))
                         .Then(LookupPattern.Create("choice"))))
-                .Discard(LexerPattern.FromPlainText("]").TrimRight());
+                .Discard(LexerPattern.FromPlainText("]"));
 
             return parser;
         }
@@ -229,12 +223,12 @@ namespace HeartScript.Peg
                             case 0:
                                 {
                                     string pattern = valueNode.Value[1..^1].Replace("``", "`");
-                                    return LexerPattern.FromRegex(pattern).TrimRight();
+                                    return LexerPattern.FromRegex(pattern);
                                 }
                             case 1:
                                 {
                                     string pattern = valueNode.Value[1..^1].Replace("''", "'");
-                                    return LexerPattern.FromPlainText(pattern).TrimRight();
+                                    return LexerPattern.FromPlainText(pattern);
                                 }
                             default: throw new NotImplementedException();
                         }

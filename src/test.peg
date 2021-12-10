@@ -1,4 +1,5 @@
 root -> 'method':method
+_ -> (`#.*` / `\s+`)*
 
 type -> 'int' / 'double' / 'bool'
 name -> `[_a-zA-Z]\w*`
