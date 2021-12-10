@@ -12,10 +12,6 @@ namespace HeartScript.Peg
         private static readonly LexerPattern s_regex = LexerPattern.FromRegex("`(?:``|[^`])*`");
         private static readonly LexerPattern s_plainText = LexerPattern.FromRegex("'(?:''|[^'])*'");
         private static readonly LexerPattern s_identifier = LexerPattern.FromRegex("[_a-zA-Z]\\w*");
-        private static readonly IPattern s_nonSignificant = QuantifierPattern.MinOrMore(0,
-            ChoicePattern.Create()
-                .Or(LexerPattern.FromRegex("#.*"))
-                .Or(LexerPattern.FromRegex("\\s+")));
 
         public static PatternParser BuildPatternParser(string path)
         {
@@ -24,11 +20,7 @@ namespace HeartScript.Peg
             var pegParser = CreatePegParser();
             var ctx = new ParserContext(input);
 
-            var pattern = SequencePattern.Create()
-                .Discard(s_nonSignificant)
-                .Then(QuantifierPattern.MinOrMore(1, LookupPattern.Create("rule")))
-                .Discard(s_nonSignificant);
-
+            var pattern = QuantifierPattern.MinOrMore(1, LookupPattern.Create("rule")).Trim(pegParser.Patterns["_"]);
             var result = pattern.Match(pegParser, ctx);
 
             ctx.AssertComplete();
@@ -63,7 +55,11 @@ namespace HeartScript.Peg
         {
             var parser = new PatternParser();
 
-            parser.Patterns["_"] = s_nonSignificant;
+            parser.Patterns["_"] = QuantifierPattern.MinOrMore(
+                0,
+                ChoicePattern.Create()
+                    .Or(LexerPattern.FromRegex("#.*"))
+                    .Or(LexerPattern.FromRegex("\\s+")));
 
             parser.Patterns["rule"] = SequencePattern.Create()
                 .Then(LookupPattern.Create("rule_head"))

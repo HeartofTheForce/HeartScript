@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using HeartScript.Parsing;
-using HeartScript.Peg.Patterns;
 
 namespace HeartScript.Expressions
 {
@@ -16,11 +15,7 @@ namespace HeartScript.Expressions
 
         public static IParseNode Parse(PatternParser parser, ParserContext ctx)
         {
-            var pattern = SequencePattern.Create()
-                .Discard(parser.Patterns["_"])
-                .Then(parser.Patterns["expr"])
-                .Discard(parser.Patterns["_"]);
-
+            var pattern = parser.Patterns["expr"].Trim(parser.Patterns["_"]);
             var result = pattern.TryMatch(parser, ctx);
 
             ctx.AssertComplete();
