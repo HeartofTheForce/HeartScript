@@ -31,11 +31,11 @@ namespace HeartScript.Peg
             var pegParser = CreatePegParser();
             var ctx = new ParserContext(input);
 
-            var root = SequencePattern.Create()
-                .Then(QuantifierPattern.MinOrMore(1, SequencePattern.Create()
+            var root = QuantifierPattern.MinOrMore(
+                1,
+                SequencePattern.Create()
                     .Discard(s_nonSignificant)
-                    .Then(LookupPattern.Create("rule"))))
-                .Discard(s_nonSignificant);
+                    .Then(LookupPattern.Create("rule")));
 
             var result = root.Match(pegParser, ctx);
 
