@@ -21,7 +21,7 @@ namespace HeartScript.Peg
             var ctx = new ParserContext(input);
 
             var pattern = QuantifierPattern.MinOrMore(1, LookupPattern.Create("rule")).Trim(pegParser.Patterns["_"]);
-            var result = pattern.Match(pegParser, ctx);
+            var result = pattern.TryMatch(pegParser, ctx);
 
             ctx.AssertComplete();
             if (result == null)
