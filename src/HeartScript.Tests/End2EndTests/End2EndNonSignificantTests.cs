@@ -19,6 +19,12 @@ namespace HeartScript.Tests.End2EndTests
                 Infix = "1 ",
                 ExpectedNodeString = "1",
             },
+            //Expression Whitespace
+            new End2EndTestCase()
+            {
+                Infix = "1 + 2",
+                ExpectedNodeString = "(+ 1 2)",
+            },
         };
 
         [TestCaseSource(nameof(s_testCases))]
