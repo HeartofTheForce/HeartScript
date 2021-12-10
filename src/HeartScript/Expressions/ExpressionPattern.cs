@@ -40,14 +40,11 @@ namespace HeartScript.Expressions
             {
                 nonSignificantHelper.PreMatch(parser, ctx);
                 var right = TryGetNodeBuilder(operand == null, parser, ctx);
-                int offset = nonSignificantHelper.PostMatch(right != null, ctx);
+                nonSignificantHelper.PostMatch(right != null, ctx);
                 if (right == null)
                 {
                     if (operand == null)
-                    {
-                        ctx.LogException(new ExpressionTermException(offset));
                         return null;
-                    }
 
                     while (nodeBuilders.Count > 0)
                     {
@@ -97,6 +94,9 @@ namespace HeartScript.Expressions
                     return new ExpressionNodeBuilder(op, result);
                 }
             }
+
+            if (wantOperand)
+                ctx.LogException(new ExpressionTermException(ctx.Offset));
 
             return null;
         }

@@ -30,15 +30,12 @@ namespace HeartScript.Parsing
                 parser.Patterns["_"].TryMatch(parser, ctx);
         }
 
-        public int PostMatch(bool success, ParserContext ctx)
+        public void PostMatch(bool success, ParserContext ctx)
         {
-            int offset = ctx.Offset;
             if (success)
                 _cnt++;
             else
                 ctx.Offset = _resetOffset;
-
-            return offset;
         }
     }
 }
