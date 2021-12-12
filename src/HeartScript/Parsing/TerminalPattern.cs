@@ -2,13 +2,13 @@
 
 namespace HeartScript.Parsing
 {
-    public class LexerPattern : IPattern
+    public class TerminalPattern : IPattern
     {
         public Regex Regex { get; }
         public string Pattern { get; }
         public bool IsRegex { get; }
 
-        private LexerPattern(string pattern, bool isRegex)
+        private TerminalPattern(string pattern, bool isRegex)
         {
             Pattern = pattern;
             IsRegex = isRegex;
@@ -22,22 +22,19 @@ namespace HeartScript.Parsing
             Regex = new Regex($"\\G({temp})");
         }
 
-        public static LexerPattern FromRegex(string pattern)
+        public static TerminalPattern FromRegex(string pattern)
         {
-            return new LexerPattern(pattern, true);
+            return new TerminalPattern(pattern, true);
         }
 
-        public static LexerPattern FromPlainText(string pattern)
+        public static TerminalPattern FromPlainText(string pattern)
         {
-            return new LexerPattern(pattern, false);
+            return new TerminalPattern(pattern, false);
         }
 
         public override string ToString()
         {
-            if (IsRegex)
-                return $"Regex: {Pattern}";
-            else
-                return Pattern;
+            return Pattern;
         }
 
         public IParseNode? Match(PatternParser parser, ParserContext ctx)
@@ -77,7 +74,7 @@ namespace HeartScript.Parsing
             ExpectedPattern = expectedPattern;
         }
 
-        public UnexpectedTokenException(int textOffset, LexerPattern lexerPattern) : this(textOffset, lexerPattern.ToString())
+        public UnexpectedTokenException(int textOffset, TerminalPattern terminalPattern) : this(textOffset, terminalPattern.ToString())
         {
         }
     }
