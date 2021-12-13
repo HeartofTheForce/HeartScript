@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using HeartScript.Expressions;
 
 namespace HeartScript.Parsing
 {
@@ -25,7 +24,7 @@ namespace HeartScript.Parsing
         {
             _patternExceptions.Add(ex);
 
-            if (Exception == null || ex.TextOffset >= Exception.TextOffset && ex.Priority <= Exception.Priority)
+            if (Exception == null || ex.TextOffset >= Exception.TextOffset && ex.Priority >= Exception.Priority)
                 Exception = ex;
         }
 
@@ -45,21 +44,16 @@ namespace HeartScript.Parsing
     public abstract class PatternException : Exception
     {
         public int TextOffset { get; }
+        public int Priority { get; }
 
-        public PatternException(int textOffset, string message) : base(message)
+        public PatternException(int textOffset, int priority, string message) : base(message)
         {
             TextOffset = textOffset;
+            Priority = priority;
         }
 
-        public int Priority
+        public PatternException(int textOffset, string message) : this(textOffset, 0, message)
         {
-            get
-            {
-                if (this is ExpressionTermException)
-                    return 0;
-
-                return 1;
-            }
         }
     }
 

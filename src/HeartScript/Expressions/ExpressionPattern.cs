@@ -107,7 +107,7 @@ namespace HeartScript.Expressions
 
     public class ExpressionTermException : PatternException
     {
-        public ExpressionTermException(int textOffset) : base(textOffset, $"Invalid Expression Term @ {textOffset}")
+        public ExpressionTermException(int textOffset) : base(textOffset, 1, $"Invalid Expression Term @ {textOffset}")
         {
         }
     }
