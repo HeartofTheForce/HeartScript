@@ -1,0 +1,3 @@
+[submodule "lib/Heart.Parsing"]
+	path = lib/Heart.Parsing
+	url = git@github.com:HeartofTheForce/Heart.Parsing.git

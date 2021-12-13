@@ -13,7 +13,7 @@ indent_size = 4
 trim_trailing_whitespace = true
 
 # Custom files
-[*.peg]
+[*.hg]
 insert_final_newline = true
 
 [*.json]
@@ -155,6 +155,7 @@ csharp_space_between_parentheses = false
 csharp_space_between_square_brackets = false
 
 dotnet_diagnostic.IDE0005.severity = warning
+dotnet_diagnostic.IDE0040.severity = warning
 dotnet_diagnostic.IDE0090.severity = none
 
 # Xml project files

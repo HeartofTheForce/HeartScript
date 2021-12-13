@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using HeartScript.Ast.Nodes;
-using HeartScript.Parsing;
-using HeartScript.Peg.Patterns;
+using Heart.Parsing;
+using Heart.Parsing.Patterns;
 
 namespace HeartScript.Ast
 {

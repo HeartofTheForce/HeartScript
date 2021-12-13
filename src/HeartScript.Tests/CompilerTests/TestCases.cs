@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
 using HeartScript.Compiling.Emit;
-using HeartScript.Parsing;
+using Heart.Parsing;
+using Heart.Parsing.Patterns;
 using NUnit.Framework;
 #pragma warning disable CS8618
 #pragma warning disable CS8625
@@ -15,7 +16,7 @@ namespace HeartScript.Tests.CompilerTests
 
     public class ExpressionCompilerTestCase<T> : IExpressionCompilerTestCase
     {
-        private static readonly Dictionary<Type, string> s_typeLookup = new()
+        private static readonly Dictionary<Type, string> s_typeLookup = new Dictionary<Type, string>()
         {
             [typeof(int)] = "int",
             [typeof(double)] = "double",
@@ -30,8 +31,8 @@ namespace HeartScript.Tests.CompilerTests
             string source = $"{s_typeLookup[typeof(T)]} main() => {Infix};";
             var ctx = new ParserContext(source);
 
-            var pattern = Helper.Parser.Patterns["root"];
-            var node = pattern.TryMatch(Helper.Parser, ctx);
+            var pattern = Utility.Parser.Patterns["root"];
+            var node = pattern.TryMatch(Utility.Parser, ctx);
 
             ctx.AssertComplete();
             if (node == null)
@@ -59,8 +60,8 @@ namespace HeartScript.Tests.CompilerTests
         public void Execute()
         {
             var ctx = new ParserContext(Method);
-            var pattern = Helper.Parser.Patterns["root"];
-            var node = pattern.TryMatch(Helper.Parser, ctx);
+            var pattern = Utility.Parser.Patterns["root"];
+            var node = pattern.TryMatch(Utility.Parser, ctx);
 
             ctx.AssertComplete();
             if (node == null)

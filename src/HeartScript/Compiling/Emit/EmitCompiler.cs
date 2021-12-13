@@ -3,7 +3,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using HeartScript.Ast;
 using HeartScript.Ast.Nodes;
-using HeartScript.Parsing;
+using Heart.Parsing;
 
 namespace HeartScript.Compiling.Emit
 {
