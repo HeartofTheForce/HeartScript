@@ -5,7 +5,7 @@ namespace HeartScript.Tests.CompilerTests
     [TestFixture]
     public class CompilerPrefixTests
     {
-        static readonly IExpressionCompilerTestCase[] s_testCases = new IExpressionCompilerTestCase[]
+        private static readonly IExpressionCompilerTestCase[] s_testCases = new IExpressionCompilerTestCase[]
         {
             //u+
             new ExpressionCompilerTestCase<int>()

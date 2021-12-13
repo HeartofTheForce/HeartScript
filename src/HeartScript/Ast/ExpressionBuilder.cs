@@ -48,13 +48,13 @@ namespace HeartScript.Ast
             throw new ArgumentException($"{node.Key} does not have a matching builder");
         }
 
-        static AstNode BuildRoundBracket(AstScope scope, ExpressionNode node)
+        private static AstNode BuildRoundBracket(AstScope scope, ExpressionNode node)
         {
             var sequenceNode = (SequenceNode)node.MidNode;
             return Build(scope, (ExpressionNode)sequenceNode.Children[1]);
         }
 
-        static AstNode ParseReal(AstScope scope, ExpressionNode node)
+        private static AstNode ParseReal(AstScope scope, ExpressionNode node)
         {
             var valueNode = (ValueNode)node.MidNode;
             if (double.TryParse(valueNode.Value, out double value))
@@ -63,7 +63,7 @@ namespace HeartScript.Ast
             throw new ArgumentException(nameof(node));
         }
 
-        static AstNode ParseIntegral(AstScope scope, ExpressionNode node)
+        private static AstNode ParseIntegral(AstScope scope, ExpressionNode node)
         {
             var valueNode = (ValueNode)node.MidNode;
             if (int.TryParse(valueNode.Value, out int value))
@@ -72,7 +72,7 @@ namespace HeartScript.Ast
             throw new ArgumentException(nameof(node));
         }
 
-        static AstNode ParseBoolean(AstScope scope, ExpressionNode node)
+        private static AstNode ParseBoolean(AstScope scope, ExpressionNode node)
         {
             var choiceNode = (ChoiceNode)node.MidNode;
             var valueNode = (ValueNode)choiceNode.Node;
@@ -82,7 +82,7 @@ namespace HeartScript.Ast
             throw new ArgumentException(nameof(node));
         }
 
-        static AstNode ParseIdentifier(AstScope scope, ExpressionNode node)
+        private static AstNode ParseIdentifier(AstScope scope, ExpressionNode node)
         {
             var valueNode = (ValueNode)node.MidNode;
             if (scope.TryGetMember(valueNode.Value, out var variable))
@@ -91,7 +91,7 @@ namespace HeartScript.Ast
             throw new ArgumentException($"Missing member {valueNode.Value}");
         }
 
-        static AstNode BuildCall(AstScope scope, ExpressionNode callNode, AstNode? instance, Type type, BindingFlags bindingFlags)
+        private static AstNode BuildCall(AstScope scope, ExpressionNode callNode, AstNode? instance, Type type, BindingFlags bindingFlags)
         {
             if (callNode.LeftNode == null)
                 throw new Exception($"{nameof(callNode.LeftNode)} cannot be null");
@@ -127,7 +127,7 @@ namespace HeartScript.Ast
             return AstNode.Call(instance, methodInfo, parameters);
         }
 
-        static AstNodeBuilder BuildStaticCall(Type type)
+        private static AstNodeBuilder BuildStaticCall(Type type)
         {
             return (scope, node) =>
             {
@@ -136,7 +136,7 @@ namespace HeartScript.Ast
             };
         }
 
-        static AstNodeBuilder BuildPrefix(Func<AstNode, AstNode> builder)
+        private static AstNodeBuilder BuildPrefix(Func<AstNode, AstNode> builder)
         {
             return (scope, node) =>
             {
@@ -149,7 +149,7 @@ namespace HeartScript.Ast
             };
         }
 
-        static AstNodeBuilder BuildPostfix(Func<AstNode, AstNode> builder)
+        private static AstNodeBuilder BuildPostfix(Func<AstNode, AstNode> builder)
         {
             return (scope, node) =>
             {
@@ -162,7 +162,7 @@ namespace HeartScript.Ast
             };
         }
 
-        static AstNodeBuilder BuildBinary(Func<AstNode, AstNode, AstNode> builder)
+        private static AstNodeBuilder BuildBinary(Func<AstNode, AstNode, AstNode> builder)
         {
             return (scope, node) =>
             {
@@ -183,7 +183,7 @@ namespace HeartScript.Ast
             };
         }
 
-        static AstNode BuildTernary(AstScope scope, ExpressionNode node)
+        private static AstNode BuildTernary(AstScope scope, ExpressionNode node)
         {
             if (node.LeftNode == null)
                 throw new Exception($"{nameof(node.LeftNode)} cannot be null");
@@ -204,12 +204,12 @@ namespace HeartScript.Ast
             return new ConditionalNode(left, mid, right);
         }
 
-        static bool IsReal(Type type) =>
+        private static bool IsReal(Type type) =>
             type == typeof(float) ||
             type == typeof(double) ||
             type == typeof(decimal);
 
-        static bool IsIntegral(Type type) =>
+        private static bool IsIntegral(Type type) =>
             type == typeof(sbyte) ||
             type == typeof(byte) ||
             type == typeof(short) ||

@@ -23,7 +23,7 @@ namespace HeartScript.Ast
             throw new ArgumentException($"{node.Label} does not have a matching builder");
         }
 
-        static AstNode BuildMethod(AstScope scope, LabelNode node)
+        private static AstNode BuildMethod(AstScope scope, LabelNode node)
         {
             var methodSequence = (SequenceNode)node.Node;
 
@@ -68,7 +68,7 @@ namespace HeartScript.Ast
             return new MethodInfoNode(methodName, parameters, body);
         }
 
-        static BlockNode BuildMethodBody(AstScope scope, Type returnType, IParseNode body)
+        private static BlockNode BuildMethodBody(AstScope scope, Type returnType, IParseNode body)
         {
             var choiceNode = (ChoiceNode)body;
             var labelNode = (LabelNode)choiceNode.Node;
@@ -103,7 +103,7 @@ namespace HeartScript.Ast
             return AstNode.Block(statements.ToArray(), returnType);
         }
 
-        static Type GetType(IParseNode typeNode)
+        private static Type GetType(IParseNode typeNode)
         {
             var choiceNode = (ChoiceNode)typeNode;
             var valueNode = (ValueNode)choiceNode.Node;
