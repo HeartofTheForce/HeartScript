@@ -27,7 +27,7 @@ namespace HeartScript.Cli
                 if (node == null)
                     throw new ArgumentException(nameof(ctx.Exception));
 
-                Console.WriteLine("Output");
+                Console.WriteLine("Parsed");
                 Console.WriteLine(StringCompiler.Compile(node));
 
                 object[]? parameters = new object[]
@@ -38,7 +38,7 @@ namespace HeartScript.Cli
                 };
                 var compiledMethodInfo = EmitCompiler.CompileFunction(node);
 
-                Console.WriteLine("Result");
+                Console.WriteLine("Output");
                 Console.WriteLine(compiledMethodInfo.Invoke(null, parameters));
             }
             catch (Exception ex)
