@@ -5,4 +5,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="../../lib/Heart.Parsing/src/Heart.Parsing/Heart.Parsing.csproj" />
+  </ItemGroup>
+
 </Project>

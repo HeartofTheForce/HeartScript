@@ -1,15 +1,14 @@
 ﻿using System;
 using System.IO;
-using HeartScript.Compiling;
 using HeartScript.Compiling.Emit;
-using HeartScript.Parsing;
-using HeartScript.Peg;
+using Heart.Parsing;
+using Heart.Parsing.Patterns;
 
 namespace HeartScript.Cli
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             try
             {
@@ -19,7 +18,7 @@ namespace HeartScript.Cli
                 Console.WriteLine(source);
 
                 var ctx = new ParserContext(source);
-                var parser = PegHelper.BuildPatternParser("./src/test.peg");
+                var parser = ParsingHelper.BuildPatternParser("./src/test.hg");
                 var pattern = parser.Patterns["root"].Trim(parser.Patterns["_"]);
                 var node = pattern.TryMatch(parser, ctx);
 

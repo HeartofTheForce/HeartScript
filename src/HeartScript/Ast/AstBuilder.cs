@@ -1,8 +1,7 @@
 using System;
 using HeartScript.Ast.Nodes;
-using HeartScript.Expressions;
-using HeartScript.Parsing;
-using HeartScript.Peg.Patterns;
+using Heart.Parsing;
+using Heart.Parsing.Patterns;
 
 namespace HeartScript.Ast
 {
