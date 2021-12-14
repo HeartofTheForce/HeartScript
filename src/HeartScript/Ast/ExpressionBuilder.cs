@@ -104,7 +104,7 @@ namespace HeartScript.Ast
             if (methodName == null)
                 throw new Exception($"{nameof(methodName)} cannot be null");
 
-            var parameterNodes = ParseNodeHelper.GetChildrenRecursive<ExpressionNode>(callNode.MidNode);
+            var parameterNodes = ParseNodeHelper.FindChildren<ExpressionNode>(callNode.MidNode);
             var parameters = new AstNode[parameterNodes.Count];
             var parameterTypes = new Type[parameterNodes.Count];
 
