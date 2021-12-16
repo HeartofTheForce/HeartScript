@@ -11,25 +11,12 @@ namespace HeartScript.Ast
         private delegate void StatmentBuilder(SymbolScope scope, MethodInfoNode methodInfoNode, IParseNode parseNode);
         private static readonly Dictionary<string, StatmentBuilder> s_statementBuilders = new Dictionary<string, StatmentBuilder>()
         {
+            ["lambda"] = BuildLambdaBody,
+            ["standard"] = BuildStandardBody,
             ["declaration"] = BuildDeclaration,
             ["assignment"] = BuildAssignment,
             ["return"] = BuildReturn,
         };
-
-        private delegate void BodyBuilder(SymbolScope scope, MethodInfoNode methodInfoNode, IParseNode parseNode);
-        private static readonly Dictionary<string, BodyBuilder> s_bodyBuilders = new Dictionary<string, BodyBuilder>()
-        {
-            ["lambda"] = BuildLambdaBody,
-            ["standard"] = BuildStandardBody,
-        };
-
-        private static void BuildBody(SymbolScope scope, MethodInfoNode methodInfoNode, LabelNode node)
-        {
-            if (node.Label != null && s_bodyBuilders.TryGetValue(node.Label, out var builder))
-                builder(scope, methodInfoNode, node.Node);
-            else
-                throw new ArgumentException($"{node.Label} has no matching builder");
-        }
 
         private static void BuildStatement(SymbolScope scope, MethodInfoNode methodInfoNode, LabelNode node)
         {
@@ -83,7 +70,7 @@ namespace HeartScript.Ast
 
             var methodInfoNode = new MethodInfoNode(methodName, returnType, parameters);
             var methodBodyLabelNode = (LabelNode)methodSequence.Children[5];
-            BuildBody(methodScope, methodInfoNode, methodBodyLabelNode);
+            BuildStatement(methodScope, methodInfoNode, methodBodyLabelNode);
 
             return methodInfoNode;
         }
