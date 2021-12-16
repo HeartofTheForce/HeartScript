@@ -1,6 +1,6 @@
 using NUnit.Framework;
 
-namespace HeartScript.Tests.CompilerTests
+namespace HeartScript.Tests.ExpressionTests
 {
     [TestFixture]
     public class InfixTests

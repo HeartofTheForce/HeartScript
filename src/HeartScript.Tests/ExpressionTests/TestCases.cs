@@ -7,7 +7,7 @@ using NUnit.Framework;
 #pragma warning disable CS8618
 #pragma warning disable CS8625
 
-namespace HeartScript.Tests.CompilerTests
+namespace HeartScript.Tests.ExpressionTests
 {
     public interface IExpressionTestCase
     {
