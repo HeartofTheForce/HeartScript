@@ -8,6 +8,7 @@ namespace HeartScript.Ast.Nodes
         public string Name { get; }
         public Type ReturnType { get; }
         public Type[] ParameterTypes { get; }
+        public List<VariableNode> Variables { get; }
         public List<AstNode> Statements { get; }
 
         public MethodInfoNode(string name, Type returnType, Type[] parameterTypes) : base(typeof(void), AstType.Default)
@@ -15,6 +16,7 @@ namespace HeartScript.Ast.Nodes
             Name = name;
             ReturnType = returnType;
             ParameterTypes = parameterTypes;
+            Variables = new List<VariableNode>();
             Statements = new List<AstNode>();
         }
     }

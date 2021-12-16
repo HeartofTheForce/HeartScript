@@ -1,4 +1,9 @@
 double main(double a, double b, double c)
 {
-    return -10 < 0 ? max(a * b + c!, 4) : (2 + 5);
+    double d = 4;
+    int e = 2;
+    int f;
+    f = 5;
+
+    return -10 < 0 ? max(a * b + c!, d) : (e + f);
 }

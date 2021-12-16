@@ -73,10 +73,12 @@ namespace HeartScript.Ast
                 var paramType = GetType(parameterValues[i].Item1);
                 string paramName = GetName(parameterValues[i].Item2);
 
-                var parameterNode = new ParameterNode(i, paramType);
+                var parameterNode = AstNode.Parameter(i, paramType);
 
                 parameters[i] = parameterNode.Type;
-                methodScope.DeclareSymbol(paramName, new Symbol<AstNode>(false, parameterNode));
+
+                var symbol = new Symbol<AstNode>(false, parameterNode);
+                methodScope.DeclareSymbol(paramName, symbol);
             }
 
             var methodInfoNode = new MethodInfoNode(methodName, returnType, parameters);
@@ -91,8 +93,10 @@ namespace HeartScript.Ast
         {
             var sequenceNode = (SequenceNode)node;
             var expressionNode = (ExpressionNode)sequenceNode.Children[1];
-            var expression = AstBuilder.ConvertIfRequired(ExpressionBuilder.Build(scope, expressionNode), methodInfoNode.ReturnType);
-            methodInfoNode.Statements.Add(AstNode.Return(expression));
+            var expression = ExpressionBuilder.Build(scope, expressionNode);
+
+            var returnNode = AstNode.Return(AstBuilder.ConvertIfRequired(expression, methodInfoNode.ReturnType));
+            methodInfoNode.Statements.Add(returnNode);
         }
 
         private static void BuildStandardBody(SymbolScope scope, MethodInfoNode methodInfoNode, IParseNode node)
@@ -111,27 +115,51 @@ namespace HeartScript.Ast
         private static void BuildDeclaration(SymbolScope scope, MethodInfoNode methodInfoNode, IParseNode node)
         {
             var declarationSequence = (SequenceNode)node;
+
             var type = GetType(declarationSequence.Children[0]);
             string name = GetName(declarationSequence.Children[1]);
 
-            var expressionNode = (ExpressionNode)declarationSequence.Children[2];
-            var expression = ExpressionBuilder.Build(scope, expressionNode);
+            var variableNode = AstNode.Variable(methodInfoNode.Variables.Count, type);
+            methodInfoNode.Variables.Add(variableNode);
 
-            // scope.DeclareSymbol(
+            var symbol = new Symbol<AstNode>(false, variableNode);
+            scope.DeclareSymbol(name, symbol);
+
+            var optionalAssignmentNode = (QuantifierNode)declarationSequence.Children[2];
+            if (optionalAssignmentNode.Children.Count > 0)
+            {
+                var assignmentSequence = (SequenceNode)optionalAssignmentNode.Children[0];
+                var expressionNode = (ExpressionNode)assignmentSequence.Children[1];
+                var expression = ExpressionBuilder.Build(scope, expressionNode);
+
+                var assignNode = AstNode.Assign(variableNode, AstBuilder.ConvertIfRequired(expression, variableNode.Type));
+                methodInfoNode.Statements.Add(assignNode);
+            }
         }
 
         private static void BuildAssignment(SymbolScope scope, MethodInfoNode methodInfoNode, IParseNode node)
         {
-            throw new NotImplementedException();
+            var assignmentSequence = (SequenceNode)node;
+
+            string name = GetName(assignmentSequence.Children[0]);
+            if (!scope.TryGetSymbol<AstNode>(name, out var symbol))
+                throw new ArgumentException($"Missing symbol {name}");
+
+            var expressionNode = (ExpressionNode)assignmentSequence.Children[2];
+            var expression = ExpressionBuilder.Build(scope, expressionNode);
+
+            var assignNode = AstNode.Assign(symbol.Value, AstBuilder.ConvertIfRequired(expression, symbol.Value.Type));
+            methodInfoNode.Statements.Add(assignNode);
         }
 
         private static void BuildReturn(SymbolScope scope, MethodInfoNode methodInfoNode, IParseNode node)
         {
             var returnSequence = (SequenceNode)node;
             var expressionNode = returnSequence.Children[1];
-            var expression = AstBuilder.ConvertIfRequired(AstBuilder.Build(scope, expressionNode), methodInfoNode.ReturnType);
+            var expression = AstBuilder.Build(scope, expressionNode);
 
-            methodInfoNode.Statements.Add(AstNode.Return(expression));
+            var returnNode = AstNode.Return(AstBuilder.ConvertIfRequired(expression, methodInfoNode.ReturnType));
+            methodInfoNode.Statements.Add(returnNode);
         }
 
         private static Type GetType(IParseNode typeNode)
