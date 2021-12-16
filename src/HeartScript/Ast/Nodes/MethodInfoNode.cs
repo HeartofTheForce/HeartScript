@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace HeartScript.Ast.Nodes
 {
@@ -7,14 +8,14 @@ namespace HeartScript.Ast.Nodes
         public string Name { get; }
         public Type ReturnType { get; }
         public Type[] ParameterTypes { get; }
-        public BlockNode Body { get; }
+        public List<AstNode> Statements { get; }
 
-        public MethodInfoNode(string name, Type[] parameterTypes, BlockNode body) : base(typeof(void), AstType.Default)
+        public MethodInfoNode(string name, Type returnType, Type[] parameterTypes) : base(typeof(void), AstType.Default)
         {
             Name = name;
-            ReturnType = body.Type;
+            ReturnType = returnType;
             ParameterTypes = parameterTypes;
-            Body = body;
+            Statements = new List<AstNode>();
         }
     }
 }

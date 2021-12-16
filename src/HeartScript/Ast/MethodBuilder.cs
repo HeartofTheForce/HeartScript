@@ -8,7 +8,7 @@ namespace HeartScript.Ast
 {
     public static class MethodBuilder
     {
-        private delegate AstNode StatmentBuilder(SymbolScope scope, Type returnType, IParseNode parseNode);
+        private delegate void StatmentBuilder(SymbolScope scope, MethodInfoNode methodInfoNode, IParseNode parseNode);
         private static readonly Dictionary<string, StatmentBuilder> s_statementBuilders = new Dictionary<string, StatmentBuilder>()
         {
             ["declaration"] = BuildDeclaration,
@@ -16,27 +16,27 @@ namespace HeartScript.Ast
             ["return"] = BuildReturn,
         };
 
-        private delegate BlockNode BodyBuilder(SymbolScope scope, Type returnType, IParseNode parseNode);
+        private delegate void BodyBuilder(SymbolScope scope, MethodInfoNode methodInfoNode, IParseNode parseNode);
         private static readonly Dictionary<string, BodyBuilder> s_bodyBuilders = new Dictionary<string, BodyBuilder>()
         {
             ["lambda"] = BuildLambdaBody,
             ["standard"] = BuildStandardBody,
         };
 
-        private static BlockNode BuildBody(SymbolScope scope, Type returnType, LabelNode node)
+        private static void BuildBody(SymbolScope scope, MethodInfoNode methodInfoNode, LabelNode node)
         {
             if (node.Label != null && s_bodyBuilders.TryGetValue(node.Label, out var builder))
-                return builder(scope, returnType, node.Node);
-
-            throw new ArgumentException($"{node.Label} has no matching builder");
+                builder(scope, methodInfoNode, node.Node);
+            else
+                throw new ArgumentException($"{node.Label} has no matching builder");
         }
 
-        private static AstNode BuildStatement(SymbolScope scope, Type returnType, LabelNode node)
+        private static void BuildStatement(SymbolScope scope, MethodInfoNode methodInfoNode, LabelNode node)
         {
             if (node.Label != null && s_statementBuilders.TryGetValue(node.Label, out var builder))
-                return builder(scope, returnType, node.Node);
-
-            throw new ArgumentException($"{node.Label} has no matching builder");
+                builder(scope, methodInfoNode, node.Node);
+            else
+                throw new ArgumentException($"{node.Label} has no matching builder");
         }
 
         public static AstNode BuildMethod(SymbolScope scope, IParseNode node)
@@ -79,65 +79,59 @@ namespace HeartScript.Ast
                 methodScope.DeclareSymbol(paramName, new Symbol<AstNode>(false, parameterNode));
             }
 
-            var body = BuildMethodBody(methodScope, returnType, methodSequence.Children[5]);
+            var methodInfoNode = new MethodInfoNode(methodName, returnType, parameters);
+            var methodBodyChoiceNode = (ChoiceNode)methodSequence.Children[5];
+            var methodBodyLabelNode = (LabelNode)methodBodyChoiceNode.Node;
+            BuildBody(methodScope, methodInfoNode, methodBodyLabelNode);
 
-            return new MethodInfoNode(methodName, parameters, body);
+            return methodInfoNode;
         }
 
-        private static BlockNode BuildMethodBody(SymbolScope scope, Type returnType, IParseNode body)
-        {
-            var choiceNode = (ChoiceNode)body;
-            var labelNode = (LabelNode)choiceNode.Node;
-
-            return BuildBody(scope, returnType, labelNode);
-        }
-
-        private static BlockNode BuildLambdaBody(SymbolScope scope, Type returnType, IParseNode node)
+        private static void BuildLambdaBody(SymbolScope scope, MethodInfoNode methodInfoNode, IParseNode node)
         {
             var sequenceNode = (SequenceNode)node;
             var expressionNode = (ExpressionNode)sequenceNode.Children[1];
-            var expression = AstBuilder.ConvertIfRequired(ExpressionBuilder.Build(scope, expressionNode), returnType);
-            var statements = new AstNode[]
-            {
-                AstNode.Return(expression),
-            };
-
-            return AstNode.Block(statements, returnType);
+            var expression = AstBuilder.ConvertIfRequired(ExpressionBuilder.Build(scope, expressionNode), methodInfoNode.ReturnType);
+            methodInfoNode.Statements.Add(AstNode.Return(expression));
         }
 
-        private static BlockNode BuildStandardBody(SymbolScope scope, Type returnType, IParseNode node)
+        private static void BuildStandardBody(SymbolScope scope, MethodInfoNode methodInfoNode, IParseNode node)
         {
             var sequenceNode = (SequenceNode)node;
             var quantifierNode = (QuantifierNode)sequenceNode.Children[1];
 
-            var statements = new List<AstNode>();
             foreach (var child in quantifierNode.Children)
             {
                 var choiceNode = (ChoiceNode)child;
                 var labelNode = (LabelNode)choiceNode.Node;
-                statements.Add(BuildStatement(scope, returnType, labelNode));
+                BuildStatement(scope, methodInfoNode, labelNode);
             }
-
-            return AstNode.Block(statements.ToArray(), returnType);
         }
 
-        private static AstNode BuildDeclaration(SymbolScope scope, Type returnType, IParseNode node)
+        private static void BuildDeclaration(SymbolScope scope, MethodInfoNode methodInfoNode, IParseNode node)
+        {
+            var declarationSequence = (SequenceNode)node;
+            var type = GetType(declarationSequence.Children[0]);
+            string name = GetName(declarationSequence.Children[1]);
+
+            var expressionNode = (ExpressionNode)declarationSequence.Children[2];
+            var expression = ExpressionBuilder.Build(scope, expressionNode);
+
+            // scope.DeclareSymbol(
+        }
+
+        private static void BuildAssignment(SymbolScope scope, MethodInfoNode methodInfoNode, IParseNode node)
         {
             throw new NotImplementedException();
         }
 
-        private static AstNode BuildAssignment(SymbolScope scope, Type returnType, IParseNode node)
-        {
-            throw new NotImplementedException();
-        }
-
-        private static AstNode BuildReturn(SymbolScope scope, Type returnType, IParseNode node)
+        private static void BuildReturn(SymbolScope scope, MethodInfoNode methodInfoNode, IParseNode node)
         {
             var returnSequence = (SequenceNode)node;
             var expressionNode = returnSequence.Children[1];
-            var expression = AstBuilder.ConvertIfRequired(AstBuilder.Build(scope, expressionNode), returnType);
+            var expression = AstBuilder.ConvertIfRequired(AstBuilder.Build(scope, expressionNode), methodInfoNode.ReturnType);
 
-            return AstNode.Return(expression);
+            methodInfoNode.Statements.Add(AstNode.Return(expression));
         }
 
         private static Type GetType(IParseNode typeNode)

@@ -59,9 +59,9 @@ namespace HeartScript.Compiling.Emit
 
         private static void EmitWrap(System.Reflection.Emit.TypeBuilder typeBuilder, AstNode node)
         {
-            var blockNode = AstNode.Block(new AstNode[] { AstNode.Return(node) }, node.Type);
-            var methodNode = new MethodInfoNode("main", new Type[] { }, blockNode);
-            Emit(typeBuilder, methodNode);
+            var methodInfoNode = new MethodInfoNode("main", node.Type, new Type[0]);
+            methodInfoNode.Statements.Add(AstNode.Return(node));
+            Emit(typeBuilder, methodInfoNode);
         }
     }
 }

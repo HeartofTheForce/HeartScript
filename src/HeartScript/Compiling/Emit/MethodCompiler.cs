@@ -19,8 +19,10 @@ namespace HeartScript.Compiling.Emit
             var ilGenerator = methodBuilder.GetILGenerator();
 
             var basicBlock = new BasicBlock();
-            EmitStatement(ilGenerator, basicBlock, node.Body);
-
+            foreach (var statementNode in node.Statements)
+            {
+                EmitStatement(ilGenerator, basicBlock, statementNode);
+            }
             if (!basicBlock.Return)
                 throw new Exception("Not all code paths return a value");
         }
@@ -29,17 +31,8 @@ namespace HeartScript.Compiling.Emit
         {
             switch (node)
             {
-                case BlockNode blockNode: EmitBlock(ilGenerator, basicBlock, blockNode); break;
                 case ReturnNode returnNode: EmitReturn(ilGenerator, basicBlock, returnNode); break;
                 default: throw new NotImplementedException();
-            }
-        }
-
-        private static void EmitBlock(ILGenerator ilGenerator, BasicBlock basicBlock, BlockNode node)
-        {
-            foreach (var statement in node.Nodes)
-            {
-                EmitStatement(ilGenerator, basicBlock, statement);
             }
         }
 
