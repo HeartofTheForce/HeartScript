@@ -2,12 +2,15 @@ root -> 'method':method
 _ -> `\s*`
 
 type -> 'int' / 'double' / 'bool'
-name -> `[_a-zA-Z]\w*`
-method -> type name '(' parameters ')' ('standard':standardBody / 'lambda':lambdaBody)
-standardBody -> '{' (statement ';')* '}'
-statement -> 'return' expr
-lambdaBody -> '=>' expr ';'
+name -> !type `[_a-zA-Z]\w*`
 parameters -> (type name (',' type name)*)?
+method -> type name '(' parameters ')' ('standard':standardBody / 'lambda':lambdaBody)
+lambdaBody -> '=>' expr ';'
+standardBody -> '{' statement* '}'
+statement -> 'declaration':declarationStatement / 'assignment':assignmentStatement / 'return':returnStatement
+declarationStatement -> type name ('=' expr)? ';'
+assignmentStatement -> name '=' expr ';'
+returnStatement -> 'return' expr ';'
 
 expr ->
     [

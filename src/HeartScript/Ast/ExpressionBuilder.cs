@@ -45,7 +45,7 @@ namespace HeartScript.Ast
             if (node.Key != null && s_nodeBuilders.TryGetValue(node.Key, out var builder))
                 return builder(scope, node);
 
-            throw new ArgumentException($"{node.Key} does not have a matching builder");
+            throw new ArgumentException($"{node.Key} has no matching builder");
         }
 
         private static AstNode BuildRoundBracket(SymbolScope scope, ExpressionNode node)
@@ -116,7 +116,7 @@ namespace HeartScript.Ast
 
             var methodInfo = type.GetMethod(methodName, bindingFlags, null, parameterTypes, null);
             if (methodInfo == null)
-                throw new Exception($"{type.FullName} does not have an overload matching '{methodName}({string.Join(',', parameterTypes.Select(x => x.Name))})'");
+                throw new Exception($"{type.FullName} has no overload matching '{methodName}({string.Join(',', parameterTypes.Select(x => x.Name))})'");
 
             var expectedParameters = methodInfo.GetParameters();
             for (int i = 0; i < parameterNodes.Count; i++)
