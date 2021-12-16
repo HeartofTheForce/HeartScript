@@ -3,17 +3,23 @@ _ -> `\s*`
 
 type -> 'int' / 'double' / 'bool'
 name -> !type `[_a-zA-Z]\w*`
+
 parameters -> (type name (',' type name)*)?
-method -> type name '(' parameters ')' ('standard':block_statement / 'lambda':lambda_body)
+method -> type name '(' parameters ')' ('block':block_statement / 'lambda':lambda_body)
+
 lambda_body -> '=>' expr ';'
-block_statement -> '{' statement* '}'
-statement ->
-    'declaration': declaration_statement /
-    'assignment':assignment_statement /
-    'return':return_statement
+
+statement -> 'declaration': declaration_statement / embedded_statement
 declaration_statement -> type name ('=' expr)? ';'
+
+block_statement -> '{' statement* '}'
 assignment_statement -> name '=' expr ';'
 return_statement -> 'return' expr ';'
+
+embedded_statement ->
+    'block':block_statement /
+    'assignment':assignment_statement /
+    'return':return_statement
 
 expr ->
     [

@@ -12,7 +12,7 @@ namespace HeartScript.Ast
         private static readonly Dictionary<string, StatmentBuilder> s_statementBuilders = new Dictionary<string, StatmentBuilder>()
         {
             ["lambda"] = BuildLambdaBody,
-            ["standard"] = BuildStandardBody,
+            ["block"] = BuildBlockBody,
             ["declaration"] = BuildDeclaration,
             ["assignment"] = BuildAssignment,
             ["return"] = BuildReturn,
@@ -64,7 +64,7 @@ namespace HeartScript.Ast
 
                 parameters[i] = parameterNode.Type;
 
-                var symbol = new Symbol<AstNode>(false, parameterNode);
+                var symbol = new Symbol<AstNode>(true, parameterNode);
                 methodScope.DeclareSymbol(paramName, symbol);
             }
 
@@ -85,15 +85,16 @@ namespace HeartScript.Ast
             methodInfoNode.Statements.Add(returnNode);
         }
 
-        private static void BuildStandardBody(SymbolScope scope, MethodInfoNode methodInfoNode, IParseNode node)
+        private static void BuildBlockBody(SymbolScope scope, MethodInfoNode methodInfoNode, IParseNode node)
         {
             var sequenceNode = (SequenceNode)node;
             var quantifierNode = (QuantifierNode)sequenceNode.Children[1];
 
+            var blockScope = new SymbolScope(scope);
             foreach (var child in quantifierNode.Children)
             {
                 var labelNode = (LabelNode)child;
-                BuildStatement(scope, methodInfoNode, labelNode);
+                BuildStatement(blockScope, methodInfoNode, labelNode);
             }
         }
 
@@ -107,7 +108,7 @@ namespace HeartScript.Ast
             var variableNode = AstNode.Variable(methodInfoNode.Variables.Count, type);
             methodInfoNode.Variables.Add(variableNode);
 
-            var symbol = new Symbol<AstNode>(false, variableNode);
+            var symbol = new Symbol<AstNode>(true, variableNode);
             scope.DeclareSymbol(name, symbol);
 
             var optionalAssignmentNode = (QuantifierNode)declarationSequence.Children[2];
