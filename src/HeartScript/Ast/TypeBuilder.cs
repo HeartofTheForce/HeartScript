@@ -8,14 +8,14 @@ namespace HeartScript.Ast
 {
     public static class TypeBuilder
     {
-        private delegate AstNode AstNodeBuilder(AstScope scope, LabelNode node);
+        private delegate AstNode AstNodeBuilder(SymbolScope scope, LabelNode node);
 
         private static readonly Dictionary<string, AstNodeBuilder> s_nodeBuilders = new Dictionary<string, AstNodeBuilder>()
         {
             ["method"] = BuildMethod,
         };
 
-        public static AstNode Build(AstScope scope, LabelNode node)
+        public static AstNode Build(SymbolScope scope, LabelNode node)
         {
             if (node.Label != null && s_nodeBuilders.TryGetValue(node.Label, out var builder))
                 return builder(scope, node);
@@ -23,7 +23,7 @@ namespace HeartScript.Ast
             throw new ArgumentException($"{node.Label} does not have a matching builder");
         }
 
-        private static AstNode BuildMethod(AstScope scope, LabelNode node)
+        private static AstNode BuildMethod(SymbolScope scope, LabelNode node)
         {
             var methodSequence = (SequenceNode)node.Node;
 
@@ -49,7 +49,7 @@ namespace HeartScript.Ast
                 }
             }
 
-            var methodScope = new AstScope(scope);
+            var methodScope = new SymbolScope(scope);
 
             var parameters = new Type[parameterValues.Count];
             for (int i = 0; i < parameters.Length; i++)
@@ -60,7 +60,7 @@ namespace HeartScript.Ast
                 var parameterNode = new ParameterNode(i, paramType);
 
                 parameters[i] = parameterNode.Type;
-                methodScope.SetMember(paramName, parameterNode, false);
+                methodScope.SetSymbol(paramName, new Symbol<AstNode>(false, parameterNode));
             }
 
             var body = BuildMethodBody(methodScope, returnType, methodSequence.Children[5]);
@@ -68,7 +68,7 @@ namespace HeartScript.Ast
             return new MethodInfoNode(methodName, parameters, body);
         }
 
-        private static BlockNode BuildMethodBody(AstScope scope, Type returnType, IParseNode body)
+        private static BlockNode BuildMethodBody(SymbolScope scope, Type returnType, IParseNode body)
         {
             var choiceNode = (ChoiceNode)body;
             var labelNode = (LabelNode)choiceNode.Node;

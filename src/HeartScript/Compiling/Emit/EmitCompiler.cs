@@ -18,7 +18,7 @@ namespace HeartScript.Compiling.Emit
 
         public static MethodInfo CompileFunction(IParseNode node)
         {
-            var scope = new AstScope();
+            var scope = new SymbolScope();
             var ast = AstBuilder.Build(scope, node);
 
             return Compile(

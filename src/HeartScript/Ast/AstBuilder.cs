@@ -7,7 +7,7 @@ namespace HeartScript.Ast
 {
     public static class AstBuilder
     {
-        public static AstNode Build(AstScope scope, IParseNode node)
+        public static AstNode Build(SymbolScope scope, IParseNode node)
         {
             switch (node)
             {
