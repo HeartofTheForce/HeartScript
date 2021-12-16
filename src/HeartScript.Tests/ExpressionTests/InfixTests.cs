@@ -5,7 +5,7 @@ namespace HeartScript.Tests.ExpressionTests
     [TestFixture]
     public class InfixTests
     {
-        private static readonly IExpressionTestCase[] s_testCases = new IExpressionTestCase[]
+        private static readonly ICompilerTestCase[] s_testCases = new ICompilerTestCase[]
         {
             //*
             new ExpressionTestCase<int>()
@@ -264,7 +264,7 @@ namespace HeartScript.Tests.ExpressionTests
         };
 
         [TestCaseSource(nameof(s_testCases))]
-        public void TestCases(IExpressionTestCase testCase)
+        public void TestCases(ICompilerTestCase testCase)
         {
             testCase.Execute();
         }

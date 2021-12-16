@@ -5,7 +5,7 @@ namespace HeartScript.Tests.ExpressionTests
     [TestFixture]
     public class NullaryTests
     {
-        private static readonly IExpressionTestCase[] s_testCases = new IExpressionTestCase[]
+        private static readonly ICompilerTestCase[] s_testCases = new ICompilerTestCase[]
         {
             //()
             new ExpressionTestCase<int>()
@@ -37,7 +37,7 @@ namespace HeartScript.Tests.ExpressionTests
                 ExpectedExpression = () => false,
             },
             //identifier
-            new ExpressionTestCase()
+            new CompilerTestCase()
             {
                 Method = "bool main(bool BoolA) => BoolA;",
                 Paramaters = new object[]
@@ -46,7 +46,7 @@ namespace HeartScript.Tests.ExpressionTests
                 },
                 ExpectedResult = true,
             },
-            new ExpressionTestCase()
+            new CompilerTestCase()
             {
                 Method = "int main(int IntA) => IntA;",
                  Paramaters = new object[]
@@ -55,7 +55,7 @@ namespace HeartScript.Tests.ExpressionTests
                 },
                 ExpectedResult = 1,
             },
-            new ExpressionTestCase()
+            new CompilerTestCase()
             {
                 Method = "double main(double DoubleA) => DoubleA;",
                 Paramaters = new object[]
@@ -64,7 +64,7 @@ namespace HeartScript.Tests.ExpressionTests
                 },
                 ExpectedResult = 1.5,
             },
-            new ExpressionTestCase()
+            new CompilerTestCase()
             {
                 Method = "bool main(bool BoolA) { return BoolA; }",
                 Paramaters = new object[]
@@ -73,7 +73,7 @@ namespace HeartScript.Tests.ExpressionTests
                 },
                 ExpectedResult = true,
             },
-            new ExpressionTestCase()
+            new CompilerTestCase()
             {
                 Method = "int main(int IntA) { return IntA; }",
                  Paramaters = new object[]
@@ -82,7 +82,7 @@ namespace HeartScript.Tests.ExpressionTests
                 },
                 ExpectedResult = 1,
             },
-            new ExpressionTestCase()
+            new CompilerTestCase()
             {
                 Method = "double main(double DoubleA) { return DoubleA; }",
                 Paramaters = new object[]
@@ -94,7 +94,7 @@ namespace HeartScript.Tests.ExpressionTests
         };
 
         [TestCaseSource(nameof(s_testCases))]
-        public void TestCases(IExpressionTestCase testCase)
+        public void TestCases(ICompilerTestCase testCase)
         {
             testCase.Execute();
         }
