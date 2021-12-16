@@ -9,12 +9,12 @@ using NUnit.Framework;
 
 namespace HeartScript.Tests.CompilerTests
 {
-    public interface IExpressionCompilerTestCase
+    public interface IExpressionTestCase
     {
         void Execute();
     }
 
-    public class ExpressionCompilerTestCase<T> : IExpressionCompilerTestCase
+    public class ExpressionTestCase<T> : IExpressionTestCase
     {
         private static readonly Dictionary<Type, string> s_typeLookup = new Dictionary<Type, string>()
         {
@@ -51,7 +51,7 @@ namespace HeartScript.Tests.CompilerTests
         }
     }
 
-    public class ExpressionCompilerTestCase : IExpressionCompilerTestCase
+    public class ExpressionTestCase : IExpressionTestCase
     {
         public string Method { get; set; }
         public object[] Paramaters { get; set; }

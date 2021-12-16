@@ -3,34 +3,34 @@ using NUnit.Framework;
 namespace HeartScript.Tests.CompilerTests
 {
     [TestFixture]
-    public class CompilerPrefixTests
+    public class PrefixTests
     {
-        private static readonly IExpressionCompilerTestCase[] s_testCases = new IExpressionCompilerTestCase[]
+        private static readonly IExpressionTestCase[] s_testCases = new IExpressionTestCase[]
         {
             //u+
-            new ExpressionCompilerTestCase<int>()
+            new ExpressionTestCase<int>()
             {
                 Infix = "+1",
                 ExpectedExpression = () => +1,
             },
-            new ExpressionCompilerTestCase<double>()
+            new ExpressionTestCase<double>()
             {
                 Infix = "+1.5",
                 ExpectedExpression = () => +1.5,
             },
             //u-
-            new ExpressionCompilerTestCase<int>()
+            new ExpressionTestCase<int>()
             {
                 Infix = "-1",
                 ExpectedExpression = () => -1,
             },
-            new ExpressionCompilerTestCase<double>()
+            new ExpressionTestCase<double>()
             {
                 Infix = "-1.5",
                 ExpectedExpression = () => -1.5,
             },
             //~
-            new ExpressionCompilerTestCase<int>()
+            new ExpressionTestCase<int>()
             {
                 Infix = "~1",
                 ExpectedExpression = () => ~1,
@@ -38,7 +38,7 @@ namespace HeartScript.Tests.CompilerTests
         };
 
         [TestCaseSource(nameof(s_testCases))]
-        public void TestCases(IExpressionCompilerTestCase testCase)
+        public void TestCases(IExpressionTestCase testCase)
         {
             testCase.Execute();
         }

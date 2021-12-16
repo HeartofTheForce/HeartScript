@@ -3,41 +3,41 @@ using NUnit.Framework;
 namespace HeartScript.Tests.CompilerTests
 {
     [TestFixture]
-    public class CompilerNullaryTests
+    public class NullaryTests
     {
-        private static readonly IExpressionCompilerTestCase[] s_testCases = new IExpressionCompilerTestCase[]
+        private static readonly IExpressionTestCase[] s_testCases = new IExpressionTestCase[]
         {
             //()
-            new ExpressionCompilerTestCase<int>()
+            new ExpressionTestCase<int>()
             {
                 Infix = "(1)",
                 ExpectedExpression = () => 1,
             },
             //real
-            new ExpressionCompilerTestCase<double>()
+            new ExpressionTestCase<double>()
             {
                 Infix = "1.5",
                 ExpectedExpression = () => 1.5,
             },
             //integral
-            new ExpressionCompilerTestCase<int>()
+            new ExpressionTestCase<int>()
             {
                 Infix = "1",
                 ExpectedExpression = () => 1,
             },
             //boolean
-            new ExpressionCompilerTestCase<bool>()
+            new ExpressionTestCase<bool>()
             {
                 Infix = "true",
                 ExpectedExpression = () => true,
             },
-            new ExpressionCompilerTestCase<bool>()
+            new ExpressionTestCase<bool>()
             {
                 Infix = "false",
                 ExpectedExpression = () => false,
             },
             //identifier
-            new ExpressionCompilerTestCase()
+            new ExpressionTestCase()
             {
                 Method = "bool main(bool BoolA) => BoolA;",
                 Paramaters = new object[]
@@ -46,7 +46,7 @@ namespace HeartScript.Tests.CompilerTests
                 },
                 ExpectedResult = true,
             },
-            new ExpressionCompilerTestCase()
+            new ExpressionTestCase()
             {
                 Method = "int main(int IntA) => IntA;",
                  Paramaters = new object[]
@@ -55,7 +55,7 @@ namespace HeartScript.Tests.CompilerTests
                 },
                 ExpectedResult = 1,
             },
-            new ExpressionCompilerTestCase()
+            new ExpressionTestCase()
             {
                 Method = "double main(double DoubleA) => DoubleA;",
                 Paramaters = new object[]
@@ -64,7 +64,7 @@ namespace HeartScript.Tests.CompilerTests
                 },
                 ExpectedResult = 1.5,
             },
-            new ExpressionCompilerTestCase()
+            new ExpressionTestCase()
             {
                 Method = "bool main(bool BoolA) { return BoolA; }",
                 Paramaters = new object[]
@@ -73,7 +73,7 @@ namespace HeartScript.Tests.CompilerTests
                 },
                 ExpectedResult = true,
             },
-            new ExpressionCompilerTestCase()
+            new ExpressionTestCase()
             {
                 Method = "int main(int IntA) { return IntA; }",
                  Paramaters = new object[]
@@ -82,7 +82,7 @@ namespace HeartScript.Tests.CompilerTests
                 },
                 ExpectedResult = 1,
             },
-            new ExpressionCompilerTestCase()
+            new ExpressionTestCase()
             {
                 Method = "double main(double DoubleA) { return DoubleA; }",
                 Paramaters = new object[]
@@ -94,7 +94,7 @@ namespace HeartScript.Tests.CompilerTests
         };
 
         [TestCaseSource(nameof(s_testCases))]
-        public void TestCases(IExpressionCompilerTestCase testCase)
+        public void TestCases(IExpressionTestCase testCase)
         {
             testCase.Execute();
         }
