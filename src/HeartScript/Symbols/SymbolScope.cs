@@ -55,8 +55,11 @@ namespace HeartScript.Ast
             return false;
         }
 
-        public void SetSymbol(string name, ISymbol symbol)
+        public void DeclareSymbol(string name, ISymbol symbol)
         {
+            if (_symbols.ContainsKey(name))
+                throw new ArgumentException(nameof(name));
+
             _symbols[name] = symbol;
         }
     }

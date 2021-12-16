@@ -60,7 +60,7 @@ namespace HeartScript.Ast
                 var parameterNode = new ParameterNode(i, paramType);
 
                 parameters[i] = parameterNode.Type;
-                methodScope.SetSymbol(paramName, new Symbol<AstNode>(false, parameterNode));
+                methodScope.DeclareSymbol(paramName, new Symbol<AstNode>(false, parameterNode));
             }
 
             var body = BuildMethodBody(methodScope, returnType, methodSequence.Children[5]);
