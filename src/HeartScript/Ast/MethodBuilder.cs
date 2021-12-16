@@ -82,8 +82,7 @@ namespace HeartScript.Ast
             }
 
             var methodInfoNode = new MethodInfoNode(methodName, returnType, parameters);
-            var methodBodyChoiceNode = (ChoiceNode)methodSequence.Children[5];
-            var methodBodyLabelNode = (LabelNode)methodBodyChoiceNode.Node;
+            var methodBodyLabelNode = (LabelNode)methodSequence.Children[5];
             BuildBody(methodScope, methodInfoNode, methodBodyLabelNode);
 
             return methodInfoNode;
@@ -106,8 +105,7 @@ namespace HeartScript.Ast
 
             foreach (var child in quantifierNode.Children)
             {
-                var choiceNode = (ChoiceNode)child;
-                var labelNode = (LabelNode)choiceNode.Node;
+                var labelNode = (LabelNode)child;
                 BuildStatement(scope, methodInfoNode, labelNode);
             }
         }
@@ -164,8 +162,7 @@ namespace HeartScript.Ast
 
         private static Type GetType(IParseNode typeNode)
         {
-            var choiceNode = (ChoiceNode)typeNode;
-            var valueNode = (ValueNode)choiceNode.Node;
+            var valueNode = (ValueNode)typeNode;
             switch (valueNode.Value)
             {
                 case "int": return typeof(int);

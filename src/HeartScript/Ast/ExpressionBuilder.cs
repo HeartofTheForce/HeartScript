@@ -74,8 +74,7 @@ namespace HeartScript.Ast
 
         private static AstNode ParseBoolean(SymbolScope scope, ExpressionNode node)
         {
-            var choiceNode = (ChoiceNode)node.MidNode;
-            var valueNode = (ValueNode)choiceNode.Node;
+            var valueNode = (ValueNode)node.MidNode;
             if (bool.TryParse(valueNode.Value, out bool value))
                 return new ConstantNode(value);
 

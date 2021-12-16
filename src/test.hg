@@ -4,13 +4,13 @@ _ -> `\s*`
 type -> 'int' / 'double' / 'bool'
 name -> !type `[_a-zA-Z]\w*`
 parameters -> (type name (',' type name)*)?
-method -> type name '(' parameters ')' ('standard':standardBody / 'lambda':lambdaBody)
-lambdaBody -> '=>' expr ';'
-standardBody -> '{' statement* '}'
-statement -> 'declaration':declarationStatement / 'assignment':assignmentStatement / 'return':returnStatement
-declarationStatement -> type name ('=' expr)? ';'
-assignmentStatement -> name '=' expr ';'
-returnStatement -> 'return' expr ';'
+method -> type name '(' parameters ')' ('standard':standard_body / 'lambda':lambda_body)
+lambda_body -> '=>' expr ';'
+standard_body -> '{' statement* '}'
+statement -> 'declaration':declaration_statement / 'assignment':assignment_statement / 'return':return_statement
+declaration_statement -> type name ('=' expr)? ';'
+assignment_statement -> name '=' expr ';'
+return_statement -> 'return' expr ';'
 
 expr ->
     [
