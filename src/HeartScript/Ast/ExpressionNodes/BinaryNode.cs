@@ -32,5 +32,6 @@ namespace HeartScript.Ast.Nodes
         public static BinaryNode And(AstNode left, AstNode right) => new BinaryNode(left, right, left.Type, AstType.And);
         public static BinaryNode ExclusiveOr(AstNode left, AstNode right) => new BinaryNode(left, right, left.Type, AstType.ExclusiveOr);
         public static BinaryNode Or(AstNode left, AstNode right) => new BinaryNode(left, right, left.Type, AstType.Or);
+        public static BinaryNode Assign(AstNode left, AstNode right) => new BinaryNode(left, right, left.Type, AstType.Assign);
     }
 }

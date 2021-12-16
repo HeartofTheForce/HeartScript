@@ -4,16 +4,16 @@ namespace HeartScript.Ast.Nodes
 {
     public class ParameterNode : AstNode
     {
-        public int ParameterIndex { get; }
+        public int Index { get; }
 
-        public ParameterNode(int parameterIndex, Type type) : base(type, AstType.Parameter)
+        public ParameterNode(int index, Type type) : base(type, AstType.Parameter)
         {
-            ParameterIndex = parameterIndex;
+            Index = index;
         }
     }
 
     public partial class AstNode
     {
-        public static ParameterNode Parameter(int parameterIndex, Type type) => new ParameterNode(parameterIndex, type);
+        public static ParameterNode Parameter(int index, Type type) => new ParameterNode(index, type);
     }
 }

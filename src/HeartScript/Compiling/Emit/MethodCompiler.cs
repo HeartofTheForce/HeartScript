@@ -18,8 +18,16 @@ namespace HeartScript.Compiling.Emit
             var methodBuilder = typeBuilder.DefineMethod(node.Name, MethodAttributes.Public | MethodAttributes.Static, node.ReturnType, node.ParameterTypes);
             var ilGenerator = methodBuilder.GetILGenerator();
 
+            foreach (var variableNode in node.Variables)
+            {
+                ilGenerator.DeclareLocal(variableNode.Type);
+            }
+
             var basicBlock = new BasicBlock();
-            EmitStatement(ilGenerator, basicBlock, node.Body);
+            foreach (var statementNode in node.Statements)
+            {
+                EmitStatement(ilGenerator, basicBlock, statementNode);
+            }
 
             if (!basicBlock.Return)
                 throw new Exception("Not all code paths return a value");
@@ -29,17 +37,8 @@ namespace HeartScript.Compiling.Emit
         {
             switch (node)
             {
-                case BlockNode blockNode: EmitBlock(ilGenerator, basicBlock, blockNode); break;
                 case ReturnNode returnNode: EmitReturn(ilGenerator, basicBlock, returnNode); break;
-                default: throw new NotImplementedException();
-            }
-        }
-
-        private static void EmitBlock(ILGenerator ilGenerator, BasicBlock basicBlock, BlockNode node)
-        {
-            foreach (var statement in node.Nodes)
-            {
-                EmitStatement(ilGenerator, basicBlock, statement);
+                default: EmitExpression(ilGenerator, node); break;
             }
         }
 
@@ -62,6 +61,7 @@ namespace HeartScript.Compiling.Emit
                 case ConditionalNode conditionalNode: EmitConditional(ilGenerator, conditionalNode); break;
                 case CallNode callNode: EmitCall(ilGenerator, callNode); break;
                 case ParameterNode parameterNode: EmitParameter(ilGenerator, parameterNode); break;
+                case VariableNode variableNode: EmitVariable(ilGenerator, variableNode); break;
                 case MemberAccessNode memberAccessNode: EmitMemberAccess(ilGenerator, memberAccessNode); break;
                 default: throw new NotImplementedException();
             }
@@ -95,6 +95,22 @@ namespace HeartScript.Compiling.Emit
 
         private static void EmitBinary(ILGenerator ilGenerator, BinaryNode node)
         {
+            if (node.NodeType == AstType.Assign)
+            {
+                EmitExpression(ilGenerator, node.Right);
+
+                switch (node.Left)
+                {
+                    case ParameterNode parameterNode:
+                        ilGenerator.Emit(OpCodes.Starg, parameterNode.Index); break;
+                    case VariableNode variableNode:
+                        ilGenerator.Emit(OpCodes.Stloc, variableNode.Index); break;
+                    default: throw new NotImplementedException();
+                }
+
+                return;
+            }
+
             EmitExpression(ilGenerator, node.Left);
             EmitExpression(ilGenerator, node.Right);
 
@@ -131,6 +147,7 @@ namespace HeartScript.Compiling.Emit
                 case AstType.And: ilGenerator.Emit(OpCodes.And); break;
                 case AstType.ExclusiveOr: ilGenerator.Emit(OpCodes.Xor); break;
                 case AstType.Or: ilGenerator.Emit(OpCodes.Or); break;
+                case AstType.Assign: ilGenerator.Emit(OpCodes.Or); break;
                 default: throw new NotImplementedException();
             }
         }
@@ -144,7 +161,7 @@ namespace HeartScript.Compiling.Emit
                 case AstType.Convert:
                     {
                         if (node.Operand.Type != typeof(int) || node.Type != typeof(double))
-                            throw new NotImplementedException();
+                            throw new NotImplementedException($"Cannot convert, {node.Operand.Type} to {node.Type}");
 
                         ilGenerator.Emit(OpCodes.Conv_R8);
                     }
@@ -191,7 +208,12 @@ namespace HeartScript.Compiling.Emit
 
         private static void EmitParameter(ILGenerator ilGenerator, ParameterNode node)
         {
-            ilGenerator.Emit(OpCodes.Ldarg, node.ParameterIndex);
+            ilGenerator.Emit(OpCodes.Ldarg, node.Index);
+        }
+
+        private static void EmitVariable(ILGenerator ilGenerator, VariableNode node)
+        {
+            ilGenerator.Emit(OpCodes.Ldloc, node.Index);
         }
 
         private static void EmitMemberAccess(ILGenerator ilGenerator, MemberAccessNode node)

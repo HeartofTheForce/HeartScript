@@ -10,7 +10,7 @@ namespace HeartScript.Ast
 {
     public static class ExpressionBuilder
     {
-        private delegate AstNode AstNodeBuilder(AstScope scope, ExpressionNode node);
+        private delegate AstNode AstNodeBuilder(SymbolScope scope, ExpressionNode node);
 
         private static readonly Dictionary<string, AstNodeBuilder> s_nodeBuilders = new Dictionary<string, AstNodeBuilder>()
         {
@@ -40,21 +40,21 @@ namespace HeartScript.Ast
             ["identifier"] = ParseIdentifier,
         };
 
-        public static AstNode Build(AstScope scope, ExpressionNode node)
+        public static AstNode Build(SymbolScope scope, ExpressionNode node)
         {
             if (node.Key != null && s_nodeBuilders.TryGetValue(node.Key, out var builder))
                 return builder(scope, node);
 
-            throw new ArgumentException($"{node.Key} does not have a matching builder");
+            throw new ArgumentException($"{node.Key} has no matching builder");
         }
 
-        private static AstNode BuildRoundBracket(AstScope scope, ExpressionNode node)
+        private static AstNode BuildRoundBracket(SymbolScope scope, ExpressionNode node)
         {
             var sequenceNode = (SequenceNode)node.MidNode;
             return Build(scope, (ExpressionNode)sequenceNode.Children[1]);
         }
 
-        private static AstNode ParseReal(AstScope scope, ExpressionNode node)
+        private static AstNode ParseReal(SymbolScope scope, ExpressionNode node)
         {
             var valueNode = (ValueNode)node.MidNode;
             if (double.TryParse(valueNode.Value, out double value))
@@ -63,7 +63,7 @@ namespace HeartScript.Ast
             throw new ArgumentException(nameof(node));
         }
 
-        private static AstNode ParseIntegral(AstScope scope, ExpressionNode node)
+        private static AstNode ParseIntegral(SymbolScope scope, ExpressionNode node)
         {
             var valueNode = (ValueNode)node.MidNode;
             if (int.TryParse(valueNode.Value, out int value))
@@ -72,7 +72,7 @@ namespace HeartScript.Ast
             throw new ArgumentException(nameof(node));
         }
 
-        private static AstNode ParseBoolean(AstScope scope, ExpressionNode node)
+        private static AstNode ParseBoolean(SymbolScope scope, ExpressionNode node)
         {
             var choiceNode = (ChoiceNode)node.MidNode;
             var valueNode = (ValueNode)choiceNode.Node;
@@ -82,16 +82,16 @@ namespace HeartScript.Ast
             throw new ArgumentException(nameof(node));
         }
 
-        private static AstNode ParseIdentifier(AstScope scope, ExpressionNode node)
+        private static AstNode ParseIdentifier(SymbolScope scope, ExpressionNode node)
         {
             var valueNode = (ValueNode)node.MidNode;
-            if (scope.TryGetMember(valueNode.Value, out var variable))
-                return variable;
+            if (scope.TryGetSymbol<AstNode>(valueNode.Value, out var symbol))
+                return symbol.Value;
 
-            throw new ArgumentException($"Missing member {valueNode.Value}");
+            throw new ArgumentException($"Missing symbol {valueNode.Value}");
         }
 
-        private static AstNode BuildCall(AstScope scope, ExpressionNode callNode, AstNode? instance, Type type, BindingFlags bindingFlags)
+        private static AstNode BuildCall(SymbolScope scope, ExpressionNode callNode, AstNode? instance, Type type, BindingFlags bindingFlags)
         {
             if (callNode.LeftNode == null)
                 throw new Exception($"{nameof(callNode.LeftNode)} cannot be null");
@@ -116,7 +116,7 @@ namespace HeartScript.Ast
 
             var methodInfo = type.GetMethod(methodName, bindingFlags, null, parameterTypes, null);
             if (methodInfo == null)
-                throw new Exception($"{type.FullName} does not have an overload matching '{methodName}({string.Join(',', parameterTypes.Select(x => x.Name))})'");
+                throw new Exception($"{type.FullName} has no overload matching '{methodName}({string.Join(',', parameterTypes.Select(x => x.Name))})'");
 
             var expectedParameters = methodInfo.GetParameters();
             for (int i = 0; i < parameterNodes.Count; i++)
@@ -183,7 +183,7 @@ namespace HeartScript.Ast
             };
         }
 
-        private static AstNode BuildTernary(AstScope scope, ExpressionNode node)
+        private static AstNode BuildTernary(SymbolScope scope, ExpressionNode node)
         {
             if (node.LeftNode == null)
                 throw new Exception($"{nameof(node.LeftNode)} cannot be null");

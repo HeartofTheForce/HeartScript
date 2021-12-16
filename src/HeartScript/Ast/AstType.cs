@@ -22,8 +22,10 @@ namespace HeartScript.Ast
         And,
         ExclusiveOr,
         Or,
+        Assign,
         Conditional,
         Convert,
         Parameter,
+        Variable,
     }
 }

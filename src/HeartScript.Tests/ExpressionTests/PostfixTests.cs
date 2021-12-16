@@ -1,46 +1,46 @@
 using System;
 using NUnit.Framework;
 
-namespace HeartScript.Tests.CompilerTests
+namespace HeartScript.Tests.ExpressionTests
 {
     [TestFixture]
-    public class CompilerPostfixTests
+    public class PostfixTests
     {
-        private static readonly IExpressionCompilerTestCase[] s_testCases = new IExpressionCompilerTestCase[]
+        private static readonly ICompilerTestCase[] s_testCases = new ICompilerTestCase[]
         {
             //$
-            new ExpressionCompilerTestCase<double>()
+            new ExpressionTestCase<double>()
             {
                 Infix = "Sin(1)",
                 ExpectedExpression = () => Math.Sin(1),
             },
-            new ExpressionCompilerTestCase<int>()
+            new ExpressionTestCase<int>()
             {
                 Infix = "Max(0, 1)",
                 ExpectedExpression = () => Math.Max(0, 1),
             },
-            new ExpressionCompilerTestCase<double>()
+            new ExpressionTestCase<double>()
             {
                 Infix = "Max(0.5, 1.5)",
                 ExpectedExpression = () => Math.Max(0.5, 1.5),
             },
-            new ExpressionCompilerTestCase<double>()
+            new ExpressionTestCase<double>()
             {
                 Infix = "Max(0.5, 1)",
                 ExpectedExpression = () => Math.Max(0.5, 1),
             },
-            new ExpressionCompilerTestCase<double>()
+            new ExpressionTestCase<double>()
             {
                 Infix = "Max(0, 1.5)",
                 ExpectedExpression = () => Math.Max(0, 1.5),
             },
             //!
-            new ExpressionCompilerTestCase<double>()
+            new ExpressionTestCase<double>()
             {
                 Infix = "1.5!",
                 ExpectedExpression = () => 1.5,
             },
-            new ExpressionCompilerTestCase<int>()
+            new ExpressionTestCase<int>()
             {
                 Infix = "1!",
                 ExpectedExpression = () => 1,
@@ -48,7 +48,7 @@ namespace HeartScript.Tests.CompilerTests
         };
 
         [TestCaseSource(nameof(s_testCases))]
-        public void TestCases(IExpressionCompilerTestCase testCase)
+        public void TestCases(ICompilerTestCase testCase)
         {
             testCase.Execute();
         }

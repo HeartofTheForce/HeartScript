@@ -7,14 +7,9 @@ using NUnit.Framework;
 #pragma warning disable CS8618
 #pragma warning disable CS8625
 
-namespace HeartScript.Tests.CompilerTests
+namespace HeartScript.Tests.ExpressionTests
 {
-    public interface IExpressionCompilerTestCase
-    {
-        void Execute();
-    }
-
-    public class ExpressionCompilerTestCase<T> : IExpressionCompilerTestCase
+    public class ExpressionTestCase<T> : ICompilerTestCase
     {
         private static readonly Dictionary<Type, string> s_typeLookup = new Dictionary<Type, string>()
         {
@@ -31,7 +26,7 @@ namespace HeartScript.Tests.CompilerTests
             string source = $"{s_typeLookup[typeof(T)]} main() => {Infix};";
             var ctx = new ParserContext(source);
 
-            var pattern = Utility.Parser.Patterns["root"];
+            var pattern = Utility.Parser.Patterns["root"].Trim(Utility.Parser.Patterns["_"]);
             var node = pattern.TryMatch(Utility.Parser, ctx);
 
             ctx.AssertComplete();
@@ -48,34 +43,6 @@ namespace HeartScript.Tests.CompilerTests
         public override string ToString()
         {
             return $"\"{Infix}\"";
-        }
-    }
-
-    public class ExpressionCompilerTestCase : IExpressionCompilerTestCase
-    {
-        public string Method { get; set; }
-        public object[] Paramaters { get; set; }
-        public object? ExpectedResult { get; set; }
-
-        public void Execute()
-        {
-            var ctx = new ParserContext(Method);
-            var pattern = Utility.Parser.Patterns["root"];
-            var node = pattern.TryMatch(Utility.Parser, ctx);
-
-            ctx.AssertComplete();
-            if (node == null)
-                throw new ArgumentException(nameof(ctx.Exception));
-
-            var compiledMethodInfo = EmitCompiler.CompileFunction(node);
-
-            object? actualResult = compiledMethodInfo.Invoke(null, Paramaters);
-            Assert.AreEqual(ExpectedResult, actualResult);
-        }
-
-        public override string ToString()
-        {
-            return $"\"{Method}\"";
         }
     }
 }
