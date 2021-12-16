@@ -28,6 +28,7 @@ namespace HeartScript.Compiling.Emit
             {
                 EmitStatement(ilGenerator, basicBlock, statementNode);
             }
+
             if (!basicBlock.Return)
                 throw new Exception("Not all code paths return a value");
         }
