@@ -1,22 +1,10 @@
 using System;
 using HeartScript.Ast.Nodes;
-using Heart.Parsing;
-using Heart.Parsing.Patterns;
 
 namespace HeartScript.Ast
 {
     public static class AstBuilder
     {
-        public static AstNode Build(SymbolScope scope, IParseNode node)
-        {
-            switch (node)
-            {
-                case ExpressionNode expressionNode: return ExpressionBuilder.Build(scope, expressionNode);
-                case LabelNode labelNode: return TypeBuilder.Build(scope, labelNode);
-                default: throw new NotImplementedException();
-            }
-        }
-
         public static AstNode ConvertIfRequired(AstNode expression, Type expectedType)
         {
             if (expression.Type != expectedType)

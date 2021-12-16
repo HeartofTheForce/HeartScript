@@ -155,8 +155,8 @@ namespace HeartScript.Ast
         private static void BuildReturn(SymbolScope scope, MethodInfoNode methodInfoNode, IParseNode node)
         {
             var returnSequence = (SequenceNode)node;
-            var expressionNode = returnSequence.Children[1];
-            var expression = AstBuilder.Build(scope, expressionNode);
+            var expressionNode = (ExpressionNode)returnSequence.Children[1];
+            var expression = ExpressionBuilder.Build(scope, expressionNode);
 
             var returnNode = AstNode.Return(AstBuilder.ConvertIfRequired(expression, methodInfoNode.ReturnType));
             methodInfoNode.Statements.Add(returnNode);

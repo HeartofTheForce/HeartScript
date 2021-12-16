@@ -4,6 +4,7 @@ using System.Reflection.Emit;
 using HeartScript.Ast;
 using HeartScript.Ast.Nodes;
 using Heart.Parsing;
+using Heart.Parsing.Patterns;
 
 namespace HeartScript.Compiling.Emit
 {
@@ -19,7 +20,22 @@ namespace HeartScript.Compiling.Emit
         public static MethodInfo CompileFunction(IParseNode node)
         {
             var scope = new SymbolScope();
-            var ast = AstBuilder.Build(scope, node);
+
+            AstNode ast;
+            switch (node)
+            {
+                case ExpressionNode expressionNode:
+                    {
+                        ast = ExpressionBuilder.Build(scope, expressionNode);
+                        break;
+                    }
+                case LabelNode labelNode:
+                    {
+                        ast = Ast.TypeBuilder.Build(scope, labelNode);
+                        break;
+                    }
+                default: throw new NotImplementedException();
+            }
 
             return Compile(
                 "AssemblyName",
