@@ -8,7 +8,7 @@ namespace HeartScript.Ast
 {
     public static class MethodBuilder
     {
-        private delegate void StatmentBuilder(SymbolScope scope, MethodInfoNode methodInfoNode, IParseNode parseNode);
+        private delegate void StatmentBuilder(SymbolScope scope, MethodInfoBuilder builder, IParseNode parseNode);
         private static readonly Dictionary<string, StatmentBuilder> s_statementBuilders = new Dictionary<string, StatmentBuilder>()
         {
             ["lambda"] = BuildLambdaBody,
@@ -18,10 +18,10 @@ namespace HeartScript.Ast
             ["return"] = BuildReturn,
         };
 
-        private static void BuildStatement(SymbolScope scope, MethodInfoNode methodInfoNode, LabelNode node)
+        private static void BuildStatement(SymbolScope scope, MethodInfoBuilder builder, LabelNode node)
         {
-            if (node.Label != null && s_statementBuilders.TryGetValue(node.Label, out var builder))
-                builder(scope, methodInfoNode, node.Node);
+            if (node.Label != null && s_statementBuilders.TryGetValue(node.Label, out var statmentBuilder))
+                statmentBuilder(scope, builder, node.Node);
             else
                 throw new ArgumentException($"{node.Label} has no matching builder");
         }
@@ -54,38 +54,42 @@ namespace HeartScript.Ast
 
             var methodScope = new SymbolScope(scope);
 
-            var parameters = new Type[parameterValues.Count];
-            for (int i = 0; i < parameters.Length; i++)
+            var methodInfoBuilder = new MethodInfoBuilder(methodName, returnType);
+            for (int i = 0; i < parameterValues.Count; i++)
             {
                 var paramType = GetType(parameterValues[i].Item1);
                 string paramName = GetName(parameterValues[i].Item2);
 
                 var parameterNode = AstNode.Parameter(i, paramType);
-
-                parameters[i] = parameterNode.Type;
+                methodInfoBuilder.ParameterTypes.Add(parameterNode.Type);
 
                 var symbol = new Symbol<AstNode>(true, parameterNode);
                 methodScope.DeclareSymbol(paramName, symbol);
             }
 
-            var methodInfoNode = new MethodInfoNode(methodName, returnType, parameters);
             var methodBodyLabelNode = (LabelNode)methodSequence.Children[5];
-            BuildStatement(methodScope, methodInfoNode, methodBodyLabelNode);
+            BuildStatement(methodScope, methodInfoBuilder, methodBodyLabelNode);
 
-            return methodInfoNode;
+            return new MethodInfoNode(
+                methodInfoBuilder.Name,
+                methodInfoBuilder.ReturnType,
+                methodInfoBuilder.ParameterTypes.ToArray(),
+                methodInfoBuilder.Variables.ToArray(),
+                AstNode.Block(methodInfoBuilder.Statements.ToArray())
+            );
         }
 
-        private static void BuildLambdaBody(SymbolScope scope, MethodInfoNode methodInfoNode, IParseNode node)
+        private static void BuildLambdaBody(SymbolScope scope, MethodInfoBuilder builder, IParseNode node)
         {
             var sequenceNode = (SequenceNode)node;
             var expressionNode = (ExpressionNode)sequenceNode.Children[1];
             var expression = ExpressionBuilder.Build(scope, expressionNode);
 
-            var returnNode = AstNode.Return(AstBuilder.ConvertIfRequired(expression, methodInfoNode.ReturnType));
-            methodInfoNode.Statements.Add(returnNode);
+            var returnNode = AstNode.Return(AstBuilder.ConvertIfRequired(expression, builder.ReturnType));
+            builder.Statements.Add(returnNode);
         }
 
-        private static void BuildBlockBody(SymbolScope scope, MethodInfoNode methodInfoNode, IParseNode node)
+        private static void BuildBlockBody(SymbolScope scope, MethodInfoBuilder builder, IParseNode node)
         {
             var sequenceNode = (SequenceNode)node;
             var quantifierNode = (QuantifierNode)sequenceNode.Children[1];
@@ -94,19 +98,19 @@ namespace HeartScript.Ast
             foreach (var child in quantifierNode.Children)
             {
                 var labelNode = (LabelNode)child;
-                BuildStatement(blockScope, methodInfoNode, labelNode);
+                BuildStatement(blockScope, builder, labelNode);
             }
         }
 
-        private static void BuildDeclaration(SymbolScope scope, MethodInfoNode methodInfoNode, IParseNode node)
+        private static void BuildDeclaration(SymbolScope scope, MethodInfoBuilder builder, IParseNode node)
         {
             var declarationSequence = (SequenceNode)node;
 
             var type = GetType(declarationSequence.Children[0]);
             string name = GetName(declarationSequence.Children[1]);
 
-            var variableNode = AstNode.Variable(methodInfoNode.Variables.Count, type);
-            methodInfoNode.Variables.Add(variableNode);
+            var variableNode = AstNode.Variable(builder.Variables.Count, type);
+            builder.Variables.Add(variableNode);
 
             var symbol = new Symbol<AstNode>(true, variableNode);
             scope.DeclareSymbol(name, symbol);
@@ -119,11 +123,11 @@ namespace HeartScript.Ast
                 var expression = ExpressionBuilder.Build(scope, expressionNode);
 
                 var assignNode = AstNode.Assign(variableNode, AstBuilder.ConvertIfRequired(expression, variableNode.Type));
-                methodInfoNode.Statements.Add(assignNode);
+                builder.Statements.Add(assignNode);
             }
         }
 
-        private static void BuildAssignment(SymbolScope scope, MethodInfoNode methodInfoNode, IParseNode node)
+        private static void BuildAssignment(SymbolScope scope, MethodInfoBuilder builder, IParseNode node)
         {
             var assignmentSequence = (SequenceNode)node;
 
@@ -135,17 +139,17 @@ namespace HeartScript.Ast
             var expression = ExpressionBuilder.Build(scope, expressionNode);
 
             var assignNode = AstNode.Assign(symbol.Value, AstBuilder.ConvertIfRequired(expression, symbol.Value.Type));
-            methodInfoNode.Statements.Add(assignNode);
+            builder.Statements.Add(assignNode);
         }
 
-        private static void BuildReturn(SymbolScope scope, MethodInfoNode methodInfoNode, IParseNode node)
+        private static void BuildReturn(SymbolScope scope, MethodInfoBuilder builder, IParseNode node)
         {
             var returnSequence = (SequenceNode)node;
             var expressionNode = (ExpressionNode)returnSequence.Children[1];
             var expression = ExpressionBuilder.Build(scope, expressionNode);
 
-            var returnNode = AstNode.Return(AstBuilder.ConvertIfRequired(expression, methodInfoNode.ReturnType));
-            methodInfoNode.Statements.Add(returnNode);
+            var returnNode = AstNode.Return(AstBuilder.ConvertIfRequired(expression, builder.ReturnType));
+            builder.Statements.Add(returnNode);
         }
 
         private static Type GetType(IParseNode typeNode)
@@ -165,6 +169,24 @@ namespace HeartScript.Ast
             var sequenceNode = (SequenceNode)nameNode;
             var valueNode = (ValueNode)sequenceNode.Children[1];
             return valueNode.Value;
+        }
+
+        private class MethodInfoBuilder
+        {
+            public string Name { get; }
+            public Type ReturnType { get; }
+            public List<Type> ParameterTypes { get; }
+            public List<VariableNode> Variables { get; }
+            public List<AstNode> Statements { get; }
+
+            public MethodInfoBuilder(string name, Type returnType)
+            {
+                Name = name;
+                ReturnType = returnType;
+                ParameterTypes = new List<Type>();
+                Variables = new List<VariableNode>();
+                Statements = new List<AstNode>();
+            }
         }
     }
 }

@@ -24,10 +24,7 @@ namespace HeartScript.Compiling.Emit
             }
 
             var basicBlock = new BasicBlock();
-            foreach (var statementNode in node.Statements)
-            {
-                EmitStatement(ilGenerator, basicBlock, statementNode);
-            }
+            EmitStatement(ilGenerator, basicBlock, node.Body);
 
             if (!basicBlock.Return)
                 throw new Exception("Not all code paths return a value");
@@ -38,7 +35,13 @@ namespace HeartScript.Compiling.Emit
             switch (node)
             {
                 case ReturnNode returnNode: EmitReturn(ilGenerator, basicBlock, returnNode); break;
-                default: EmitExpression(ilGenerator, node); break;
+                case BlockNode blockNode: EmitBlock(ilGenerator, basicBlock, blockNode); break;
+                default:
+                    {
+                        if (node.NodeType == AstType.Assign)
+                            EmitExpression(ilGenerator, node);
+                    }
+                    break;
             }
         }
 
@@ -49,6 +52,31 @@ namespace HeartScript.Compiling.Emit
 
             ilGenerator.Emit(OpCodes.Ret);
             basicBlock.Return = true;
+        }
+
+        private static void EmitBlock(ILGenerator ilGenerator, BasicBlock basicBlock, BlockNode node)
+        {
+            foreach (var statement in node.Statements)
+            {
+                EmitStatement(ilGenerator, basicBlock, statement);
+            }
+        }
+
+        private static void EmitExpressionStatement(ILGenerator ilGenerator, BasicBlock basicBlock, AstNode node)
+        {
+            if (node is BinaryNode binaryNode && binaryNode.NodeType == AstType.Assign)
+            {
+                EmitExpression(ilGenerator, binaryNode.Right);
+
+                switch (binaryNode.Left)
+                {
+                    case ParameterNode parameterNode:
+                        ilGenerator.Emit(OpCodes.Starg, parameterNode.Index); break;
+                    case VariableNode variableNode:
+                        ilGenerator.Emit(OpCodes.Stloc, variableNode.Index); break;
+                    default: throw new NotImplementedException();
+                }
+            }
         }
 
         private static void EmitExpression(ILGenerator ilGenerator, AstNode node)
