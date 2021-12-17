@@ -40,4 +40,30 @@ namespace HeartScript.Tests
             return $"\"{Method}\"";
         }
     }
+
+    public class CompilerExceptionTestCase<T> : ICompilerTestCase
+        where T : Exception
+    {
+        public string Method { get; set; }
+        public string Message { get; set; }
+
+        public void Execute()
+        {
+            var ctx = new ParserContext(Method);
+            var pattern = Utility.Parser.Patterns["root"].Trim(Utility.Parser.Patterns["_"]);
+            var node = pattern.TryMatch(Utility.Parser, ctx);
+
+            ctx.AssertComplete();
+            if (node == null)
+                throw new ArgumentException(nameof(ctx.Exception));
+
+            var exception = Assert.Throws<T>(() => EmitCompiler.CompileFunction(node));
+            Assert.AreEqual(exception.Message, Message);
+        }
+
+        public override string ToString()
+        {
+            return $"\"{Method}\"";
+        }
+    }
 }

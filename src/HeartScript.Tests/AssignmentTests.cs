@@ -16,8 +16,7 @@ namespace HeartScript.Tests.VariableTests
                 {
                     a = 1;
                     return a;
-                }
-                ",
+                }",
                 Paramaters = new object[]
                 {
                     0,
@@ -33,8 +32,7 @@ namespace HeartScript.Tests.VariableTests
                     double a;
                     a = 1;
                     return a;
-                }
-                ",
+                }",
                 Paramaters = Array.Empty<object>(),
                 ExpectedResult = 1
             },
@@ -46,8 +44,7 @@ namespace HeartScript.Tests.VariableTests
                 {
                     double a = 1;
                     return a;
-                }
-                ",
+                }",
                 Paramaters = Array.Empty<object>(),
                 ExpectedResult = 1
             },
@@ -59,11 +56,20 @@ namespace HeartScript.Tests.VariableTests
                 {
                     double a = 1;
                     return a;
-                }
-                ",
+                }",
                 Paramaters = Array.Empty<object>(),
                 ExpectedResult = 1
             },
+            new CompilerExceptionTestCase<ArgumentException>()
+            {
+                Method = @"
+                int main()
+                {
+                    int a;
+                    int b = a = 1;
+                }",
+                Message = $"Cannot convert, {typeof(void)} to {typeof(int)}"
+            }
         };
 
         [TestCaseSource(nameof(s_testCases))]

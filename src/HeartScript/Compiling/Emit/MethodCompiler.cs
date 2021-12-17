@@ -167,7 +167,7 @@ namespace HeartScript.Compiling.Emit
                 case AstType.Convert:
                     {
                         if (node.Operand.Type != typeof(int) || node.Type != typeof(double))
-                            throw new NotImplementedException($"Cannot convert, {node.Operand.Type} to {node.Type}");
+                            throw new ArgumentException($"Cannot convert, {node.Operand.Type} to {node.Type}");
 
                         ilGenerator.Emit(OpCodes.Conv_R8);
                     }
