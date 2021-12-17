@@ -9,17 +9,18 @@ method -> type name '(' parameters ')' ('block':block_statement / 'lambda':lambd
 
 lambda_body -> '=>' expr ';'
 
-statement -> 'declaration': declaration_statement / embedded_statement
+statement -> 'declaration':declaration_statement / embedded_statement
 declaration_statement -> type name ('=' expr)? ';'
 
 block_statement -> '{' statement* '}'
 assignment_statement -> name '=' expr ';'
 return_statement -> 'return' expr ';'
+statement_expr -> expr ';'
 
 embedded_statement ->
     'block':block_statement /
-    'assignment':assignment_statement /
-    'return':return_statement
+    'return':return_statement /
+    'statement_expr':statement_expr
 
 expr ->
     [
@@ -48,6 +49,7 @@ expr ->
         '&'          7    7    '&'
         '^'          8    8    '^'
         '|'          9    9    '|'
+        '='          0    99   '='
         '?:'         10   99   '?' expr ':'
         '!'          2    none '!'
     ]

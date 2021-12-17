@@ -14,7 +14,7 @@ namespace HeartScript.Ast
             ["lambda"] = BuildLambdaBody,
             ["block"] = BuildBlockBody,
             ["declaration"] = BuildDeclaration,
-            ["assignment"] = BuildAssignment,
+            ["statement_expr"] = BuildStatementExpression,
             ["return"] = BuildReturn,
         };
 
@@ -127,19 +127,21 @@ namespace HeartScript.Ast
             }
         }
 
-        private static void BuildAssignment(SymbolScope scope, MethodInfoBuilder builder, IParseNode node)
+        private static readonly ICollection<AstType> s_validStatmentExpressions = new HashSet<AstType>()
         {
-            var assignmentSequence = (SequenceNode)node;
+            AstType.Assign,
+        };
 
-            string name = GetName(assignmentSequence.Children[0]);
-            if (!scope.TryGetSymbol<AstNode>(name, out var symbol))
-                throw new ArgumentException($"Missing symbol {name}");
+        private static void BuildStatementExpression(SymbolScope scope, MethodInfoBuilder builder, IParseNode node)
+        {
+            var statementSequence = (SequenceNode)node;
+            var expressionNode = (ExpressionNode)statementSequence.Children[0];
 
-            var expressionNode = (ExpressionNode)assignmentSequence.Children[2];
             var expression = ExpressionBuilder.Build(scope, expressionNode);
+            if (!s_validStatmentExpressions.Contains(expression.NodeType))
+                throw new ArgumentException("Invalid statement expression");
 
-            var assignNode = AstNode.Assign(symbol.Value, AstBuilder.ConvertIfRequired(expression, symbol.Value.Type));
-            builder.Statements.Add(assignNode);
+            builder.Statements.Add(expression);
         }
 
         private static void BuildReturn(SymbolScope scope, MethodInfoBuilder builder, IParseNode node)

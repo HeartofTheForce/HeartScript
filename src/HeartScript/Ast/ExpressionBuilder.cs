@@ -33,6 +33,7 @@ namespace HeartScript.Ast
             ["&"] = BuildBinary(AstNode.And),
             ["^"] = BuildBinary(AstNode.ExclusiveOr),
             ["|"] = BuildBinary(AstNode.Or),
+            ["="] = BuildBinary(AstNode.Assign),
             ["?:"] = BuildTernary,
             ["real"] = ParseReal,
             ["integral"] = ParseIntegral,

@@ -36,12 +36,7 @@ namespace HeartScript.Compiling.Emit
             {
                 case ReturnNode returnNode: EmitReturn(ilGenerator, basicBlock, returnNode); break;
                 case BlockNode blockNode: EmitBlock(ilGenerator, basicBlock, blockNode); break;
-                default:
-                    {
-                        if (node.NodeType == AstType.Assign)
-                            EmitExpression(ilGenerator, node);
-                    }
-                    break;
+                default: EmitExpression(ilGenerator, node); break;
             }
         }
 
@@ -59,23 +54,6 @@ namespace HeartScript.Compiling.Emit
             foreach (var statement in node.Statements)
             {
                 EmitStatement(ilGenerator, basicBlock, statement);
-            }
-        }
-
-        private static void EmitExpressionStatement(ILGenerator ilGenerator, BasicBlock basicBlock, AstNode node)
-        {
-            if (node is BinaryNode binaryNode && binaryNode.NodeType == AstType.Assign)
-            {
-                EmitExpression(ilGenerator, binaryNode.Right);
-
-                switch (binaryNode.Left)
-                {
-                    case ParameterNode parameterNode:
-                        ilGenerator.Emit(OpCodes.Starg, parameterNode.Index); break;
-                    case VariableNode variableNode:
-                        ilGenerator.Emit(OpCodes.Stloc, variableNode.Index); break;
-                    default: throw new NotImplementedException();
-                }
             }
         }
 
@@ -133,7 +111,7 @@ namespace HeartScript.Compiling.Emit
                         ilGenerator.Emit(OpCodes.Starg, parameterNode.Index); break;
                     case VariableNode variableNode:
                         ilGenerator.Emit(OpCodes.Stloc, variableNode.Index); break;
-                    default: throw new NotImplementedException();
+                    default: throw new ArgumentException("The left-hand side of an assignment must be a variable or parameter");
                 }
 
                 return;
