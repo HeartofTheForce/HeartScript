@@ -14,7 +14,7 @@ namespace HeartScript.Ast
             ["lambda"] = BuildLambdaBody,
             ["block_statement"] = BuildBlockBody,
             ["declaration_statement"] = BuildDeclaration,
-            ["expr_statement"] = BuildStatementExpression,
+            ["expr_statement"] = BuildExpressionStatement,
             ["return_statement"] = BuildReturn,
         };
 
@@ -133,7 +133,7 @@ namespace HeartScript.Ast
             AstType.Assign,
         };
 
-        private static void BuildStatementExpression(SymbolScope scope, MethodInfoBuilder builder, IParseNode node)
+        private static void BuildExpressionStatement(SymbolScope scope, MethodInfoBuilder builder, IParseNode node)
         {
             var statementSequence = (SequenceNode)node;
             var expressionNode = (ExpressionNode)statementSequence.Children[0];

@@ -1,26 +1,32 @@
-root -> 'method':method
+root -> method:'method'
 _ -> `\s*`
 
 type -> 'int' / 'double' / 'bool'
 name -> !type `[_a-zA-Z]\w*`
 
 parameters -> (type name (',' type name)*)?
-method -> type name '(' parameters ')' ('block_statement':block_statement / 'lambda':lambda_body)
+method -> type name '(' parameters ')' (block_statement / lambda_body)
 
-lambda_body -> '=>' expr ';'
+lambda_body:'lambda' -> '=>' expr ';'
 
 statement ->
-    'declaration_statement':(declaration ';') /
+    declaration_statement /
     embedded_statement
-declaration -> type name ('=' expr)?
 
-block_statement -> '{' statement* '}'
+declaration -> type name ('=' expr)?
+declaration_statement:'declaration_statement' -> declaration ';'
+
+block_statement:'block_statement' -> '{' statement* '}'
+
 return -> 'return' expr
+return_statement:'return_statement' -> return ';'
+
+expr_statement:'expr_statement' -> expr ';'
 
 embedded_statement ->
-    'block_statement':block_statement /
-    'return_statement':(return ';') /
-    'expr_statement':(expr ';')
+    block_statement /
+    return_statement /
+    expr_statement
 
 expr ->
     [
