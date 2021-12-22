@@ -13,14 +13,11 @@ statement ->
     declaration_statement /
     embedded_statement
 
-declaration -> type name ('=' expr)?
+declaration:'declaration' -> type name ('=' expr)?
 declaration_statement:'declaration_statement' -> declaration ';'
 
 block_statement:'block_statement' -> '{' statement* '}'
-
-return -> 'return' expr
-return_statement:'return_statement' -> return ';'
-
+return_statement:'return_statement' -> 'return' expr ';'
 expr_statement:'expr_statement' -> expr ';'
 
 embedded_statement ->

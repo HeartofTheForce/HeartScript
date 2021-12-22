@@ -13,7 +13,8 @@ namespace HeartScript.Ast
         {
             ["lambda"] = BuildLambdaBody,
             ["block_statement"] = BuildBlockBody,
-            ["declaration_statement"] = BuildDeclaration,
+            ["declaration"] = BuildDeclaration,
+            ["declaration_statement"] = BuildSemicolonStatement,
             ["expr_statement"] = BuildExpressionStatement,
             ["return_statement"] = BuildReturn,
         };
@@ -102,10 +103,16 @@ namespace HeartScript.Ast
             }
         }
 
-        private static void BuildDeclaration(SymbolScope scope, MethodInfoBuilder builder, IParseNode node)
+        private static void BuildSemicolonStatement(SymbolScope scope, MethodInfoBuilder builder, IParseNode node)
         {
             var statementSequence = (SequenceNode)node;
-            var declarationSequence = (SequenceNode)statementSequence.Children[0];
+            var labelNode = (LabelNode)statementSequence.Children[0];
+            BuildStatement(scope, builder, labelNode);
+        }
+
+        private static void BuildDeclaration(SymbolScope scope, MethodInfoBuilder builder, IParseNode node)
+        {
+            var declarationSequence = (SequenceNode)node;
 
             var type = GetType(declarationSequence.Children[0]);
             string name = GetName(declarationSequence.Children[1]);
@@ -147,8 +154,7 @@ namespace HeartScript.Ast
 
         private static void BuildReturn(SymbolScope scope, MethodInfoBuilder builder, IParseNode node)
         {
-            var statementSequence = (SequenceNode)node;
-            var returnSequence = (SequenceNode)statementSequence.Children[0];
+            var returnSequence = (SequenceNode)node;
             var expressionNode = (ExpressionNode)returnSequence.Children[1];
             var expression = ExpressionBuilder.Build(scope, expressionNode);
 
