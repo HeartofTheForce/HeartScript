@@ -12,10 +12,10 @@ namespace HeartScript.Ast
         private static readonly Dictionary<string, StatmentBuilder> s_statementBuilders = new Dictionary<string, StatmentBuilder>()
         {
             ["lambda"] = BuildLambdaBody,
-            ["block"] = BuildBlockBody,
-            ["declaration"] = BuildDeclaration,
-            ["statement_expr"] = BuildStatementExpression,
-            ["return"] = BuildReturn,
+            ["block_statement"] = BuildBlockBody,
+            ["declaration_statement"] = BuildDeclaration,
+            ["expr_statement"] = BuildStatementExpression,
+            ["return_statement"] = BuildReturn,
         };
 
         private static void BuildStatement(SymbolScope scope, MethodInfoBuilder builder, LabelNode node)
@@ -104,7 +104,8 @@ namespace HeartScript.Ast
 
         private static void BuildDeclaration(SymbolScope scope, MethodInfoBuilder builder, IParseNode node)
         {
-            var declarationSequence = (SequenceNode)node;
+            var statementSequence = (SequenceNode)node;
+            var declarationSequence = (SequenceNode)statementSequence.Children[0];
 
             var type = GetType(declarationSequence.Children[0]);
             string name = GetName(declarationSequence.Children[1]);
@@ -146,7 +147,8 @@ namespace HeartScript.Ast
 
         private static void BuildReturn(SymbolScope scope, MethodInfoBuilder builder, IParseNode node)
         {
-            var returnSequence = (SequenceNode)node;
+            var statementSequence = (SequenceNode)node;
+            var returnSequence = (SequenceNode)statementSequence.Children[0];
             var expressionNode = (ExpressionNode)returnSequence.Children[1];
             var expression = ExpressionBuilder.Build(scope, expressionNode);
 
