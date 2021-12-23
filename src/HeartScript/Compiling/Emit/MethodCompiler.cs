@@ -12,7 +12,7 @@ namespace HeartScript.Compiling.Emit
             public bool Return { get; set; }
         }
 
-        public static void EmitMethod(System.Reflection.Emit.TypeBuilder typeBuilder, MethodInfoNode node)
+        public static void EmitMethod(TypeBuilder typeBuilder, MethodInfoNode node)
         {
             var methodBuilder = typeBuilder.DefineMethod(node.Name, MethodAttributes.Public | MethodAttributes.Static, node.ReturnType, node.ParameterTypes);
             var ilGenerator = methodBuilder.GetILGenerator();
@@ -35,14 +35,14 @@ namespace HeartScript.Compiling.Emit
             {
                 case ReturnNode returnNode: EmitReturn(ilGenerator, basicBlock, returnNode); break;
                 case BlockNode blockNode: EmitBlock(ilGenerator, basicBlock, blockNode); break;
-                default: ExpressionCompiler.EmitExpression(ilGenerator, node); break;
+                default: ExpressionCompiler.EmitExpression(ilGenerator, node, true); break;
             }
         }
 
         private static void EmitReturn(ILGenerator ilGenerator, BasicBlock basicBlock, ReturnNode node)
         {
             if (node.Node != null)
-                ExpressionCompiler.EmitExpression(ilGenerator, node.Node);
+                ExpressionCompiler.EmitExpression(ilGenerator, node.Node, false);
 
             ilGenerator.Emit(OpCodes.Ret);
             basicBlock.Return = true;

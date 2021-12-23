@@ -8,12 +8,12 @@ namespace HeartScript.Compiling.Emit
 {
     public static class ExpressionCompiler
     {
-        public static void EmitExpression(ILGenerator ilGenerator, AstNode node)
+        public static void EmitExpression(ILGenerator ilGenerator, AstNode node, bool isStatement)
         {
             switch (node)
             {
                 case ConstantNode constantNode: EmitConstant(ilGenerator, constantNode); break;
-                case BinaryNode binaryNode: EmitBinary(ilGenerator, binaryNode); break;
+                case BinaryNode binaryNode: EmitBinary(ilGenerator, binaryNode, isStatement); break;
                 case UnaryNode unaryNode: EmitUnary(ilGenerator, unaryNode); break;
                 case ConditionalNode conditionalNode: EmitConditional(ilGenerator, conditionalNode); break;
                 case CallNode callNode: EmitCall(ilGenerator, callNode); break;
@@ -50,35 +50,42 @@ namespace HeartScript.Compiling.Emit
             throw new NotImplementedException();
         }
 
-        private static void EmitBinary(ILGenerator ilGenerator, BinaryNode node)
+        private static void EmitBinary(ILGenerator ilGenerator, BinaryNode node, bool isStatement)
         {
-            if (node.NodeType == AstType.Assign)
-            {
-                EmitExpression(ilGenerator, node.Right);
-
-                switch (node.Left)
-                {
-                    case ParameterNode parameterNode:
-                        ilGenerator.Emit(OpCodes.Starg, parameterNode.Index); break;
-                    case VariableNode variableNode:
-                        ilGenerator.Emit(OpCodes.Stloc, variableNode.Index); break;
-                    default: throw new ArgumentException("The left-hand side of an assignment must be a variable or parameter");
-                }
-
-                return;
-            }
-
-            EmitExpression(ilGenerator, node.Left);
-            EmitExpression(ilGenerator, node.Right);
-
             switch (node.NodeType)
             {
-                case AstType.Multiply: ilGenerator.Emit(OpCodes.Mul); break;
-                case AstType.Divide: ilGenerator.Emit(OpCodes.Div); break;
-                case AstType.Add: ilGenerator.Emit(OpCodes.Add); break;
-                case AstType.Subtract: ilGenerator.Emit(OpCodes.Sub); break;
+                case AstType.Multiply:
+                    {
+                        EmitExpression(ilGenerator, node.Left, false);
+                        EmitExpression(ilGenerator, node.Right, false);
+                        ilGenerator.Emit(OpCodes.Mul);
+                    }
+                    break;
+                case AstType.Divide:
+                    {
+                        EmitExpression(ilGenerator, node.Left, false);
+                        EmitExpression(ilGenerator, node.Right, false);
+                        ilGenerator.Emit(OpCodes.Div);
+                    }
+                    break;
+                case AstType.Add:
+                    {
+                        EmitExpression(ilGenerator, node.Left, false);
+                        EmitExpression(ilGenerator, node.Right, false);
+                        ilGenerator.Emit(OpCodes.Add);
+                    }
+                    break;
+                case AstType.Subtract:
+                    {
+                        EmitExpression(ilGenerator, node.Left, false);
+                        EmitExpression(ilGenerator, node.Right, false);
+                        ilGenerator.Emit(OpCodes.Sub);
+                    }
+                    break;
                 case AstType.LessThanOrEqual:
                     {
+                        EmitExpression(ilGenerator, node.Left, false);
+                        EmitExpression(ilGenerator, node.Right, false);
                         ilGenerator.Emit(OpCodes.Cgt);
                         ilGenerator.Emit(OpCodes.Ldc_I4, 0);
                         ilGenerator.Emit(OpCodes.Ceq);
@@ -86,32 +93,87 @@ namespace HeartScript.Compiling.Emit
                     break;
                 case AstType.GreaterThanOrEqual:
                     {
+                        EmitExpression(ilGenerator, node.Left, false);
+                        EmitExpression(ilGenerator, node.Right, false);
                         ilGenerator.Emit(OpCodes.Clt);
                         ilGenerator.Emit(OpCodes.Ldc_I4, 0);
                         ilGenerator.Emit(OpCodes.Ceq);
                     }
                     break;
-                case AstType.LessThan: ilGenerator.Emit(OpCodes.Clt); break;
-                case AstType.GreaterThan: ilGenerator.Emit(OpCodes.Cgt); break;
-                case AstType.Equal: ilGenerator.Emit(OpCodes.Ceq); break;
+                case AstType.LessThan:
+                    {
+                        EmitExpression(ilGenerator, node.Left, false);
+                        EmitExpression(ilGenerator, node.Right, false);
+                        ilGenerator.Emit(OpCodes.Clt);
+                    }
+                    break;
+                case AstType.GreaterThan:
+                    {
+                        EmitExpression(ilGenerator, node.Left, false);
+                        EmitExpression(ilGenerator, node.Right, false);
+                        ilGenerator.Emit(OpCodes.Cgt);
+                    }
+                    break;
+                case AstType.Equal:
+                    {
+                        EmitExpression(ilGenerator, node.Left, false);
+                        EmitExpression(ilGenerator, node.Right, false);
+                        ilGenerator.Emit(OpCodes.Ceq);
+                    }
+                    break;
                 case AstType.NotEqual:
                     {
+                        EmitExpression(ilGenerator, node.Left, false);
+                        EmitExpression(ilGenerator, node.Right, false);
                         ilGenerator.Emit(OpCodes.Ceq);
                         ilGenerator.Emit(OpCodes.Ldc_I4, 0);
                         ilGenerator.Emit(OpCodes.Ceq);
                     }
                     break;
-                case AstType.And: ilGenerator.Emit(OpCodes.And); break;
-                case AstType.ExclusiveOr: ilGenerator.Emit(OpCodes.Xor); break;
-                case AstType.Or: ilGenerator.Emit(OpCodes.Or); break;
-                case AstType.Assign: ilGenerator.Emit(OpCodes.Or); break;
+                case AstType.And:
+                    {
+                        EmitExpression(ilGenerator, node.Left, false);
+                        EmitExpression(ilGenerator, node.Right, false);
+                        ilGenerator.Emit(OpCodes.And);
+                    }
+                    break;
+                case AstType.ExclusiveOr:
+                    {
+                        EmitExpression(ilGenerator, node.Left, false);
+                        EmitExpression(ilGenerator, node.Right, false);
+                        ilGenerator.Emit(OpCodes.Xor);
+                    }
+                    break;
+                case AstType.Or:
+                    {
+                        EmitExpression(ilGenerator, node.Left, false);
+                        EmitExpression(ilGenerator, node.Right, false);
+                        ilGenerator.Emit(OpCodes.Or);
+                    }
+                    break;
+                case AstType.Assign:
+                    {
+                        EmitExpression(ilGenerator, node.Right, false);
+                        if (!isStatement)
+                            ilGenerator.Emit(OpCodes.Dup);
+
+                        switch (node.Left)
+                        {
+                            case ParameterNode parameterNode:
+                                ilGenerator.Emit(OpCodes.Starg, parameterNode.Index); break;
+                            case VariableNode variableNode:
+                                ilGenerator.Emit(OpCodes.Stloc, variableNode.Index); break;
+                            default: throw new ArgumentException("The left-hand side of an assignment must be a variable or parameter");
+                        }
+                    }
+                    break;
                 default: throw new NotImplementedException();
             }
         }
 
         private static void EmitUnary(ILGenerator ilGenerator, UnaryNode node)
         {
-            EmitExpression(ilGenerator, node.Operand);
+            EmitExpression(ilGenerator, node.Operand, false);
 
             switch (node.NodeType)
             {
@@ -135,16 +197,16 @@ namespace HeartScript.Compiling.Emit
             var ifFalseLabel = ilGenerator.DefineLabel();
             var endLabel = ilGenerator.DefineLabel();
 
-            EmitExpression(ilGenerator, node.Test);
+            EmitExpression(ilGenerator, node.Test, false);
             ilGenerator.Emit(OpCodes.Brfalse, ifFalseLabel);
 
             //true
-            EmitExpression(ilGenerator, node.IfTrue);
+            EmitExpression(ilGenerator, node.IfTrue, false);
             ilGenerator.Emit(OpCodes.Br, endLabel);
 
             //false
             ilGenerator.MarkLabel(ifFalseLabel);
-            EmitExpression(ilGenerator, node.IfFalse);
+            EmitExpression(ilGenerator, node.IfFalse, false);
 
             ilGenerator.MarkLabel(endLabel);
         }
@@ -152,11 +214,11 @@ namespace HeartScript.Compiling.Emit
         private static void EmitCall(ILGenerator ilGenerator, CallNode node)
         {
             if (node.Instance != null)
-                EmitExpression(ilGenerator, node.Instance);
+                EmitExpression(ilGenerator, node.Instance, false);
 
             foreach (var parameter in node.Parameters)
             {
-                EmitExpression(ilGenerator, parameter);
+                EmitExpression(ilGenerator, parameter, false);
             }
 
             ilGenerator.EmitCall(OpCodes.Call, node.MethodInfo, null);
@@ -176,7 +238,7 @@ namespace HeartScript.Compiling.Emit
         private static void EmitMemberAccess(ILGenerator ilGenerator, MemberAccessNode node)
         {
             if (node.Instance != null)
-                EmitExpression(ilGenerator, node.Instance);
+                EmitExpression(ilGenerator, node.Instance, false);
 
             switch (node.Member)
             {

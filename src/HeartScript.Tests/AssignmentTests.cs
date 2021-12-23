@@ -60,15 +60,57 @@ namespace HeartScript.Tests.VariableTests
                 Paramaters = Array.Empty<object>(),
                 ExpectedResult = 1
             },
-            new CompilerExceptionTestCase<ArgumentException>()
+            //Chained Assign
+            new CompilerTestCase()
             {
                 Method = @"
                 int main()
                 {
                     int a;
-                    int b = a = 1;
+                    int b;
+                    b = a = 1;
+                    return b;
                 }",
-                Message = $"Cannot convert, {typeof(void)} to {typeof(int)}"
+                Paramaters = Array.Empty<object>(),
+                ExpectedResult = 1
+            },
+            //Chained Declaration Assign
+            new CompilerTestCase()
+            {
+                Method = @"
+                double main()
+                {
+                    int a;
+                    int b = a = 1;
+                    return b;
+                }",
+                Paramaters = Array.Empty<object>(),
+                ExpectedResult = 1
+            },
+            //Chained Implicit Convert Assign
+            new CompilerTestCase()
+            {
+                Method = @"
+                double main()
+                {
+                    int a;
+                    double b = a = 1;
+                    return b;
+                }",
+                Paramaters = Array.Empty<object>(),
+                ExpectedResult = 1
+            },
+            //Type Mistmatch Chained Implicit Convert Assign
+            new CompilerExceptionTestCase<ArgumentException>()
+            {
+                Method = @"
+                int main()
+                {
+                    double a;
+                    int b = a = 1;
+                    return b;
+                }",
+                Message = $"Cannot convert, {typeof(double)} to {typeof(int)}"
             }
         };
 

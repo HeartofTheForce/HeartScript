@@ -58,7 +58,7 @@ namespace HeartScript.Tests
                 throw new ArgumentException(nameof(ctx.Exception));
 
             var exception = Assert.Throws<T>(() => EmitCompiler.CompileFunction(node));
-            Assert.AreEqual(exception.Message, Message);
+            Assert.AreEqual(Message, exception.Message);
         }
 
         public override string ToString()
