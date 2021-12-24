@@ -135,19 +135,11 @@ namespace HeartScript.Ast
             }
         }
 
-        private static readonly ICollection<AstType> s_validStatmentExpressions = new HashSet<AstType>()
-        {
-            AstType.Assign,
-        };
-
         private static void BuildExpressionStatement(SymbolScope scope, MethodInfoBuilder builder, IParseNode node)
         {
             var statementSequence = (SequenceNode)node;
             var expressionNode = (ExpressionNode)statementSequence.Children[0];
-
             var expression = ExpressionBuilder.Build(scope, expressionNode);
-            if (!s_validStatmentExpressions.Contains(expression.NodeType))
-                throw new ArgumentException("Invalid statement expression");
 
             builder.Statements.Add(expression);
         }

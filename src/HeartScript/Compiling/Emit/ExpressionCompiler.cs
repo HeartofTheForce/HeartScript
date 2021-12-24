@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 using HeartScript.Ast;
@@ -8,8 +9,16 @@ namespace HeartScript.Compiling.Emit
 {
     public static class ExpressionCompiler
     {
+        private static readonly HashSet<AstType> s_validStatmentExpressions = new HashSet<AstType>()
+        {
+            AstType.Assign,
+        };
+
         public static void EmitExpression(ILGenerator ilGenerator, AstNode node, bool isStatement)
         {
+            if (isStatement && !s_validStatmentExpressions.Contains(node.NodeType))
+                throw new ArgumentException("Invalid statement expression");
+
             switch (node)
             {
                 case ConstantNode constantNode: EmitConstant(ilGenerator, constantNode); break;
