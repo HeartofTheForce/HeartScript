@@ -12,6 +12,8 @@ namespace HeartScript.Compiling.Emit
         private static readonly HashSet<AstType> s_validStatmentExpressions = new HashSet<AstType>()
         {
             AstType.Assign,
+            AstType.PostIncrement,
+            AstType.PostDecrement,
         };
 
         public static void EmitExpression(ILGenerator ilGenerator, AstNode node, bool isStatement)
@@ -23,7 +25,7 @@ namespace HeartScript.Compiling.Emit
             {
                 case ConstantNode constantNode: EmitConstant(ilGenerator, constantNode); break;
                 case BinaryNode binaryNode: EmitBinary(ilGenerator, binaryNode, isStatement); break;
-                case UnaryNode unaryNode: EmitUnary(ilGenerator, unaryNode); break;
+                case UnaryNode unaryNode: EmitUnary(ilGenerator, unaryNode, isStatement); break;
                 case ConditionalNode conditionalNode: EmitConditional(ilGenerator, conditionalNode); break;
                 case CallNode callNode: EmitCall(ilGenerator, callNode); break;
                 case ParameterNode parameterNode: EmitParameter(ilGenerator, parameterNode); break;
@@ -166,24 +168,15 @@ namespace HeartScript.Compiling.Emit
                         if (!isStatement)
                             ilGenerator.Emit(OpCodes.Dup);
 
-                        switch (node.Left)
-                        {
-                            case ParameterNode parameterNode:
-                                ilGenerator.Emit(OpCodes.Starg, parameterNode.Index); break;
-                            case VariableNode variableNode:
-                                ilGenerator.Emit(OpCodes.Stloc, variableNode.Index); break;
-                            default: throw new ArgumentException("The left-hand side of an assignment must be a variable or parameter");
-                        }
+                        EmitSet(ilGenerator, node.Left, "The left-hand side of an assignment must be a variable or parameter");
                     }
                     break;
                 default: throw new NotImplementedException();
             }
         }
 
-        private static void EmitUnary(ILGenerator ilGenerator, UnaryNode node)
+        private static void EmitUnary(ILGenerator ilGenerator, UnaryNode node, bool isStatement)
         {
-            EmitExpression(ilGenerator, node.Operand, false);
-
             switch (node.NodeType)
             {
                 case AstType.Convert:
@@ -191,13 +184,74 @@ namespace HeartScript.Compiling.Emit
                         if (node.Operand.Type != typeof(int) || node.Type != typeof(double))
                             throw new ArgumentException($"Cannot convert, {node.Operand.Type} to {node.Type}");
 
+                        EmitExpression(ilGenerator, node.Operand, false);
                         ilGenerator.Emit(OpCodes.Conv_R8);
                     }
                     break;
-                case AstType.UnaryPlus: break;
-                case AstType.Negate: ilGenerator.Emit(OpCodes.Neg); break;
-                case AstType.Not: ilGenerator.Emit(OpCodes.Not); break;
+                case AstType.UnaryPlus:
+                    {
+                        EmitExpression(ilGenerator, node.Operand, false);
+                    }
+                    break;
+                case AstType.Negate:
+                    {
+                        EmitExpression(ilGenerator, node.Operand, false);
+                        ilGenerator.Emit(OpCodes.Neg);
+                    }
+                    break;
+                case AstType.Not:
+                    {
+                        EmitExpression(ilGenerator, node.Operand, false);
+                        ilGenerator.Emit(OpCodes.Not);
+                    }
+                    break;
+                case AstType.PostIncrement:
+                    {
+                        EmitExpression(ilGenerator, node.Operand, false);
+                        if (!isStatement)
+                            ilGenerator.Emit(OpCodes.Dup);
+
+                        if (node.Operand.Type == typeof(int))
+                            ilGenerator.Emit(OpCodes.Ldc_I4, 1);
+                        else if (node.Operand.Type == typeof(double))
+                            ilGenerator.Emit(OpCodes.Ldc_R8, 1.0);
+                        else
+                            throw new ArgumentException(nameof(node.Operand.Type));
+
+                        ilGenerator.Emit(OpCodes.Add);
+                        EmitSet(ilGenerator, node.Operand, "The operand of an increment or decrement operator must be a variable or parameter");
+                    }
+                    break;
+                case AstType.PostDecrement:
+                    {
+                        EmitExpression(ilGenerator, node.Operand, false);
+                        if (!isStatement)
+                            ilGenerator.Emit(OpCodes.Dup);
+
+                        if (node.Operand.Type == typeof(int))
+                            ilGenerator.Emit(OpCodes.Ldc_I4, 1);
+                        else if (node.Operand.Type == typeof(double))
+                            ilGenerator.Emit(OpCodes.Ldc_R8, 1.0);
+                        else
+                            throw new ArgumentException(nameof(node.Operand.Type));
+
+                        ilGenerator.Emit(OpCodes.Sub);
+                        EmitSet(ilGenerator, node.Operand, "The operand of an increment or decrement operator must be a variable or parameter");
+                    }
+                    break;
                 default: throw new NotImplementedException();
+            }
+        }
+
+        private static void EmitSet(ILGenerator ilGenerator, AstNode node, string invalidTypeMessage)
+        {
+            switch (node)
+            {
+                case ParameterNode parameterNode:
+                    ilGenerator.Emit(OpCodes.Starg, parameterNode.Index); break;
+                case VariableNode variableNode:
+                    ilGenerator.Emit(OpCodes.Stloc, variableNode.Index); break;
+                default: throw new ArgumentException(invalidTypeMessage);
             }
         }
 

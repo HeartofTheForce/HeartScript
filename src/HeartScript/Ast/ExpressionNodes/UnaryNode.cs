@@ -22,5 +22,7 @@ namespace HeartScript.Ast.Nodes
         public static UnaryNode Negate(AstNode operand) => new UnaryNode(operand, AstType.Negate);
         public static UnaryNode Not(AstNode operand) => new UnaryNode(operand, AstType.Not);
         public static UnaryNode Convert(AstNode operand, Type type) => new UnaryNode(operand, type, AstType.Convert);
+        public static UnaryNode PostIncrement(AstNode operand) => new UnaryNode(operand, AstType.PostIncrement);
+        public static UnaryNode PostDecrement(AstNode operand) => new UnaryNode(operand, AstType.PostDecrement);
     }
 }

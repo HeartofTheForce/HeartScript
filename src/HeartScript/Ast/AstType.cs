@@ -9,6 +9,8 @@ namespace HeartScript.Ast
         Constant,
         MemberAccess,
         Call,
+        PostIncrement,
+        PostDecrement,
         Multiply,
         Divide,
         Add,

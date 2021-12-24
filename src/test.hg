@@ -39,6 +39,8 @@ expr ->
 
         #HaveOperand (Postfix, Infix)
         '$'          0    none '(' (expr (',' expr)*)? ')'
+        'post++'     2    none '++'
+        'post--'     2    none '--'
         '*'          3    3    '*'
         '/'          3    3    '/'
         '+'          4    4    '+'
@@ -54,5 +56,4 @@ expr ->
         '|'          9    9    '|'
         '='          0    99   '='
         '?:'         10   99   '?' expr ':'
-        '!'          2    none '!'
     ]

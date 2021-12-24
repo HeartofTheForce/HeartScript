@@ -34,17 +34,6 @@ namespace HeartScript.Tests.ExpressionTests
                 Infix = "Max(0, 1.5)",
                 ExpectedExpression = () => Math.Max(0, 1.5),
             },
-            //!
-            new ExpressionTestCase<double>()
-            {
-                Infix = "1.5!",
-                ExpectedExpression = () => 1.5,
-            },
-            new ExpressionTestCase<int>()
-            {
-                Infix = "1!",
-                ExpectedExpression = () => 1,
-            },
         };
 
         [TestCaseSource(nameof(s_testCases))]
