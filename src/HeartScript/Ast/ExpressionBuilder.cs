@@ -92,19 +92,26 @@ namespace HeartScript.Ast
             throw new ArgumentException($"Missing symbol {valueNode.Value}");
         }
 
+        private static MethodInfo ResolveMethodOverload(ExpressionNode? methodNode, Type type, BindingFlags bindingFlags, Type[] parameterTypes)
+        {
+            if (methodNode == null)
+                throw new Exception($"{nameof(methodNode)} cannot be null");
+
+            if (methodNode.Key != "identifier")
+                throw new Exception($"{nameof(methodNode)} is not identifier");
+
+            var valueNode = (ValueNode)methodNode.MidNode;
+            string methodName = valueNode.Value;
+
+            var methodInfo = type.GetMethod(methodName, bindingFlags, null, parameterTypes, null);
+            if (methodInfo == null)
+                throw new Exception($"{type.FullName} has no overload matching '{methodName}({string.Join(',', parameterTypes.Select(x => x.Name))})'");
+
+            return methodInfo;
+        }
+
         private static AstNode BuildCall(SymbolScope scope, ExpressionNode callNode, AstNode? instance, Type type, BindingFlags bindingFlags)
         {
-            if (callNode.LeftNode == null)
-                throw new Exception($"{nameof(callNode.LeftNode)} cannot be null");
-
-            if (callNode.LeftNode.Key != "identifier")
-                throw new Exception($"{nameof(callNode.LeftNode)} is not identifier");
-
-            var leftValueNode = (ValueNode)callNode.LeftNode.MidNode;
-            string methodName = leftValueNode.Value;
-            if (methodName == null)
-                throw new Exception($"{nameof(methodName)} cannot be null");
-
             var parameterNodes = ParseNodeHelper.FindChildren<ExpressionNode>(callNode.MidNode);
             var parameters = new AstNode[parameterNodes.Count];
             var parameterTypes = new Type[parameterNodes.Count];
@@ -115,10 +122,7 @@ namespace HeartScript.Ast
                 parameterTypes[i] = parameters[i].Type;
             }
 
-            var methodInfo = type.GetMethod(methodName, bindingFlags, null, parameterTypes, null);
-            if (methodInfo == null)
-                throw new Exception($"{type.FullName} has no overload matching '{methodName}({string.Join(',', parameterTypes.Select(x => x.Name))})'");
-
+            var methodInfo = ResolveMethodOverload(callNode.LeftNode, type, bindingFlags, parameterTypes);
             var expectedParameters = methodInfo.GetParameters();
             for (int i = 0; i < parameterNodes.Count; i++)
             {
