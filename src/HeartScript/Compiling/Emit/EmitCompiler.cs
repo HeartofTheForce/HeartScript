@@ -20,6 +20,7 @@ namespace HeartScript.Compiling.Emit
         public static MethodInfo CompileFunction(IParseNode node)
         {
             var scope = new SymbolScope();
+            scope.DeclareSymbol("Math", new Symbol<Type>(true, typeof(Math)));
 
             AstNode ast;
             switch (node)

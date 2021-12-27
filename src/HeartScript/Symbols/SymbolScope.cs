@@ -12,7 +12,7 @@ namespace HeartScript.Ast
         public SymbolScope(SymbolScope? parent)
         {
             _parent = parent;
-            _symbols = new Dictionary<string, ISymbol>(StringComparer.OrdinalIgnoreCase);
+            _symbols = new Dictionary<string, ISymbol>();
         }
 
         public SymbolScope() : this(null)

@@ -15,7 +15,8 @@ namespace HeartScript.Ast
         private static readonly Dictionary<string, AstNodeBuilder> s_nodeBuilders = new Dictionary<string, AstNodeBuilder>()
         {
             ["()"] = BuildRoundBracket,
-            ["$"] = BuildStaticCall(typeof(Math)),
+            ["$"] = CallBuilder.BuildStaticCall,
+            ["."] = BuildMemberAccess,
             ["u+"] = BuildPrefix(AstNode.UnaryPlus),
             ["u-"] = BuildPrefix(AstNode.Negate),
             ["~"] = BuildPrefix(AstNode.Not),
@@ -89,56 +90,12 @@ namespace HeartScript.Ast
             if (scope.TryGetSymbol<AstNode>(valueNode.Value, out var symbol))
                 return symbol.Value;
 
-            throw new ArgumentException($"Missing symbol {valueNode.Value}");
+            throw new ArgumentException($"Missing {nameof(AstNode)} symbol, {valueNode.Value}");
         }
 
-        private static MethodInfo ResolveMethodOverload(ExpressionNode? methodNode, Type type, BindingFlags bindingFlags, Type[] parameterTypes)
+        private static AstNode BuildMemberAccess(SymbolScope scope, ExpressionNode node)
         {
-            if (methodNode == null)
-                throw new Exception($"{nameof(methodNode)} cannot be null");
-
-            if (methodNode.Key != "identifier")
-                throw new Exception($"{nameof(methodNode)} is not identifier");
-
-            var valueNode = (ValueNode)methodNode.MidNode;
-            string methodName = valueNode.Value;
-
-            var methodInfo = type.GetMethod(methodName, bindingFlags, null, parameterTypes, null);
-            if (methodInfo == null)
-                throw new Exception($"{type.FullName} has no overload matching '{methodName}({string.Join(',', parameterTypes.Select(x => x.Name))})'");
-
-            return methodInfo;
-        }
-
-        private static AstNode BuildCall(SymbolScope scope, ExpressionNode callNode, AstNode? instance, Type type, BindingFlags bindingFlags)
-        {
-            var parameterNodes = ParseNodeHelper.FindChildren<ExpressionNode>(callNode.MidNode);
-            var parameters = new AstNode[parameterNodes.Count];
-            var parameterTypes = new Type[parameterNodes.Count];
-
-            for (int i = 0; i < parameterNodes.Count; i++)
-            {
-                parameters[i] = Build(scope, parameterNodes[i]);
-                parameterTypes[i] = parameters[i].Type;
-            }
-
-            var methodInfo = ResolveMethodOverload(callNode.LeftNode, type, bindingFlags, parameterTypes);
-            var expectedParameters = methodInfo.GetParameters();
-            for (int i = 0; i < parameterNodes.Count; i++)
-            {
-                parameters[i] = AstBuilder.ConvertIfRequired(parameters[i], expectedParameters[i].ParameterType);
-            }
-
-            return AstNode.Call(instance, methodInfo, parameters);
-        }
-
-        private static AstNodeBuilder BuildStaticCall(Type type)
-        {
-            return (scope, node) =>
-            {
-                var bindingFlags = BindingFlags.Public | BindingFlags.Static | BindingFlags.IgnoreCase;
-                return BuildCall(scope, node, null, type, bindingFlags);
-            };
+            throw new NotImplementedException("Member access");
         }
 
         private static AstNodeBuilder BuildPrefix(Func<AstNode, AstNode> builder)

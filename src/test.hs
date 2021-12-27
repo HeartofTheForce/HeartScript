@@ -5,5 +5,5 @@ double main(double a, double b, double c)
     int f;
     f = 5;
 
-    return -10 < 0 ? max(a * b + c, d) : (e + f);
+    return -10 < 0 ? Math.Max(a * b + c, d) : (e + f);
 }
