@@ -23,20 +23,10 @@ namespace HeartScript.Compiling.Emit
             scope.DeclareSymbol("Math", new Symbol<Type>(true, typeof(Math)));
 
             AstNode ast;
-            switch (node)
-            {
-                case ExpressionNode expressionNode:
-                    {
-                        ast = ExpressionBuilder.Build(scope, expressionNode);
-                        break;
-                    }
-                case LabelNode labelNode:
-                    {
-                        ast = Ast.TypeBuilder.Build(scope, labelNode);
-                        break;
-                    }
-                default: throw new NotImplementedException();
-            }
+            if (node is LabelNode labelNode)
+                ast = Ast.TypeBuilder.Build(scope, labelNode);
+            else
+                throw new NotImplementedException();
 
             return Compile(
                 "AssemblyName",
@@ -70,21 +60,8 @@ namespace HeartScript.Compiling.Emit
             switch (node)
             {
                 case MethodInfoNode methodInfoNode: MethodCompiler.EmitMethod(typeBuilder, methodInfoNode); break;
-                default: EmitWrap(typeBuilder, node); break;
+                default: throw new NotImplementedException();
             }
-        }
-
-        private static void EmitWrap(System.Reflection.Emit.TypeBuilder typeBuilder, AstNode node)
-        {
-            var methodInfoNode = new MethodInfoNode(
-                "main",
-                node.Type,
-                new Type[0],
-                new VariableNode[0],
-                AstNode.Block(new AstNode[] { AstNode.Return(node) })
-            );
-
-            Emit(typeBuilder, methodInfoNode);
         }
     }
 }
