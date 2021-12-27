@@ -1,9 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using HeartScript.Ast.Nodes;
-using Heart.Parsing;
 using Heart.Parsing.Patterns;
 
 namespace HeartScript.Ast
@@ -16,7 +13,7 @@ namespace HeartScript.Ast
         {
             ["()"] = BuildRoundBracket,
             ["$"] = CallBuilder.BuildStaticCall,
-            ["."] = BuildMemberAccess,
+            ["."] = MemberAccessBuilder.BuildMemberAccess,
             ["u+"] = BuildPrefix(AstNode.UnaryPlus),
             ["u-"] = BuildPrefix(AstNode.Negate),
             ["~"] = BuildPrefix(AstNode.Not),
@@ -91,11 +88,6 @@ namespace HeartScript.Ast
                 return symbol.Value;
 
             throw new ArgumentException($"Missing {nameof(AstNode)} symbol, {valueNode.Value}");
-        }
-
-        private static AstNode BuildMemberAccess(SymbolScope scope, ExpressionNode node)
-        {
-            throw new NotImplementedException("Member access");
         }
 
         private static AstNodeBuilder BuildPrefix(Func<AstNode, AstNode> builder)
