@@ -7,7 +7,7 @@ using System.Reflection;
 
 namespace HeartScript.Ast
 {
-    public static class MethodBuilder
+    public static class MethodBodyBuilder
     {
         private delegate void StatmentBuilder(SymbolScope scope, MethodInfoBuilder builder, IParseNode parseNode);
         private static readonly Dictionary<string, StatmentBuilder> s_statementBuilders = new Dictionary<string, StatmentBuilder>()

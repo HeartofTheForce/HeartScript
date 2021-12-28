@@ -14,7 +14,7 @@ namespace HeartScript.Compiling.Emit
         public static Type Compile(SymbolScope scope, TypeBuilder typeBuilder, IParseNode node)
         {
             var quantifierNode = (QuantifierNode)node;
-            var methodSignatureResults = new List<(System.Reflection.Emit.MethodBuilder, SymbolScope, IParseNode)>();
+            var methodSignatureResults = new List<(MethodBuilder, SymbolScope, IParseNode)>();
             foreach (var child in quantifierNode.Children)
             {
                 var labelNode = (LabelNode)child;
@@ -24,7 +24,7 @@ namespace HeartScript.Compiling.Emit
 
             foreach (var (methodBuilder, methodScope, methodBodyNode) in methodSignatureResults)
             {
-                var methodBodyAst = Ast.MethodBuilder.BuildMethodBody(methodScope, methodBuilder, methodBodyNode);
+                var methodBodyAst = MethodBodyBuilder.BuildMethodBody(methodScope, methodBuilder, methodBodyNode);
                 MethodCompiler.EmitMethodBody(methodBuilder, methodBodyAst);
             }
 
@@ -33,7 +33,7 @@ namespace HeartScript.Compiling.Emit
             return loadedType;
         }
 
-        public static (System.Reflection.Emit.MethodBuilder, SymbolScope, IParseNode) EmitMethodSignature(SymbolScope scope, TypeBuilder typeBuilder, IParseNode node)
+        public static (MethodBuilder, SymbolScope, IParseNode) EmitMethodSignature(SymbolScope scope, TypeBuilder typeBuilder, IParseNode node)
         {
             var methodSequence = (SequenceNode)node;
 
