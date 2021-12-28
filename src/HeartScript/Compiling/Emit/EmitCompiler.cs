@@ -19,21 +19,12 @@ namespace HeartScript.Compiling.Emit
 
         public static MethodInfo CompileFunction(IParseNode node)
         {
-            var scope = new SymbolScope();
-            scope.DeclareSymbol("Math", new Symbol<Type>(true, typeof(Math)));
-
-            AstNode ast;
-            if (node is LabelNode labelNode)
-                ast = Ast.TypeBuilder.Build(scope, labelNode);
-            else
-                throw new NotImplementedException();
-
             return Compile(
                 "AssemblyName",
                 "ModuleName",
                 "TypeName",
                 "main",
-                ast);
+                node);
         }
 
         private static MethodInfo Compile(
@@ -41,27 +32,20 @@ namespace HeartScript.Compiling.Emit
             string moduleName,
             string typeName,
             string methodName,
-            AstNode ast)
+            IParseNode node)
         {
             var assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName(assemblyName), AssemblyBuilderAccess.Run);
             var moduleBuilder = assemblyBuilder.DefineDynamicModule(moduleName);
             var typeBuilder = moduleBuilder.DefineType(typeName, TypeAttributes.Public);
 
-            Emit(typeBuilder, ast);
+            var scope = new SymbolScope();
+            scope.DeclareSymbol("Math", new Symbol<Type>(true, typeof(Math)));
+            TypeCompiler.Compile(scope, typeBuilder, node);
 
             var loadedType = typeBuilder.CreateType();
             var loadedMethodInfo = loadedType.GetMethod(methodName);
 
             return loadedMethodInfo;
-        }
-
-        private static void Emit(System.Reflection.Emit.TypeBuilder typeBuilder, AstNode node)
-        {
-            switch (node)
-            {
-                case MethodInfoNode methodInfoNode: MethodCompiler.EmitMethod(typeBuilder, methodInfoNode); break;
-                default: throw new NotImplementedException();
-            }
         }
     }
 }

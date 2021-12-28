@@ -12,14 +12,13 @@ namespace HeartScript.Compiling.Emit
             public bool Return { get; set; }
         }
 
-        public static void EmitMethod(TypeBuilder typeBuilder, MethodInfoNode node)
+        public static void EmitMethodBody(MethodBuilder methodBuilder, MethodBodyNode node)
         {
-            var methodBuilder = typeBuilder.DefineMethod(node.Name, MethodAttributes.Public | MethodAttributes.Static, node.ReturnType, node.ParameterTypes);
             var ilGenerator = methodBuilder.GetILGenerator();
 
-            foreach (var variableNode in node.Variables)
+            foreach (var variable in node.Variables)
             {
-                ilGenerator.DeclareLocal(variableNode.Type);
+                ilGenerator.DeclareLocal(variable.Type);
             }
 
             var basicBlock = new BasicBlock();

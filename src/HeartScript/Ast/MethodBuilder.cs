@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using HeartScript.Ast.Nodes;
 using Heart.Parsing;
 using Heart.Parsing.Patterns;
+using System.Reflection;
 
 namespace HeartScript.Ast
 {
@@ -27,54 +28,14 @@ namespace HeartScript.Ast
                 throw new ArgumentException($"{node.Label} has no matching builder");
         }
 
-        public static AstNode BuildMethod(SymbolScope scope, IParseNode node)
+        public static MethodBodyNode BuildMethodBody(SymbolScope scope, MethodInfo methodInfo, IParseNode node)
         {
-            var methodSequence = (SequenceNode)node;
+            var methodInfoBuilder = new MethodInfoBuilder(methodInfo.ReturnType);
 
-            string methodName = GetName(methodSequence.Children[1]);
-            var returnType = GetType(methodSequence.Children[0]);
+            var labelNode = (LabelNode)node;
+            BuildStatement(scope, methodInfoBuilder, labelNode);
 
-            var parameterValues = new List<(IParseNode, IParseNode)>();
-            var parameterMatch = (QuantifierNode)methodSequence.Children[3];
-            if (parameterMatch.Children.Count > 0)
-            {
-                var head = (SequenceNode)parameterMatch.Children[0];
-                var paramTypeNode = head.Children[0];
-                var paramNameNode = head.Children[1];
-                parameterValues.Add((paramTypeNode, paramNameNode));
-
-                var tail = (QuantifierNode)head.Children[2];
-                foreach (var tailChild in tail.Children)
-                {
-                    var tailSequence = (SequenceNode)tailChild;
-                    paramTypeNode = tailSequence.Children[1];
-                    paramNameNode = tailSequence.Children[2];
-                    parameterValues.Add((paramTypeNode, paramNameNode));
-                }
-            }
-
-            var methodScope = new SymbolScope(scope);
-
-            var methodInfoBuilder = new MethodInfoBuilder(methodName, returnType);
-            for (int i = 0; i < parameterValues.Count; i++)
-            {
-                var paramType = GetType(parameterValues[i].Item1);
-                string paramName = GetName(parameterValues[i].Item2);
-
-                var parameterNode = AstNode.Parameter(i, paramType);
-                methodInfoBuilder.ParameterTypes.Add(parameterNode.Type);
-
-                var symbol = new Symbol<AstNode>(true, parameterNode);
-                methodScope.DeclareSymbol(paramName, symbol);
-            }
-
-            var methodBodyLabelNode = (LabelNode)methodSequence.Children[5];
-            BuildStatement(methodScope, methodInfoBuilder, methodBodyLabelNode);
-
-            return new MethodInfoNode(
-                methodInfoBuilder.Name,
-                methodInfoBuilder.ReturnType,
-                methodInfoBuilder.ParameterTypes.ToArray(),
+            return new MethodBodyNode(
                 methodInfoBuilder.Variables.ToArray(),
                 AstNode.Block(methodInfoBuilder.Statements.ToArray())
             );
@@ -175,17 +136,13 @@ namespace HeartScript.Ast
 
         private class MethodInfoBuilder
         {
-            public string Name { get; }
             public Type ReturnType { get; }
-            public List<Type> ParameterTypes { get; }
             public List<VariableNode> Variables { get; }
             public List<AstNode> Statements { get; }
 
-            public MethodInfoBuilder(string name, Type returnType)
+            public MethodInfoBuilder(Type returnType)
             {
-                Name = name;
                 ReturnType = returnType;
-                ParameterTypes = new List<Type>();
                 Variables = new List<VariableNode>();
                 Statements = new List<AstNode>();
             }

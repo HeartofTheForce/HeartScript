@@ -1,11 +1,11 @@
-root -> method:'method'
+root -> method+
 _ -> `\s*`
 
 type -> 'int' / 'double' / 'bool'
 name -> !type `[_a-zA-Z]\w*`
 
 parameters -> (type name (',' type name)*)?
-method -> type name '(' parameters ')' (block_statement / lambda_body)
+method:'method' -> type name '(' parameters ')' (block_statement / lambda_body)
 
 lambda_body:'lambda' -> '=>' expr ';'
 
