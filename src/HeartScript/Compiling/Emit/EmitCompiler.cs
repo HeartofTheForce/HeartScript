@@ -2,9 +2,7 @@ using System;
 using System.Reflection;
 using System.Reflection.Emit;
 using HeartScript.Ast;
-using HeartScript.Ast.Nodes;
 using Heart.Parsing;
-using Heart.Parsing.Patterns;
 
 namespace HeartScript.Compiling.Emit
 {

@@ -1,5 +1,3 @@
-using System;
-
 namespace HeartScript.Ast.Nodes
 {
     public class MethodBodyNode : AstNode
