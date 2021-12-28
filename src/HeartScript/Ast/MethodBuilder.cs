@@ -16,7 +16,8 @@ namespace HeartScript.Ast
             ["block_statement"] = BuildBlockBody,
             ["declaration"] = BuildDeclaration,
             ["declaration_statement"] = BuildSemicolonStatement,
-            ["expr_statement"] = BuildExpressionStatement,
+            ["expr"] = BuildExpressionStatement,
+            ["expr_statement"] = BuildSemicolonStatement,
             ["return_statement"] = BuildReturn,
         };
 
@@ -98,8 +99,7 @@ namespace HeartScript.Ast
 
         private static void BuildExpressionStatement(SymbolScope scope, MethodInfoBuilder builder, IParseNode node)
         {
-            var statementSequence = (SequenceNode)node;
-            var expressionNode = (ExpressionNode)statementSequence.Children[0];
+            var expressionNode = (ExpressionNode)node;
             var expression = ExpressionBuilder.Build(scope, expressionNode);
 
             builder.Statements.Add(expression);
