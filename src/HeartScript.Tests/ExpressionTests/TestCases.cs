@@ -27,11 +27,7 @@ namespace HeartScript.Tests.ExpressionTests
             var ctx = new ParserContext(source);
 
             var pattern = Utility.Parser.Patterns["root"].Trim(Utility.Parser.Patterns["_"]);
-            var node = pattern.TryMatch(Utility.Parser, ctx);
-
-            ctx.AssertComplete();
-            if (node == null)
-                throw new ArgumentException(nameof(ctx.Exception));
+            var node = pattern.MatchComplete(Utility.Parser, ctx);
 
             var compiledExpression = EmitCompiler.CompileFunction<Func<T>>(node);
 
