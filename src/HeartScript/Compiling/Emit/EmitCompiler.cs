@@ -37,7 +37,8 @@ namespace HeartScript.Compiling.Emit
             var typeBuilder = moduleBuilder.DefineType(typeName, TypeAttributes.Public);
 
             var scope = new SymbolScope();
-            scope.DeclareSymbol("Math", new Symbol<Type>(true, typeof(Math)));
+            scope.DeclareSymbol("Math", true, new ScriptType(typeof(Math)));
+
             TypeCompiler.Compile(scope, typeBuilder, node);
 
             var loadedType = typeBuilder.CreateType();

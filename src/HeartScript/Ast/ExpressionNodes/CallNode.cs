@@ -9,33 +9,31 @@ namespace HeartScript.Ast.Nodes
         public MethodInfo MethodInfo { get; }
         public AstNode[] Parameters { get; }
 
-        public CallNode(AstNode? instance, MethodInfo methodInfo, AstNode[] parameters) : base(methodInfo.ReturnType, AstType.Default)
+        public CallNode(AstNode? instance, ScriptMethod scriptMethod, AstNode[] parameters) : base(scriptMethod.MethodInfo.ReturnType, AstType.Default)
         {
-            if (methodInfo.IsStatic && instance != null)
+            if (scriptMethod.MethodInfo.IsStatic && instance != null)
                 throw new ArgumentException($"{nameof(instance)} must be null for static method");
 
-            if (!methodInfo.IsStatic && instance == null)
+            if (!scriptMethod.MethodInfo.IsStatic && instance == null)
                 throw new ArgumentException($"{nameof(instance)} must not be null for instance method");
 
-            var parameterInfos = methodInfo.GetParameters();
-
-            if (parameters.Length != parameterInfos.Length)
+            if (parameters.Length != scriptMethod.ParameterTypes.Length)
                 throw new ArgumentException($"Parameter Count mismatch");
 
-            for (int i = 0; i < parameterInfos.Length; i++)
+            for (int i = 0; i < parameters.Length; i++)
             {
-                if (parameters[i].Type != parameterInfos[i].ParameterType)
+                if (parameters[i].Type != scriptMethod.ParameterTypes[i])
                     throw new ArgumentException($"Parameter Type mismatch, {i}");
             }
 
             Instance = instance;
-            MethodInfo = methodInfo;
+            MethodInfo = scriptMethod.MethodInfo;
             Parameters = parameters;
         }
     }
 
     public partial class AstNode
     {
-        public static CallNode Call(AstNode? instance, MethodInfo methodInfo, AstNode[] parameters) => new CallNode(instance, methodInfo, parameters);
+        public static CallNode Call(AstNode? instance, ScriptMethod scriptMethod, AstNode[] parameters) => new CallNode(instance, scriptMethod, parameters);
     }
 }

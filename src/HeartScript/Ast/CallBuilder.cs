@@ -21,17 +21,16 @@ namespace HeartScript.Ast
                 parameterTypes[i] = parameters[i].Type;
             }
 
-            var methodInfo = ResolveMethodOverload(scope, callNode.LeftNode, parameterTypes);
-            var expectedParameters = methodInfo.GetParameters();
+            var scripMethod = ResolveMethodOverload(scope, callNode.LeftNode, parameterTypes);
             for (int i = 0; i < parameterNodes.Count; i++)
             {
-                parameters[i] = AstBuilder.ConvertIfRequired(parameters[i], expectedParameters[i].ParameterType);
+                parameters[i] = AstBuilder.ConvertIfRequired(parameters[i], scripMethod.ParameterTypes[i]);
             }
 
-            return AstNode.Call(null, methodInfo, parameters);
+            return AstNode.Call(null, scripMethod, parameters);
         }
 
-        private static Type ResolveCallType(SymbolScope scope, ExpressionNode? typeNode)
+        private static ScriptType ResolveCallType(SymbolScope scope, ExpressionNode? typeNode)
         {
             if (typeNode == null)
                 throw new Exception($"{nameof(typeNode)} cannot be null");
@@ -42,7 +41,7 @@ namespace HeartScript.Ast
             var typeNameNode = (ValueNode)typeNode.MidNode;
             string typeName = typeNameNode.Value;
 
-            if (scope.TryGetSymbol<Type>(typeName, out var symbol))
+            if (scope.TryGetSymbol<ScriptType>(typeName, out var symbol))
                 return symbol.Value;
 
             throw new ArgumentException($"Missing {nameof(Type)} symbol, {typeName}");
@@ -60,7 +59,7 @@ namespace HeartScript.Ast
             return valueNode.Value;
         }
 
-        private static MethodInfo ResolveMethodOverload(SymbolScope scope, ExpressionNode? memberAccessNode, Type[] parameterTypes)
+        private static ScriptMethod ResolveMethodOverload(SymbolScope scope, ExpressionNode? memberAccessNode, Type[] parameterTypes)
         {
             if (memberAccessNode == null)
                 throw new Exception($"{nameof(memberAccessNode)} cannot be null");
@@ -72,11 +71,11 @@ namespace HeartScript.Ast
             string? methodName = ResolveCallName(memberAccessNode.RightNode);
 
             var bindingFlags = BindingFlags.Public | BindingFlags.Static;
-            var methodInfo = type.GetMethod(methodName, bindingFlags, null, parameterTypes, null);
-            if (methodInfo == null)
-                throw new Exception($"{type.FullName} has no overload matching '{methodName}({string.Join(',', parameterTypes.Select(x => x.Name))})'");
+            var scripMethod = type.GetMethod(methodName, bindingFlags, parameterTypes);
+            if (scripMethod == null)
+                throw new Exception($"{type.Name} has no overload matching '{methodName}({string.Join(',', parameterTypes.Select(x => x.Name))})'");
 
-            return methodInfo;
+            return scripMethod;
         }
     }
 }

@@ -13,19 +13,24 @@ namespace HeartScript.Compiling.Emit
     {
         public static Type Compile(SymbolScope scope, TypeBuilder typeBuilder, IParseNode node)
         {
+            var scriptType = new ScriptType(typeBuilder);
+            scope.DeclareSymbol("this", true, scriptType);
+
             var quantifierNode = (QuantifierNode)node;
-            var methodSignatureResults = new List<(MethodBuilder, SymbolScope, IParseNode)>();
+            var methodSignatureResults = new List<MethodSignature>();
             foreach (var child in quantifierNode.Children)
             {
                 var labelNode = (LabelNode)child;
-                var methodSignatureResult = EmitMethodSignature(scope, typeBuilder, labelNode.Node);
-                methodSignatureResults.Add(methodSignatureResult);
+                var methodSignature = EmitMethodSignature(scope, typeBuilder, labelNode.Node);
+                methodSignatureResults.Add(methodSignature);
+
+                scriptType.AddMethod(new ScriptMethod(methodSignature.MethodBuilder, methodSignature.ParameterTypes));
             }
 
-            foreach (var (methodBuilder, methodScope, methodBodyNode) in methodSignatureResults)
+            foreach (var methodSignature in methodSignatureResults)
             {
-                var methodBodyAst = MethodBodyBuilder.BuildMethodBody(methodScope, methodBuilder, methodBodyNode);
-                MethodCompiler.EmitMethodBody(methodBuilder, methodBodyAst);
+                var methodBodyAst = MethodBodyBuilder.BuildMethodBody(methodSignature.MethodScope, methodSignature.MethodBuilder, methodSignature.Body);
+                MethodCompiler.EmitMethodBody(methodSignature.MethodBuilder, methodBodyAst);
             }
 
             var loadedType = typeBuilder.CreateType();
@@ -33,7 +38,23 @@ namespace HeartScript.Compiling.Emit
             return loadedType;
         }
 
-        public static (MethodBuilder, SymbolScope, IParseNode) EmitMethodSignature(SymbolScope scope, TypeBuilder typeBuilder, IParseNode node)
+        private class MethodSignature
+        {
+            public SymbolScope MethodScope { get; }
+            public MethodBuilder MethodBuilder { get; }
+            public Type[] ParameterTypes { get; }
+            public IParseNode Body { get; }
+
+            public MethodSignature(SymbolScope methodScope, MethodBuilder methodBuilder, Type[] parameterTypes, IParseNode body)
+            {
+                MethodScope = methodScope;
+                MethodBuilder = methodBuilder;
+                ParameterTypes = parameterTypes;
+                Body = body;
+            }
+        }
+
+        private static MethodSignature EmitMethodSignature(SymbolScope scope, TypeBuilder typeBuilder, IParseNode node)
         {
             var methodSequence = (SequenceNode)node;
 
@@ -75,7 +96,8 @@ namespace HeartScript.Compiling.Emit
 
             var methodBuilder = typeBuilder.DefineMethod(methodName, MethodAttributes.Public | MethodAttributes.Static, returnType, parameterTypes);
             var methodBodyNode = methodSequence.Children[5];
-            return (methodBuilder, methodScope, methodBodyNode);
+
+            return new MethodSignature(methodScope, methodBuilder, parameterTypes, methodBodyNode);
         }
 
         private static Type GetType(IParseNode typeNode)

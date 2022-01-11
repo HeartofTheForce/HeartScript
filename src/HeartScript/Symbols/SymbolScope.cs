@@ -62,5 +62,13 @@ namespace HeartScript.Ast
 
             _symbols[name] = symbol;
         }
+
+        public void DeclareSymbol<T>(string name, bool isPublic, T value)
+        {
+            if (_symbols.ContainsKey(name))
+                throw new ArgumentException(nameof(name));
+
+            _symbols[name] = new Symbol<T>(isPublic, value);
+        }
     }
 }
