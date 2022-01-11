@@ -6,9 +6,6 @@ namespace HeartScript.Ast
         UnaryPlus,
         Negate,
         Not,
-        Constant,
-        MemberAccess,
-        Call,
         PostIncrement,
         PostDecrement,
         Multiply,
@@ -25,9 +22,6 @@ namespace HeartScript.Ast
         ExclusiveOr,
         Or,
         Assign,
-        Conditional,
         Convert,
-        Parameter,
-        Variable,
     }
 }

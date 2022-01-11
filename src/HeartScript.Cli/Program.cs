@@ -19,7 +19,7 @@ namespace HeartScript.Cli
 
                 var ctx = new ParserContext(source);
                 var parser = ParsingHelper.BuildPatternParser("./src/test.hg");
-                var pattern = parser.Patterns["root"].Trim(parser.Patterns["_"]);
+                var pattern = parser.Patterns["root"].Trim();
                 var node = pattern.MatchComplete(parser, ctx);
 
                 Console.WriteLine("Parsed");

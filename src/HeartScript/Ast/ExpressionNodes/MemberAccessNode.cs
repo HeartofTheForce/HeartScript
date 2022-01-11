@@ -8,7 +8,7 @@ namespace HeartScript.Ast.Nodes
         public AstNode? Instance { get; }
         public MemberInfo Member { get; }
 
-        public MemberAccessNode(AstNode? instance, MemberInfo member) : base(GetUnderlyingType(member), AstType.MemberAccess)
+        public MemberAccessNode(AstNode? instance, MemberInfo member) : base(GetUnderlyingType(member), AstType.Default)
         {
             if (IsStatic(member) && instance != null)
                 throw new ArgumentException($"{nameof(instance)} must be null for static member");

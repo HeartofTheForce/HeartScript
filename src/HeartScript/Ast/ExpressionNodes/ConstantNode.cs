@@ -6,7 +6,7 @@ namespace HeartScript.Ast.Nodes
     {
         public object? Value { get; }
 
-        public ConstantNode(object? value, Type type) : base(type, AstType.Constant)
+        public ConstantNode(object? value, Type type) : base(type, AstType.Default)
         {
             if (value != null && value.GetType() != type)
                 throw new ArgumentException("Type mismatch");
