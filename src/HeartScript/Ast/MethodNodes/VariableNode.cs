@@ -6,7 +6,7 @@ namespace HeartScript.Ast.Nodes
     {
         public int Index { get; }
 
-        public VariableNode(int index, Type type) : base(type, AstType.Variable)
+        public VariableNode(int index, Type type) : base(type, AstType.Default)
         {
             Index = index;
         }
