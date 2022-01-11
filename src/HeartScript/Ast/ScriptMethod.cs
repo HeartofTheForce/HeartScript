@@ -40,5 +40,7 @@ namespace HeartScript.Ast
 
             return true;
         }
+
+        public override string ToString() => $"{MethodInfo.Name}({string.Join<object>(", ", ParameterTypes)})";
     }
 }

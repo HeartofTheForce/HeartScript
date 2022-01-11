@@ -48,7 +48,7 @@ namespace HeartScript.Ast
         {
             if (MethodGroups.TryGetValue(methodName, out var methodGroup))
             {
-                int bestExactCount = 0;
+                int bestMatchQuality = 0;
                 ScriptMethod? bestMatch = null;
                 foreach (var method in methodGroup)
                 {
@@ -64,20 +64,27 @@ namespace HeartScript.Ast
                     if (!matchBindingFlags)
                         continue;
 
-                    int exactCount = 0;
+                    int matchQuality = 0;
                     bool isValid = true;
                     for (int i = 0; i < parameterTypes.Length; i++)
                     {
                         if (parameterTypes[i] == method.ParameterTypes[i])
-                            exactCount++;
+                            matchQuality++;
                         else if (!IsConvertible(parameterTypes[i], method.ParameterTypes[i]))
                             isValid = false;
                     }
 
-                    if (isValid && exactCount >= bestExactCount)
+                    if (isValid)
                     {
-                        bestExactCount = exactCount;
-                        bestMatch = method;
+                        if (bestMatch != null && matchQuality == bestMatchQuality)
+                        {
+                            throw new Exception($"The call is ambiguous between the following methods: '{bestMatch}' and '{method}'");
+                        }
+                        else if (matchQuality >= bestMatchQuality)
+                        {
+                            bestMatchQuality = matchQuality;
+                            bestMatch = method;
+                        }
                     }
                 }
 
