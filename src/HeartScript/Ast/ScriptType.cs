@@ -48,7 +48,7 @@ namespace HeartScript.Ast
         {
             if (MethodGroups.TryGetValue(methodName, out var methodGroup))
             {
-                int bestMatchStrength = 0;
+                int bestExactCount = 0;
                 ScriptMethod? bestMatch = null;
                 foreach (var method in methodGroup)
                 {
@@ -64,21 +64,19 @@ namespace HeartScript.Ast
                     if (!matchBindingFlags)
                         continue;
 
-                    int matchQuality = 0;
+                    int exactCount = 0;
                     bool isValid = true;
                     for (int i = 0; i < parameterTypes.Length; i++)
                     {
                         if (parameterTypes[i] == method.ParameterTypes[i])
-                            matchQuality += 2;
-                        else if (IsConvertible(parameterTypes[i], method.ParameterTypes[i]))
-                            matchQuality += 1;
-                        else
+                            exactCount++;
+                        else if (!IsConvertible(parameterTypes[i], method.ParameterTypes[i]))
                             isValid = false;
                     }
 
-                    if (isValid && matchQuality >= bestMatchStrength)
+                    if (isValid && exactCount >= bestExactCount)
                     {
-                        bestMatchStrength = matchQuality;
+                        bestExactCount = exactCount;
                         bestMatch = method;
                     }
                 }
