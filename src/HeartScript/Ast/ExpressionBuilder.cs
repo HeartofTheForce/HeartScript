@@ -1,9 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using HeartScript.Ast.Nodes;
-using Heart.Parsing;
 using Heart.Parsing.Patterns;
 
 namespace HeartScript.Ast
@@ -15,7 +12,8 @@ namespace HeartScript.Ast
         private static readonly Dictionary<string, AstNodeBuilder> s_nodeBuilders = new Dictionary<string, AstNodeBuilder>()
         {
             ["()"] = BuildRoundBracket,
-            ["$"] = BuildStaticCall(typeof(Math)),
+            ["$"] = CallBuilder.BuildStaticCall,
+            ["."] = MemberAccessBuilder.BuildMemberAccess,
             ["u+"] = BuildPrefix(AstNode.UnaryPlus),
             ["u-"] = BuildPrefix(AstNode.Negate),
             ["~"] = BuildPrefix(AstNode.Not),
@@ -89,56 +87,7 @@ namespace HeartScript.Ast
             if (scope.TryGetSymbol<AstNode>(valueNode.Value, out var symbol))
                 return symbol.Value;
 
-            throw new ArgumentException($"Missing symbol {valueNode.Value}");
-        }
-
-        private static MethodInfo ResolveMethodOverload(ExpressionNode? methodNode, Type type, BindingFlags bindingFlags, Type[] parameterTypes)
-        {
-            if (methodNode == null)
-                throw new Exception($"{nameof(methodNode)} cannot be null");
-
-            if (methodNode.Key != "identifier")
-                throw new Exception($"{nameof(methodNode)} is not identifier");
-
-            var valueNode = (ValueNode)methodNode.MidNode;
-            string methodName = valueNode.Value;
-
-            var methodInfo = type.GetMethod(methodName, bindingFlags, null, parameterTypes, null);
-            if (methodInfo == null)
-                throw new Exception($"{type.FullName} has no overload matching '{methodName}({string.Join(',', parameterTypes.Select(x => x.Name))})'");
-
-            return methodInfo;
-        }
-
-        private static AstNode BuildCall(SymbolScope scope, ExpressionNode callNode, AstNode? instance, Type type, BindingFlags bindingFlags)
-        {
-            var parameterNodes = ParseNodeHelper.FindChildren<ExpressionNode>(callNode.MidNode);
-            var parameters = new AstNode[parameterNodes.Count];
-            var parameterTypes = new Type[parameterNodes.Count];
-
-            for (int i = 0; i < parameterNodes.Count; i++)
-            {
-                parameters[i] = Build(scope, parameterNodes[i]);
-                parameterTypes[i] = parameters[i].Type;
-            }
-
-            var methodInfo = ResolveMethodOverload(callNode.LeftNode, type, bindingFlags, parameterTypes);
-            var expectedParameters = methodInfo.GetParameters();
-            for (int i = 0; i < parameterNodes.Count; i++)
-            {
-                parameters[i] = AstBuilder.ConvertIfRequired(parameters[i], expectedParameters[i].ParameterType);
-            }
-
-            return AstNode.Call(instance, methodInfo, parameters);
-        }
-
-        private static AstNodeBuilder BuildStaticCall(Type type)
-        {
-            return (scope, node) =>
-            {
-                var bindingFlags = BindingFlags.Public | BindingFlags.Static | BindingFlags.IgnoreCase;
-                return BuildCall(scope, node, null, type, bindingFlags);
-            };
+            throw new ArgumentException($"Missing {nameof(AstNode)} symbol, {valueNode.Value}");
         }
 
         private static AstNodeBuilder BuildPrefix(Func<AstNode, AstNode> builder)
@@ -179,9 +128,9 @@ namespace HeartScript.Ast
                 var left = Build(scope, node.LeftNode);
                 var right = Build(scope, node.RightNode);
 
-                if (IsReal(left.Type) && IsIntegral(right.Type))
+                if (TypeHelper.IsReal(left.Type) && TypeHelper.IsIntegral(right.Type))
                     right = AstNode.Convert(right, left.Type);
-                else if (IsIntegral(left.Type) && IsReal(right.Type))
+                else if (TypeHelper.IsIntegral(left.Type) && TypeHelper.IsReal(right.Type))
                     left = AstNode.Convert(left, right.Type);
 
                 return builder(left, right);
@@ -201,27 +150,12 @@ namespace HeartScript.Ast
             var sequenceNode = (SequenceNode)node.MidNode;
             var mid = Build(scope, (ExpressionNode)sequenceNode.Children[1]);
 
-            if (IsIntegral(mid.Type) && IsReal(right.Type))
+            if (TypeHelper.IsIntegral(mid.Type) && TypeHelper.IsReal(right.Type))
                 mid = AstNode.Convert(mid, right.Type);
-            else if (IsReal(mid.Type) && IsIntegral(right.Type))
+            else if (TypeHelper.IsReal(mid.Type) && TypeHelper.IsIntegral(right.Type))
                 right = AstNode.Convert(right, mid.Type);
 
             return new ConditionalNode(left, mid, right);
         }
-
-        private static bool IsReal(Type type) =>
-            type == typeof(float) ||
-            type == typeof(double) ||
-            type == typeof(decimal);
-
-        private static bool IsIntegral(Type type) =>
-            type == typeof(sbyte) ||
-            type == typeof(byte) ||
-            type == typeof(short) ||
-            type == typeof(int) ||
-            type == typeof(long) ||
-            type == typeof(ushort) ||
-            type == typeof(uint) ||
-            type == typeof(ulong);
     }
 }

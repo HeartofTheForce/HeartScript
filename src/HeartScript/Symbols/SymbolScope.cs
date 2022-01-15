@@ -12,7 +12,7 @@ namespace HeartScript.Ast
         public SymbolScope(SymbolScope? parent)
         {
             _parent = parent;
-            _symbols = new Dictionary<string, ISymbol>(StringComparer.OrdinalIgnoreCase);
+            _symbols = new Dictionary<string, ISymbol>();
         }
 
         public SymbolScope() : this(null)
@@ -61,6 +61,14 @@ namespace HeartScript.Ast
                 throw new ArgumentException(nameof(name));
 
             _symbols[name] = symbol;
+        }
+
+        public void DeclareSymbol<T>(string name, bool isPublic, T value)
+        {
+            if (_symbols.ContainsKey(name))
+                throw new ArgumentException(nameof(name));
+
+            _symbols[name] = new Symbol<T>(isPublic, value);
         }
     }
 }

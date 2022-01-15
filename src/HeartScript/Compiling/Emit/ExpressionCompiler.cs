@@ -181,11 +181,9 @@ namespace HeartScript.Compiling.Emit
             {
                 case AstType.Convert:
                     {
-                        if (node.Operand.Type != typeof(int) || node.Type != typeof(double))
-                            throw new ArgumentException($"Cannot convert, {node.Operand.Type} to {node.Type}");
-
                         EmitExpression(ilGenerator, node.Operand, false);
-                        ilGenerator.Emit(OpCodes.Conv_R8);
+                        var opCode = TypeHelper.ConvertOpCode(node.Operand.Type, node.Type);
+                        ilGenerator.Emit(opCode);
                     }
                     break;
                 case AstType.UnaryPlus:
