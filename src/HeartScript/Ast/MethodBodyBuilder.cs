@@ -76,7 +76,7 @@ namespace HeartScript.Ast
         {
             var declarationSequence = (SequenceNode)node;
 
-            var type = GetType(declarationSequence.Children[0]);
+            var type = TypeHelper.ResolveTypeNode(declarationSequence.Children[0]);
             string name = GetName(declarationSequence.Children[1]);
 
             var variableNode = AstNode.Variable(builder.Variables.Count, type);
@@ -113,18 +113,6 @@ namespace HeartScript.Ast
 
             var returnNode = AstNode.Return(AstBuilder.ConvertIfRequired(expression, builder.ReturnType));
             builder.Statements.Add(returnNode);
-        }
-
-        private static Type GetType(IParseNode typeNode)
-        {
-            var valueNode = (ValueNode)typeNode;
-            switch (valueNode.Value)
-            {
-                case "int": return typeof(int);
-                case "double": return typeof(double);
-                case "bool": return typeof(bool);
-                default: throw new NotImplementedException();
-            }
         }
 
         private static string GetName(IParseNode nameNode)

@@ -182,7 +182,7 @@ namespace HeartScript.Compiling.Emit
                 case AstType.Convert:
                     {
                         EmitExpression(ilGenerator, node.Operand, false);
-                        var opCode = ConvertHelper.ConvertOpCode(node.Operand.Type, node.Type);
+                        var opCode = TypeHelper.ConvertOpCode(node.Operand.Type, node.Type);
                         ilGenerator.Emit(opCode);
                     }
                     break;

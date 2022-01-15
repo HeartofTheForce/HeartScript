@@ -128,9 +128,9 @@ namespace HeartScript.Ast
                 var left = Build(scope, node.LeftNode);
                 var right = Build(scope, node.RightNode);
 
-                if (ConvertHelper.IsReal(left.Type) && ConvertHelper.IsIntegral(right.Type))
+                if (TypeHelper.IsReal(left.Type) && TypeHelper.IsIntegral(right.Type))
                     right = AstNode.Convert(right, left.Type);
-                else if (ConvertHelper.IsIntegral(left.Type) && ConvertHelper.IsReal(right.Type))
+                else if (TypeHelper.IsIntegral(left.Type) && TypeHelper.IsReal(right.Type))
                     left = AstNode.Convert(left, right.Type);
 
                 return builder(left, right);
@@ -150,9 +150,9 @@ namespace HeartScript.Ast
             var sequenceNode = (SequenceNode)node.MidNode;
             var mid = Build(scope, (ExpressionNode)sequenceNode.Children[1]);
 
-            if (ConvertHelper.IsIntegral(mid.Type) && ConvertHelper.IsReal(right.Type))
+            if (TypeHelper.IsIntegral(mid.Type) && TypeHelper.IsReal(right.Type))
                 mid = AstNode.Convert(mid, right.Type);
-            else if (ConvertHelper.IsReal(mid.Type) && ConvertHelper.IsIntegral(right.Type))
+            else if (TypeHelper.IsReal(mid.Type) && TypeHelper.IsIntegral(right.Type))
                 right = AstNode.Convert(right, mid.Type);
 
             return new ConditionalNode(left, mid, right);

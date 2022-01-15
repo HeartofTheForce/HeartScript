@@ -71,7 +71,7 @@ namespace HeartScript.Ast
                     {
                         if (parameterTypes[i] == method.ParameterTypes[i])
                             matchQuality++;
-                        else if (!ConvertHelper.CanConvert(parameterTypes[i], method.ParameterTypes[i]))
+                        else if (!TypeHelper.CanConvert(parameterTypes[i], method.ParameterTypes[i]))
                             isValid = false;
                     }
 

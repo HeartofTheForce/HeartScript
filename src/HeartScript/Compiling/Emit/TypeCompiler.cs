@@ -60,7 +60,7 @@ namespace HeartScript.Compiling.Emit
             var methodSequence = (SequenceNode)node;
 
             string methodName = GetName(methodSequence.Children[1]);
-            var returnType = GetType(methodSequence.Children[0]);
+            var returnType = TypeHelper.ResolveTypeNode(methodSequence.Children[0]);
 
             var parameterValues = new List<(IParseNode, IParseNode)>();
             var parameterMatch = (QuantifierNode)methodSequence.Children[3];
@@ -85,7 +85,7 @@ namespace HeartScript.Compiling.Emit
             var parameterTypes = new Type[parameterValues.Count];
             for (int i = 0; i < parameterValues.Count; i++)
             {
-                var paramType = GetType(parameterValues[i].Item1);
+                var paramType = TypeHelper.ResolveTypeNode(parameterValues[i].Item1);
                 string paramName = GetName(parameterValues[i].Item2);
 
                 var parameterNode = AstNode.Parameter(i, paramType);
@@ -99,18 +99,6 @@ namespace HeartScript.Compiling.Emit
             var methodBodyNode = methodSequence.Children[5];
 
             return new MethodSignature(methodScope, methodBuilder, parameterTypes, methodBodyNode);
-        }
-
-        private static Type GetType(IParseNode typeNode)
-        {
-            var valueNode = (ValueNode)typeNode;
-            switch (valueNode.Value)
-            {
-                case "int": return typeof(int);
-                case "double": return typeof(double);
-                case "bool": return typeof(bool);
-                default: throw new NotImplementedException();
-            }
         }
 
         private static string GetName(IParseNode nameNode)

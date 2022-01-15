@@ -1,9 +1,11 @@
 using System;
 using System.Reflection.Emit;
+using Heart.Parsing;
+using Heart.Parsing.Patterns;
 
 namespace HeartScript.Ast
 {
-    public static class ConvertHelper
+    public static class TypeHelper
     {
         public static bool CanConvert(Type a, Type b)
         {
@@ -19,6 +21,18 @@ namespace HeartScript.Ast
                 throw new ArgumentException($"Cannot convert, {a} to {b}");
 
             return OpCodes.Conv_R8;
+        }
+
+        public static Type ResolveTypeNode(IParseNode typeNode)
+        {
+            var valueNode = (ValueNode)typeNode;
+            switch (valueNode.Value)
+            {
+                case "int": return typeof(int);
+                case "double": return typeof(double);
+                case "bool": return typeof(bool);
+                default: throw new NotImplementedException();
+            }
         }
 
         public static bool IsReal(Type type) =>
