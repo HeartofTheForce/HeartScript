@@ -15,6 +15,7 @@ namespace HeartScript.Compiling.Emit
         {
             var scriptType = new ScriptType(typeBuilder);
             scope.DeclareSymbol(ScriptType.CurrentTypeKey, true, scriptType);
+            scope.DeclareSymbol("Math", true, new ScriptType(typeof(Math)));
 
             var quantifierNode = (QuantifierNode)node;
             var methodSignatureResults = new List<MethodSignature>();
