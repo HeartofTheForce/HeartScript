@@ -30,7 +30,7 @@ namespace HeartScript.Ast
             return AstNode.Call(null, scripMethod, parameters);
         }
 
-        private static ScriptType ResolveCallType(SymbolScope scope, ExpressionNode? typeNode)
+        private static ScriptType ResolveMemberAccessType(SymbolScope scope, ExpressionNode? typeNode)
         {
             if (typeNode == null)
                 throw new Exception($"{nameof(typeNode)} cannot be null");
@@ -47,6 +47,14 @@ namespace HeartScript.Ast
             throw new ArgumentException($"Missing {nameof(Type)} symbol, {typeName}");
         }
 
+        private static ScriptType ResolveCurrentType(SymbolScope scope)
+        {
+            if (scope.TryGetSymbol<ScriptType>(ScriptType.CurrentTypeKey, out var symbol))
+                return symbol.Value;
+
+            throw new ArgumentException($"Missing {nameof(Type)} symbol, {ScriptType.CurrentTypeKey}");
+        }
+
         private static string ResolveCallName(ExpressionNode? methodNameNode)
         {
             if (methodNameNode == null)
@@ -59,16 +67,28 @@ namespace HeartScript.Ast
             return valueNode.Value;
         }
 
-        private static ScriptMethod ResolveMethodOverload(SymbolScope scope, ExpressionNode? memberAccessNode, Type[] parameterTypes)
+        private static ScriptMethod ResolveMethodOverload(SymbolScope scope, ExpressionNode? node, Type[] parameterTypes)
         {
-            if (memberAccessNode == null)
-                throw new Exception($"{nameof(memberAccessNode)} cannot be null");
+            if (node == null)
+                throw new Exception($"{nameof(node)} cannot be null");
 
-            if (memberAccessNode.Key != ".")
-                throw new Exception($"{nameof(memberAccessNode)} is not MemberAccess");
-
-            var type = ResolveCallType(scope, memberAccessNode.LeftNode);
-            string? methodName = ResolveCallName(memberAccessNode.RightNode);
+            ScriptType type;
+            string methodName;
+            switch (node.Key)
+            {
+                case ".":
+                    {
+                        type = ResolveMemberAccessType(scope, node.LeftNode);
+                        methodName = ResolveCallName(node.RightNode);
+                    }
+                    break;
+                default:
+                    {
+                        type = ResolveCurrentType(scope);
+                        methodName = ResolveCallName(node);
+                    }
+                    break;
+            }
 
             var bindingFlags = BindingFlags.Public | BindingFlags.Static;
             var scripMethod = type.GetMethod(methodName, bindingFlags, parameterTypes);

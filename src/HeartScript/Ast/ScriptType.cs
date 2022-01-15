@@ -8,6 +8,7 @@ namespace HeartScript.Ast
 {
     public class ScriptType
     {
+        public const string CurrentTypeKey = "<CurrentType>";
         public string Name { get; }
         public Dictionary<string, List<ScriptMethod>> MethodGroups { get; }
 

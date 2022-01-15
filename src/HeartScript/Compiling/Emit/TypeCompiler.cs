@@ -14,7 +14,7 @@ namespace HeartScript.Compiling.Emit
         public static Type Compile(SymbolScope scope, TypeBuilder typeBuilder, IParseNode node)
         {
             var scriptType = new ScriptType(typeBuilder);
-            scope.DeclareSymbol("this", true, scriptType);
+            scope.DeclareSymbol(ScriptType.CurrentTypeKey, true, scriptType);
 
             var quantifierNode = (QuantifierNode)node;
             var methodSignatureResults = new List<MethodSignature>();
