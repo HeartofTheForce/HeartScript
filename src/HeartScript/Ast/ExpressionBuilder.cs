@@ -128,9 +128,9 @@ namespace HeartScript.Ast
                 var left = Build(scope, node.LeftNode);
                 var right = Build(scope, node.RightNode);
 
-                if (IsReal(left.Type) && IsIntegral(right.Type))
+                if (ConvertHelper.IsReal(left.Type) && ConvertHelper.IsIntegral(right.Type))
                     right = AstNode.Convert(right, left.Type);
-                else if (IsIntegral(left.Type) && IsReal(right.Type))
+                else if (ConvertHelper.IsIntegral(left.Type) && ConvertHelper.IsReal(right.Type))
                     left = AstNode.Convert(left, right.Type);
 
                 return builder(left, right);
@@ -150,27 +150,12 @@ namespace HeartScript.Ast
             var sequenceNode = (SequenceNode)node.MidNode;
             var mid = Build(scope, (ExpressionNode)sequenceNode.Children[1]);
 
-            if (IsIntegral(mid.Type) && IsReal(right.Type))
+            if (ConvertHelper.IsIntegral(mid.Type) && ConvertHelper.IsReal(right.Type))
                 mid = AstNode.Convert(mid, right.Type);
-            else if (IsReal(mid.Type) && IsIntegral(right.Type))
+            else if (ConvertHelper.IsReal(mid.Type) && ConvertHelper.IsIntegral(right.Type))
                 right = AstNode.Convert(right, mid.Type);
 
             return new ConditionalNode(left, mid, right);
         }
-
-        private static bool IsReal(Type type) =>
-            type == typeof(float) ||
-            type == typeof(double) ||
-            type == typeof(decimal);
-
-        private static bool IsIntegral(Type type) =>
-            type == typeof(sbyte) ||
-            type == typeof(byte) ||
-            type == typeof(short) ||
-            type == typeof(int) ||
-            type == typeof(long) ||
-            type == typeof(ushort) ||
-            type == typeof(uint) ||
-            type == typeof(ulong);
     }
 }

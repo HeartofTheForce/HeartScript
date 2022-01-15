@@ -70,7 +70,7 @@ namespace HeartScript.Ast
                     {
                         if (parameterTypes[i] == method.ParameterTypes[i])
                             matchQuality++;
-                        else if (!IsConvertible(parameterTypes[i], method.ParameterTypes[i]))
+                        else if (!ConvertHelper.CanConvert(parameterTypes[i], method.ParameterTypes[i]))
                             isValid = false;
                     }
 
@@ -92,14 +92,6 @@ namespace HeartScript.Ast
             }
 
             return null;
-        }
-
-        private bool IsConvertible(Type a, Type b)
-        {
-            if (a == typeof(int) && b == typeof(double))
-                return true;
-
-            return false;
         }
     }
 }
