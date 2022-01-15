@@ -1,3 +1,4 @@
+using System;
 using NUnit.Framework;
 
 namespace HeartScript.Tests.VariableTests
@@ -52,6 +53,17 @@ namespace HeartScript.Tests.VariableTests
                 }",
                 ExpectedResult = 2.0,
             },
+            new CompilerExceptionTestCase<Exception>()
+            {
+                Method = @"
+                double test(double a, int b) => 1;
+                double test(int a, double b) => 2;
+                double main()
+                {
+                    return test(0, 0);
+                }",
+                Message = $"The call is ambiguous between the following methods: 'test({typeof(double).FullName}, {typeof(int).FullName})' and 'test({typeof(int).FullName}, {typeof(double).FullName})'",
+            }
         };
 
         [TestCaseSource(nameof(s_testCases))]
