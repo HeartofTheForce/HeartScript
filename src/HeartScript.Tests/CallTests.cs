@@ -53,6 +53,7 @@ namespace HeartScript.Tests.VariableTests
                 }",
                 ExpectedResult = 2.0,
             },
+            //Call Ambiguous
             new CompilerExceptionTestCase<Exception>()
             {
                 Method = @"
