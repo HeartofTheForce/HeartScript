@@ -90,6 +90,25 @@ namespace HeartScript.Tests.VariableTests
                     {
                         i++;
                     }
+                    while(i < 5)
+
+                    return i;
+                }
+                ",
+                Paramaters = System.Array.Empty<object>(),
+                ExpectedResult = 5
+            },
+            //DoWhileLoopAtLeastOnce
+            new CompilerTestCase()
+            {
+                Method = @"
+                double main()
+                {
+                    int i = 0;
+                    do
+                    {
+                        i++;
+                    }
                     while(i < 0)
 
                     return i;

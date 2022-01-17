@@ -19,7 +19,7 @@ namespace HeartScript.Ast
             ["return_statement"] = BuildReturn,
             ["for_statement"] = BuildForStatement,
             ["while_statement"] = BuildWhileStatement,
-            ["do_while_statement"] = BuildDoWhileStatement,
+            ["do_statement"] = BuildDoStatement,
             ["expr"] = BuildExpression,
             ["expr_statement"] = BuildSemicolonStatement,
         };
@@ -167,7 +167,7 @@ namespace HeartScript.Ast
             return loopNode;
         }
 
-        private static AstNode? BuildDoWhileStatement(SymbolScope scope, MethodInfoBuilder builder, IParseNode node)
+        private static AstNode? BuildDoStatement(SymbolScope scope, MethodInfoBuilder builder, IParseNode node)
         {
             var doWhileSequence = (SequenceNode)node;
 
