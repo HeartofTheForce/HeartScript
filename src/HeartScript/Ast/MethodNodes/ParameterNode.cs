@@ -4,11 +4,11 @@ namespace HeartScript.Ast.Nodes
 {
     public class ParameterNode : AstNode
     {
-        public int Index { get; }
+        public short Index { get; }
 
         public ParameterNode(int index, Type type) : base(type, AstType.Default)
         {
-            Index = index;
+            Index = (short)index;
         }
     }
 

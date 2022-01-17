@@ -4,11 +4,11 @@ namespace HeartScript.Ast.Nodes
 {
     public class VariableNode : AstNode
     {
-        public int Index { get; }
+        public short Index { get; }
 
         public VariableNode(int index, Type type) : base(type, AstType.Default)
         {
-            Index = index;
+            Index = (short)index;
         }
     }
 
