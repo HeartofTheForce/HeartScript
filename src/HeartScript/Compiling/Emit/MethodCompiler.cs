@@ -63,6 +63,9 @@ namespace HeartScript.Compiling.Emit
             if (loopNode.Initialize != null)
                 EmitStatement(ilGenerator, basicBlock, loopNode.Initialize);
 
+            if (!loopNode.RunAtLeastOnce)
+                ilGenerator.Emit(OpCodes.Br, loopCondition);
+
             ilGenerator.MarkLabel(loopHead);
             EmitStatement(ilGenerator, basicBlock, loopNode.Body);
             if (loopNode.Step != null)

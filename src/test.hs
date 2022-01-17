@@ -1,9 +1,11 @@
 double main(double a, double b, double c)
 {
-    double d = 4;
-    int e = 2;
-    int f;
-    f = 5;
+    int i = 0;
+    do
+    {
+        i++;
+    }
+    while(i < 0)
 
-    return -10 < 0 ? Math.Max(a * b + c, d) : (e + f);
+    return i;
 }
