@@ -90,7 +90,7 @@ namespace HeartScript.Tests.VariableTests
                     {
                         i++;
                     }
-                    while(i < 5)
+                    while(i < 5);
 
                     return i;
                 }
@@ -109,7 +109,7 @@ namespace HeartScript.Tests.VariableTests
                     {
                         i++;
                     }
-                    while(i < 0)
+                    while(i < 0);
 
                     return i;
                 }

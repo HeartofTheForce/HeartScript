@@ -21,7 +21,7 @@ return_statement:'return_statement' -> 'return' expr ';'
 
 for_statement:'for_statement' -> 'for' '(' (declaration / expr:'expr')? ';' expr? ';' expr? ')' embedded_statement
 while_statement:'while_statement' -> 'while' '(' expr ')' embedded_statement
-do_statement:'do_statement' -> 'do' embedded_statement 'while' '(' expr ')'
+do_statement:'do_statement' -> 'do' embedded_statement 'while' '(' expr ')' ';'
 if_else_statement:'if_else_statement' -> 'if' '(' expr ')' embedded_statement ('else' embedded_statement)?
 
 expr_statement:'expr_statement' -> expr:'expr' ';'
