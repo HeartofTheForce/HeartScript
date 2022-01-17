@@ -33,6 +33,7 @@ namespace HeartScript.Compiling.Emit
             {
                 case ReturnNode returnNode: EmitReturn(ilGenerator, basicBlock, returnNode); break;
                 case BlockNode blockNode: EmitBlock(ilGenerator, basicBlock, blockNode); break;
+                case LoopNode loopNode: EmitLoop(ilGenerator, basicBlock, loopNode); break;
                 default: ExpressionCompiler.EmitExpression(ilGenerator, node, true); break;
             }
         }
@@ -52,6 +53,28 @@ namespace HeartScript.Compiling.Emit
             {
                 EmitStatement(ilGenerator, basicBlock, statement);
             }
+        }
+
+        private static void EmitLoop(ILGenerator ilGenerator, BasicBlock basicBlock, LoopNode loopNode)
+        {
+            var loopHead = ilGenerator.DefineLabel();
+            var loopCondition = ilGenerator.DefineLabel();
+
+            if (loopNode.Initialize != null)
+                EmitStatement(ilGenerator, basicBlock, loopNode.Initialize);
+
+            ilGenerator.MarkLabel(loopHead);
+            EmitStatement(ilGenerator, basicBlock, loopNode.Body);
+            if (loopNode.Step != null)
+                EmitStatement(ilGenerator, basicBlock, loopNode.Step);
+
+            ilGenerator.MarkLabel(loopCondition);
+            if (loopNode.Condition != null)
+            {
+                ExpressionCompiler.EmitExpression(ilGenerator, loopNode.Condition, false);
+                ilGenerator.Emit(OpCodes.Brtrue, loopHead);
+            }
+
         }
     }
 }
