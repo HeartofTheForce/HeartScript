@@ -18,11 +18,19 @@ declaration_statement:'declaration_statement' -> declaration ';'
 
 block_statement:'block_statement' -> '{' statement* '}'
 return_statement:'return_statement' -> 'return' expr ';'
+
+for_statement:'for_statement' -> 'for' '(' (declaration / expr:'expr')? ';' expr? ';' expr? ')' embedded_statement
+while_statement:'while_statement' -> 'while' '(' expr ')' embedded_statement
+do_statement:'do_statement' -> 'do' embedded_statement 'while' '(' expr ')'
+
 expr_statement:'expr_statement' -> expr:'expr' ';'
 
 embedded_statement ->
     block_statement /
     return_statement /
+    for_statement /
+    while_statement /
+    do_statement /
     expr_statement
 
 expr ->

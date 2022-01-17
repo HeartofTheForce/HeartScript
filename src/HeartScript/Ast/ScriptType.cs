@@ -34,7 +34,7 @@ namespace HeartScript.Ast
             if (MethodGroups.TryGetValue(method.MethodInfo.Name, out var methodGroup))
             {
                 if (methodGroup.Any(existingMethod => ScriptMethod.SignaturesMatch(method, existingMethod)))
-                    throw new Exception("A method with a matching signature already exists.");
+                    throw new Exception("A method with a matching signature already exists");
 
                 methodGroup.Add(method);
             }
