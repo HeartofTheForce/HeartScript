@@ -20,6 +20,7 @@ namespace HeartScript.Ast
             ["for_statement"] = BuildForStatement,
             ["while_statement"] = BuildWhileStatement,
             ["do_statement"] = BuildDoStatement,
+            ["if_else_statement"] = BuildIfElseStatement,
             ["expr"] = BuildExpression,
             ["expr_statement"] = BuildSemicolonStatement,
         };
@@ -181,6 +182,28 @@ namespace HeartScript.Ast
 
             var loopNode = AstNode.Loop(null, null, condition, body, true);
             return loopNode;
+        }
+        private static AstNode? BuildIfElseStatement(SymbolScope scope, MethodInfoBuilder builder, IParseNode node)
+        {
+            var ifSequence = (SequenceNode)node;
+
+            var conditionNode = (ExpressionNode)ifSequence.Children[2];
+            var condition = ExpressionBuilder.Build(scope, conditionNode);
+
+            var ifTrueNode = (LabelNode)ifSequence.Children[4];
+            var ifTrue = BuildStatement(scope, builder, ifTrueNode);
+            if (ifTrue == null)
+                throw new ArgumentException(nameof(ifTrue));
+
+            var ifFalseNode = (QuantifierNode)ifSequence.Children[5];
+            AstNode? ifFalse = null;
+            if (ifFalseNode.Children.Count > 0)
+            {
+                var elseSequence = (SequenceNode)ifFalseNode.Children[0];
+                ifFalse = BuildStatement(scope, builder, (LabelNode)elseSequence.Children[1]);
+            }
+
+            return AstNode.IfElse(condition, ifTrue, ifFalse);
         }
 
         private static AstNode? BuildExpression(SymbolScope scope, MethodInfoBuilder builder, IParseNode node)

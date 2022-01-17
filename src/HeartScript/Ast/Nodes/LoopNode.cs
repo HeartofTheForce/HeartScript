@@ -18,7 +18,7 @@ namespace HeartScript.Ast.Nodes
             bool runAtLeastOnce) : base(typeof(void), AstType.Default)
         {
             if (condition != null && condition.Type != typeof(bool))
-                throw new ArgumentException($"{nameof(condition)} must be null or return bool");
+                throw new ArgumentException($"{nameof(condition)} must be null or {typeof(bool)}");
 
             Initialize = initialize;
             Step = step;

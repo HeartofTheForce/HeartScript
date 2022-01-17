@@ -155,7 +155,7 @@ namespace HeartScript.Ast
             else if (TypeHelper.IsReal(mid.Type) && TypeHelper.IsIntegral(right.Type))
                 right = AstNode.Convert(right, mid.Type);
 
-            return new ConditionalNode(left, mid, right);
+            return AstNode.Conditional(left, mid, right);
         }
     }
 }

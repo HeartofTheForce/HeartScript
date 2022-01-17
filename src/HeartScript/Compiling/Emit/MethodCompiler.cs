@@ -24,6 +24,7 @@ namespace HeartScript.Compiling.Emit
                 case ReturnNode returnNode: EmitReturn(ilGenerator, returnNode); break;
                 case BlockNode blockNode: EmitBlock(ilGenerator, blockNode); break;
                 case LoopNode loopNode: EmitLoop(ilGenerator, loopNode); break;
+                case IfElseNode ifElseNode: EmitIfElse(ilGenerator, ifElseNode); break;
                 default: ExpressionCompiler.EmitExpression(ilGenerator, node, true); break;
             }
         }
@@ -66,7 +67,39 @@ namespace HeartScript.Compiling.Emit
                 ExpressionCompiler.EmitExpression(ilGenerator, loopNode.Condition, false);
                 ilGenerator.Emit(OpCodes.Brtrue, loopHead);
             }
+        }
 
+        private static void EmitIfElse(ILGenerator ilGenerator, IfElseNode node)
+        {
+            if (node.IfFalse != null)
+            {
+                var ifFalseLabel = ilGenerator.DefineLabel();
+                var endLabel = ilGenerator.DefineLabel();
+
+                ExpressionCompiler.EmitExpression(ilGenerator, node.Condition, false);
+                ilGenerator.Emit(OpCodes.Brfalse, ifFalseLabel);
+
+                //true
+                EmitStatement(ilGenerator, node.IfTrue);
+                ilGenerator.Emit(OpCodes.Br, endLabel);
+
+                //false
+                ilGenerator.MarkLabel(ifFalseLabel);
+                EmitStatement(ilGenerator, node.IfFalse);
+
+                ilGenerator.MarkLabel(endLabel);
+            }
+            else
+            {
+                var endLabel = ilGenerator.DefineLabel();
+                ExpressionCompiler.EmitExpression(ilGenerator, node.Condition, false);
+                ilGenerator.Emit(OpCodes.Brfalse, endLabel);
+
+                //true
+                EmitStatement(ilGenerator, node.IfTrue);
+
+                ilGenerator.MarkLabel(endLabel);
+            }
         }
     }
 }
