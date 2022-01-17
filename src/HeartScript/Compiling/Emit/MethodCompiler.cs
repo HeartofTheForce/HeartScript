@@ -6,11 +6,6 @@ namespace HeartScript.Compiling.Emit
 {
     public static class MethodCompiler
     {
-        private class BasicBlock
-        {
-            public bool Return { get; set; }
-        }
-
         public static void EmitMethodBody(MethodBuilder methodBuilder, MethodBodyNode node)
         {
             var ilGenerator = methodBuilder.GetILGenerator();
@@ -20,56 +15,51 @@ namespace HeartScript.Compiling.Emit
                 ilGenerator.DeclareLocal(variable.Type);
             }
 
-            var basicBlock = new BasicBlock();
-            EmitStatement(ilGenerator, basicBlock, node.Body);
-
-            if (!basicBlock.Return)
-                throw new Exception("Not all code paths return a value");
+            EmitStatement(ilGenerator, node.Body);
         }
 
-        private static void EmitStatement(ILGenerator ilGenerator, BasicBlock basicBlock, AstNode node)
+        private static void EmitStatement(ILGenerator ilGenerator, AstNode node)
         {
             switch (node)
             {
-                case ReturnNode returnNode: EmitReturn(ilGenerator, basicBlock, returnNode); break;
-                case BlockNode blockNode: EmitBlock(ilGenerator, basicBlock, blockNode); break;
-                case LoopNode loopNode: EmitLoop(ilGenerator, basicBlock, loopNode); break;
+                case ReturnNode returnNode: EmitReturn(ilGenerator, returnNode); break;
+                case BlockNode blockNode: EmitBlock(ilGenerator, blockNode); break;
+                case LoopNode loopNode: EmitLoop(ilGenerator, loopNode); break;
                 default: ExpressionCompiler.EmitExpression(ilGenerator, node, true); break;
             }
         }
 
-        private static void EmitReturn(ILGenerator ilGenerator, BasicBlock basicBlock, ReturnNode node)
+        private static void EmitReturn(ILGenerator ilGenerator, ReturnNode node)
         {
             if (node.Node != null)
                 ExpressionCompiler.EmitExpression(ilGenerator, node.Node, false);
 
             ilGenerator.Emit(OpCodes.Ret);
-            basicBlock.Return = true;
         }
 
-        private static void EmitBlock(ILGenerator ilGenerator, BasicBlock basicBlock, BlockNode node)
+        private static void EmitBlock(ILGenerator ilGenerator, BlockNode node)
         {
             foreach (var statement in node.Statements)
             {
-                EmitStatement(ilGenerator, basicBlock, statement);
+                EmitStatement(ilGenerator, statement);
             }
         }
 
-        private static void EmitLoop(ILGenerator ilGenerator, BasicBlock basicBlock, LoopNode loopNode)
+        private static void EmitLoop(ILGenerator ilGenerator, LoopNode loopNode)
         {
             var loopHead = ilGenerator.DefineLabel();
             var loopCondition = ilGenerator.DefineLabel();
 
             if (loopNode.Initialize != null)
-                EmitStatement(ilGenerator, basicBlock, loopNode.Initialize);
+                EmitStatement(ilGenerator, loopNode.Initialize);
 
             if (!loopNode.RunAtLeastOnce)
                 ilGenerator.Emit(OpCodes.Br, loopCondition);
 
             ilGenerator.MarkLabel(loopHead);
-            EmitStatement(ilGenerator, basicBlock, loopNode.Body);
+            EmitStatement(ilGenerator, loopNode.Body);
             if (loopNode.Step != null)
-                EmitStatement(ilGenerator, basicBlock, loopNode.Step);
+                EmitStatement(ilGenerator, loopNode.Step);
 
             ilGenerator.MarkLabel(loopCondition);
             if (loopNode.Condition != null)
