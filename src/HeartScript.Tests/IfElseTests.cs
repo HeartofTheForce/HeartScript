@@ -135,7 +135,7 @@ namespace HeartScript.Tests.VariableTests
                 Paramaters = System.Array.Empty<object>(),
                 ExpectedResult = 0
             },
-            //IfElseChainedFalse
+            //DanglingElseFalse
             new CompilerTestCase()
             {
                 Method = @"
@@ -153,7 +153,7 @@ namespace HeartScript.Tests.VariableTests
                 Paramaters = System.Array.Empty<object>(),
                 ExpectedResult = 3
             },
-            //IfElseChainedTrue
+            //DanglingElseTrue
             new CompilerTestCase()
             {
                 Method = @"
