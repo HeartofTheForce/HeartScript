@@ -135,6 +135,40 @@ namespace HeartScript.Tests.VariableTests
                 Paramaters = System.Array.Empty<object>(),
                 ExpectedResult = 0
             },
+            //IfElseChainedFalse
+            new CompilerTestCase()
+            {
+                Method = @"
+                double main()
+                {
+                    if(false)
+                    if(false)
+                        return 1;
+                    else
+                        return 2;
+
+                    return 3;
+                }
+                ",
+                Paramaters = System.Array.Empty<object>(),
+                ExpectedResult = 3
+            },
+            //IfElseChainedTrue
+            new CompilerTestCase()
+            {
+                Method = @"
+                double main()
+                {
+                    if(true)
+                    if(false)
+                        return 1;
+                    else
+                        return 2;
+                }
+                ",
+                Paramaters = System.Array.Empty<object>(),
+                ExpectedResult = 2
+            },
         };
 
         [TestCaseSource(nameof(s_testCases))]
