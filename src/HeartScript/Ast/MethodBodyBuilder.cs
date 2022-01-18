@@ -19,8 +19,10 @@ namespace HeartScript.Ast
             ["return_statement"] = BuildReturn,
             ["for_statement"] = BuildForStatement,
             ["while_statement"] = BuildWhileStatement,
-            ["do_statement"] = BuildDoStatement,
+            ["do_while_statement"] = BuildDoWhileStatement,
             ["if_else_statement"] = BuildIfElseStatement,
+            ["break_statement"] = (scope, builder, node) => AstNode.Break(),
+            ["continue_statement"] = (scope, builder, node) => AstNode.Continue(),
             ["expr"] = BuildExpression,
             ["expr_statement"] = BuildSemicolonStatement,
         };
@@ -169,16 +171,16 @@ namespace HeartScript.Ast
             return loopNode;
         }
 
-        private static AstNode? BuildDoStatement(SymbolScope scope, MethodInfoBuilder builder, IParseNode node)
+        private static AstNode? BuildDoWhileStatement(SymbolScope scope, MethodInfoBuilder builder, IParseNode node)
         {
-            var doSequence = (SequenceNode)node;
+            var doWhileSequence = (SequenceNode)node;
 
-            var bodyNode = (LabelNode)doSequence.Children[1];
+            var bodyNode = (LabelNode)doWhileSequence.Children[1];
             var body = BuildStatement(scope, builder, bodyNode);
             if (body == null)
                 throw new ArgumentException(nameof(body));
 
-            var conditionNode = (ExpressionNode)doSequence.Children[4];
+            var conditionNode = (ExpressionNode)doWhileSequence.Children[4];
             var condition = ExpressionBuilder.Build(scope, conditionNode);
 
             var loopNode = AstNode.Loop(null, null, condition, body, true);

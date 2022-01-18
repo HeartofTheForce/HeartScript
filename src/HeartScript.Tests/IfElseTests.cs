@@ -67,7 +67,7 @@ namespace HeartScript.Tests.VariableTests
                 Paramaters = System.Array.Empty<object>(),
                 ExpectedResult = 0
             },
-            //IfTrueSet
+            //IfTrueAssign
             new CompilerTestCase()
             {
                 Method = @"
@@ -83,7 +83,7 @@ namespace HeartScript.Tests.VariableTests
                 Paramaters = System.Array.Empty<object>(),
                 ExpectedResult = 1
             },
-            //IfFalseSet
+            //IfFalseAssign
             new CompilerTestCase()
             {
                 Method = @"
@@ -99,7 +99,7 @@ namespace HeartScript.Tests.VariableTests
                 Paramaters = System.Array.Empty<object>(),
                 ExpectedResult = 0
             },
-            //IfElseTrueSet
+            //IfElseTrueAssign
             new CompilerTestCase()
             {
                 Method = @"
@@ -117,7 +117,7 @@ namespace HeartScript.Tests.VariableTests
                 Paramaters = System.Array.Empty<object>(),
                 ExpectedResult = 1
             },
-            //IfElseFalseSet
+            //IfElseFalseAssign
             new CompilerTestCase()
             {
                 Method = @"

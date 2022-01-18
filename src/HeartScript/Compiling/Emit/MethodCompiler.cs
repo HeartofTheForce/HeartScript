@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Reflection.Emit;
 using HeartScript.Ast.Nodes;
 
@@ -9,6 +10,16 @@ namespace HeartScript.Compiling.Emit
         {
             public Label ReturnLabel { get; set; }
             public LocalBuilder? ReturnLocal { get; set; }
+            public Stack<Label> BreakLabel { get; set; }
+            public Stack<Label> ContinueLabel { get; set; }
+
+            public MethodBodyContext(Label returnLabel, LocalBuilder? returnLocal)
+            {
+                ReturnLabel = returnLabel;
+                ReturnLocal = returnLocal;
+                BreakLabel = new Stack<Label>();
+                ContinueLabel = new Stack<Label>();
+            }
         }
 
         public static void EmitMethodBody(MethodBuilder methodBuilder, MethodBodyNode node)
@@ -20,11 +31,9 @@ namespace HeartScript.Compiling.Emit
                 ilGenerator.DeclareLocal(variable.Type);
             }
 
-            var ctx = new MethodBodyContext()
-            {
-                ReturnLabel = ilGenerator.DefineLabel(),
-                ReturnLocal = methodBuilder.ReturnType != typeof(void) ? ilGenerator.DeclareLocal(methodBuilder.ReturnType) : null
-            };
+            var ctx = new MethodBodyContext(
+                ilGenerator.DefineLabel(),
+                methodBuilder.ReturnType != typeof(void) ? ilGenerator.DeclareLocal(methodBuilder.ReturnType) : null);
 
             EmitStatement(ilGenerator, ctx, node.Body);
 
@@ -43,6 +52,8 @@ namespace HeartScript.Compiling.Emit
                 case BlockNode blockNode: EmitBlock(ilGenerator, ctx, blockNode); break;
                 case LoopNode loopNode: EmitLoop(ilGenerator, ctx, loopNode); break;
                 case IfElseNode ifElseNode: EmitIfElse(ilGenerator, ctx, ifElseNode); break;
+                case BreakNode _: ilGenerator.Emit(OpCodes.Br, ctx.BreakLabel.Peek()); break;
+                case ContinueNode _: ilGenerator.Emit(OpCodes.Br, ctx.ContinueLabel.Peek()); break;
                 default: ExpressionCompiler.EmitExpression(ilGenerator, node, true); break;
             }
         }
@@ -70,6 +81,11 @@ namespace HeartScript.Compiling.Emit
         {
             var loopHead = ilGenerator.DefineLabel();
             var loopCondition = ilGenerator.DefineLabel();
+            var loopStep = ilGenerator.DefineLabel();
+            var loopTail = ilGenerator.DefineLabel();
+
+            ctx.BreakLabel.Push(loopTail);
+            ctx.ContinueLabel.Push(loopStep);
 
             if (loopNode.Initialize != null)
                 EmitStatement(ilGenerator, ctx, loopNode.Initialize);
@@ -79,6 +95,8 @@ namespace HeartScript.Compiling.Emit
 
             ilGenerator.MarkLabel(loopHead);
             EmitStatement(ilGenerator, ctx, loopNode.Body);
+
+            ilGenerator.MarkLabel(loopStep);
             if (loopNode.Step != null)
                 EmitStatement(ilGenerator, ctx, loopNode.Step);
 
@@ -88,6 +106,11 @@ namespace HeartScript.Compiling.Emit
                 ExpressionCompiler.EmitExpression(ilGenerator, loopNode.Condition, false);
                 ilGenerator.Emit(OpCodes.Brtrue, loopHead);
             }
+
+            ilGenerator.MarkLabel(loopTail);
+
+            ctx.BreakLabel.Pop();
+            ctx.ContinueLabel.Pop();
         }
 
         private static void EmitIfElse(ILGenerator ilGenerator, MethodBodyContext ctx, IfElseNode node)
