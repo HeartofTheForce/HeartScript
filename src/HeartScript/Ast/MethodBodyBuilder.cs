@@ -20,6 +20,7 @@ namespace HeartScript.Ast
             ["for_statement"] = BuildForStatement,
             ["while_statement"] = BuildWhileStatement,
             ["do_statement"] = BuildDoStatement,
+            ["if_else_statement"] = BuildIfElseStatement,
             ["expr"] = BuildExpression,
             ["expr_statement"] = BuildSemicolonStatement,
         };
@@ -119,31 +120,32 @@ namespace HeartScript.Ast
 
         private static AstNode? BuildForStatement(SymbolScope scope, MethodInfoBuilder builder, IParseNode node)
         {
+            var loopScope = new SymbolScope(scope);
             var forSequence = (SequenceNode)node;
 
             var initializerNode = (QuantifierNode)forSequence.Children[2];
             AstNode? initialize = null;
             if (initializerNode.Children.Count > 0)
             {
-                initialize = BuildStatement(scope, builder, (LabelNode)initializerNode.Children[0]);
+                initialize = BuildStatement(loopScope, builder, (LabelNode)initializerNode.Children[0]);
             }
 
             var conditionNode = (QuantifierNode)forSequence.Children[4];
             AstNode? condition = null;
             if (conditionNode.Children.Count > 0)
             {
-                condition = ExpressionBuilder.Build(scope, (ExpressionNode)conditionNode.Children[0]);
+                condition = ExpressionBuilder.Build(loopScope, (ExpressionNode)conditionNode.Children[0]);
             }
 
             var stepNode = (QuantifierNode)forSequence.Children[6];
             AstNode? step = null;
             if (stepNode.Children.Count > 0)
             {
-                step = ExpressionBuilder.Build(scope, (ExpressionNode)stepNode.Children[0]);
+                step = ExpressionBuilder.Build(loopScope, (ExpressionNode)stepNode.Children[0]);
             }
 
             var bodyNode = (LabelNode)forSequence.Children[8];
-            var body = BuildStatement(scope, builder, bodyNode);
+            var body = BuildStatement(loopScope, builder, bodyNode);
             if (body == null)
                 throw new ArgumentException(nameof(body));
 
@@ -169,18 +171,41 @@ namespace HeartScript.Ast
 
         private static AstNode? BuildDoStatement(SymbolScope scope, MethodInfoBuilder builder, IParseNode node)
         {
-            var doWhileSequence = (SequenceNode)node;
+            var doSequence = (SequenceNode)node;
 
-            var bodyNode = (LabelNode)doWhileSequence.Children[1];
+            var bodyNode = (LabelNode)doSequence.Children[1];
             var body = BuildStatement(scope, builder, bodyNode);
             if (body == null)
                 throw new ArgumentException(nameof(body));
 
-            var conditionNode = (ExpressionNode)doWhileSequence.Children[4];
+            var conditionNode = (ExpressionNode)doSequence.Children[4];
             var condition = ExpressionBuilder.Build(scope, conditionNode);
 
             var loopNode = AstNode.Loop(null, null, condition, body, true);
             return loopNode;
+        }
+
+        private static AstNode? BuildIfElseStatement(SymbolScope scope, MethodInfoBuilder builder, IParseNode node)
+        {
+            var ifSequence = (SequenceNode)node;
+
+            var conditionNode = (ExpressionNode)ifSequence.Children[2];
+            var condition = ExpressionBuilder.Build(scope, conditionNode);
+
+            var ifTrueNode = (LabelNode)ifSequence.Children[4];
+            var ifTrue = BuildStatement(scope, builder, ifTrueNode);
+            if (ifTrue == null)
+                throw new ArgumentException(nameof(ifTrue));
+
+            var ifFalseNode = (QuantifierNode)ifSequence.Children[5];
+            AstNode? ifFalse = null;
+            if (ifFalseNode.Children.Count > 0)
+            {
+                var elseSequence = (SequenceNode)ifFalseNode.Children[0];
+                ifFalse = BuildStatement(scope, builder, (LabelNode)elseSequence.Children[1]);
+            }
+
+            return AstNode.IfElse(condition, ifTrue, ifFalse);
         }
 
         private static AstNode? BuildExpression(SymbolScope scope, MethodInfoBuilder builder, IParseNode node)

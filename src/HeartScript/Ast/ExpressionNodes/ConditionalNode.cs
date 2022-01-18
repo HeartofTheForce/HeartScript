@@ -4,21 +4,26 @@ namespace HeartScript.Ast.Nodes
 {
     public class ConditionalNode : AstNode
     {
-        public AstNode Test { get; }
+        public AstNode Condition { get; }
         public AstNode IfTrue { get; }
         public AstNode IfFalse { get; }
 
-        public ConditionalNode(AstNode test, AstNode ifTrue, AstNode ifFalse) : base(ifTrue.Type, AstType.Default)
+        public ConditionalNode(AstNode condition, AstNode ifTrue, AstNode ifFalse) : base(ifTrue.Type, AstType.Default)
         {
-            if (test.Type != typeof(bool))
-                throw new ArgumentException($"{nameof(test)} must be {typeof(bool)}");
+            if (condition.Type != typeof(bool))
+                throw new ArgumentException($"{nameof(condition)} must be {typeof(bool)}");
 
             if (ifTrue.Type != ifFalse.Type)
                 throw new ArgumentException($"{nameof(ifTrue)} and {nameof(ifFalse)} must be the same Type");
 
-            Test = test;
+            Condition = condition;
             IfTrue = ifTrue;
             IfFalse = ifFalse;
         }
+    }
+
+    public partial class AstNode
+    {
+        public static ConditionalNode Conditional(AstNode condition, AstNode ifTrue, AstNode ifFalse) => new ConditionalNode(condition, ifTrue, ifFalse);
     }
 }

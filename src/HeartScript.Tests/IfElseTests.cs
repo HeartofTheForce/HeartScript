@@ -3,137 +3,79 @@ using NUnit.Framework;
 namespace HeartScript.Tests.VariableTests
 {
     [TestFixture]
-    public class LoopTests
+    public class IfElseTests
     {
         private static readonly ICompilerTestCase[] s_testCases = new ICompilerTestCase[]
         {
-            //ForLoop
+            //IfTrueReturn
             new CompilerTestCase()
             {
                 Method = @"
                 double main()
                 {
-                    int r = 0;
-                    for(int i = 0; i < 5; i++)
-                    {
-                        r++;
-                    }
+                    if(true)
+                        return 1;
 
-                    return r;
+                    return 0;
                 }
                 ",
                 Paramaters = System.Array.Empty<object>(),
-                ExpectedResult = 5
+                ExpectedResult = 1
             },
-            //ForLoopNone
+            //IfFalseReturn
             new CompilerTestCase()
             {
                 Method = @"
                 double main()
                 {
-                    int r = 0;
-                    for(int i = 0; i < 0; i++)
-                    {
-                        r++;
-                    }
+                    if(false)
+                        return 1;
 
-                    return r;
+                    return 0;
                 }
                 ",
                 Paramaters = System.Array.Empty<object>(),
                 ExpectedResult = 0
             },
-            //ForLoopSameIntialize
+            //IfElseTrueReturn
             new CompilerTestCase()
             {
                 Method = @"
                 double main()
                 {
-                    int r = 0;
-
-                    for(int i = 0; i < 5; i++)
-                    {
-                        r++;
-                    }
-
-                    for(int i = 0; i < 5; i++)
-                    {
-                        r++;
-                    }
-
-                    return r;
+                    if(true)
+                        return 1;
+                    else
+                        return 0;
                 }
                 ",
                 Paramaters = System.Array.Empty<object>(),
-                ExpectedResult = 10
+                ExpectedResult = 1
             },
-            //WhileLoop
+            //IfElseFalseReturn
             new CompilerTestCase()
             {
                 Method = @"
                 double main()
                 {
-                    int i = 0;
-                    while(i < 5)
-                    {
-                        i++;
-                    }
-
-                    return i;
-                }
-                ",
-                Paramaters = System.Array.Empty<object>(),
-                ExpectedResult = 5
-            },
-            //WhileLoopNone
-            new CompilerTestCase()
-            {
-                Method = @"
-                double main()
-                {
-                    int i = 0;
-                    while(i < 0)
-                    {
-                        i++;
-                    }
-
-                    return i;
+                    if(false)
+                        return 1;
+                    else
+                        return 0;
                 }
                 ",
                 Paramaters = System.Array.Empty<object>(),
                 ExpectedResult = 0
             },
-            //DoWhileLoop
+            //IfTrueSet
             new CompilerTestCase()
             {
                 Method = @"
                 double main()
                 {
                     int i = 0;
-                    do
-                    {
-                        i++;
-                    }
-                    while(i < 5);
-
-                    return i;
-                }
-                ",
-                Paramaters = System.Array.Empty<object>(),
-                ExpectedResult = 5
-            },
-            //DoWhileLoopAtLeastOnce
-            new CompilerTestCase()
-            {
-                Method = @"
-                double main()
-                {
-                    int i = 0;
-                    do
-                    {
-                        i++;
-                    }
-                    while(i < 0);
+                    if(true)
+                        i = 1;
 
                     return i;
                 }
@@ -141,21 +83,91 @@ namespace HeartScript.Tests.VariableTests
                 Paramaters = System.Array.Empty<object>(),
                 ExpectedResult = 1
             },
-            //DoWhileLoopReturn
+            //IfFalseSet
             new CompilerTestCase()
             {
                 Method = @"
                 double main()
                 {
-                    do
-                    {
-                        return 0;
-                    }
-                    while(true);
+                    int i = 0;
+                    if(false)
+                        i = 1;
+
+                    return i;
                 }
                 ",
                 Paramaters = System.Array.Empty<object>(),
                 ExpectedResult = 0
+            },
+            //IfElseTrueSet
+            new CompilerTestCase()
+            {
+                Method = @"
+                double main()
+                {
+                    int i;
+                    if(true)
+                        i = 1;
+                    else
+                        i = 0;
+
+                    return i;
+                }
+                ",
+                Paramaters = System.Array.Empty<object>(),
+                ExpectedResult = 1
+            },
+            //IfElseFalseSet
+            new CompilerTestCase()
+            {
+                Method = @"
+                double main()
+                {
+                    int i;
+                    if(false)
+                        i = 1;
+                    else
+                        i = 0;
+
+                    return i;
+                }
+                ",
+                Paramaters = System.Array.Empty<object>(),
+                ExpectedResult = 0
+            },
+            //DanglingElseFalse
+            new CompilerTestCase()
+            {
+                Method = @"
+                double main()
+                {
+                    if(false)
+                    if(false)
+                        return 1;
+                    else
+                        return 2;
+
+                    return 3;
+                }
+                ",
+                Paramaters = System.Array.Empty<object>(),
+                ExpectedResult = 3
+            },
+            //DanglingElseTrue
+            new CompilerTestCase()
+            {
+                Method = @"
+                double main()
+                {
+                    if(true)
+                    if(false)
+                        return 1;
+                    else
+                        return 2;
+                }
+                ",
+                Paramaters = System.Array.Empty<object>(),
+                ExpectedResult = 2
             },
         };
 

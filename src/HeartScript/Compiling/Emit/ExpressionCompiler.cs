@@ -258,7 +258,7 @@ namespace HeartScript.Compiling.Emit
             var ifFalseLabel = ilGenerator.DefineLabel();
             var endLabel = ilGenerator.DefineLabel();
 
-            EmitExpression(ilGenerator, node.Test, false);
+            EmitExpression(ilGenerator, node.Condition, false);
             ilGenerator.Emit(OpCodes.Brfalse, ifFalseLabel);
 
             //true
