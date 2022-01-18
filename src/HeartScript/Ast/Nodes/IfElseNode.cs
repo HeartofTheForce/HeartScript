@@ -8,7 +8,7 @@ namespace HeartScript.Ast.Nodes
         public AstNode IfTrue { get; }
         public AstNode? IfFalse { get; }
 
-        public IfElseNode(AstNode condition, AstNode ifTrue, AstNode? ifFalse) : base(ifTrue.Type, AstType.Default)
+        public IfElseNode(AstNode condition, AstNode ifTrue, AstNode? ifFalse) : base(typeof(void), AstType.Default)
         {
             if (condition.Type != typeof(bool))
                 throw new ArgumentException($"{nameof(condition)} must be {typeof(bool)}");
