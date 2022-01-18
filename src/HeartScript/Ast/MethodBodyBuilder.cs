@@ -184,6 +184,7 @@ namespace HeartScript.Ast
             var loopNode = AstNode.Loop(null, null, condition, body, true);
             return loopNode;
         }
+
         private static AstNode? BuildIfElseStatement(SymbolScope scope, MethodInfoBuilder builder, IParseNode node)
         {
             var ifSequence = (SequenceNode)node;
