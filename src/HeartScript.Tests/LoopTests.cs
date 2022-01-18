@@ -287,6 +287,60 @@ namespace HeartScript.Tests.VariableTests
                 Paramaters = System.Array.Empty<object>(),
                 ExpectedResult = 4,
             },
+            //ForLoopNestedBreak
+            new CompilerTestCase()
+            {
+                Method = @"
+                double main()
+                {
+                    int r = 0;
+                    for(int i = 0; i < 5; i++)
+                    {
+                        if(i == 2)
+                            break;
+
+                        for(int j = 0; j < 5; j++)
+                        {
+                            if(j == 1)
+                                break;
+
+                            r++;
+                        }
+                    }
+
+                    return r;
+                }
+                ",
+                Paramaters = System.Array.Empty<object>(),
+                ExpectedResult = 2,
+            },
+            //ForLoopNestedContinue
+            new CompilerTestCase()
+            {
+                Method = @"
+                double main()
+                {
+                    int r = 0;
+                    for(int i = 0; i < 5; i++)
+                    {
+                        if(i < 2)
+                            continue;
+
+                        for(int j = 0; j < 5; j++)
+                        {
+                            if(j < 1)
+                                continue;
+
+                            r++;
+                        }
+                    }
+
+                    return r;
+                }
+                ",
+                Paramaters = System.Array.Empty<object>(),
+                ExpectedResult = 12,
+            },
         };
 
         [TestCaseSource(nameof(s_testCases))]
