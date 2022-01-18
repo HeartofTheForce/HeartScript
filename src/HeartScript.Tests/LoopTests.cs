@@ -43,6 +43,30 @@ namespace HeartScript.Tests.VariableTests
                 Paramaters = System.Array.Empty<object>(),
                 ExpectedResult = 0
             },
+            //ForLoopSameIntialize
+            new CompilerTestCase()
+            {
+                Method = @"
+                double main()
+                {
+                    int r = 0;
+
+                    for(int i = 0; i < 5; i++)
+                    {
+                        r++;
+                    }
+
+                    for(int i = 0; i < 5; i++)
+                    {
+                        r++;
+                    }
+
+                    return r;
+                }
+                ",
+                Paramaters = System.Array.Empty<object>(),
+                ExpectedResult = 10
+            },
             //WhileLoop
             new CompilerTestCase()
             {

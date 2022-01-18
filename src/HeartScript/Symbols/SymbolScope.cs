@@ -58,7 +58,7 @@ namespace HeartScript.Ast
         public void DeclareSymbol(string name, ISymbol symbol)
         {
             if (_symbols.ContainsKey(name))
-                throw new ArgumentException(nameof(name));
+                throw new ArgumentException($"{nameof(ISymbol)}: '{name}' already exists");
 
             _symbols[name] = symbol;
         }

@@ -120,31 +120,32 @@ namespace HeartScript.Ast
 
         private static AstNode? BuildForStatement(SymbolScope scope, MethodInfoBuilder builder, IParseNode node)
         {
+            var loopScope = new SymbolScope(scope);
             var forSequence = (SequenceNode)node;
 
             var initializerNode = (QuantifierNode)forSequence.Children[2];
             AstNode? initialize = null;
             if (initializerNode.Children.Count > 0)
             {
-                initialize = BuildStatement(scope, builder, (LabelNode)initializerNode.Children[0]);
+                initialize = BuildStatement(loopScope, builder, (LabelNode)initializerNode.Children[0]);
             }
 
             var conditionNode = (QuantifierNode)forSequence.Children[4];
             AstNode? condition = null;
             if (conditionNode.Children.Count > 0)
             {
-                condition = ExpressionBuilder.Build(scope, (ExpressionNode)conditionNode.Children[0]);
+                condition = ExpressionBuilder.Build(loopScope, (ExpressionNode)conditionNode.Children[0]);
             }
 
             var stepNode = (QuantifierNode)forSequence.Children[6];
             AstNode? step = null;
             if (stepNode.Children.Count > 0)
             {
-                step = ExpressionBuilder.Build(scope, (ExpressionNode)stepNode.Children[0]);
+                step = ExpressionBuilder.Build(loopScope, (ExpressionNode)stepNode.Children[0]);
             }
 
             var bodyNode = (LabelNode)forSequence.Children[8];
-            var body = BuildStatement(scope, builder, bodyNode);
+            var body = BuildStatement(loopScope, builder, bodyNode);
             if (body == null)
                 throw new ArgumentException(nameof(body));
 
@@ -170,14 +171,14 @@ namespace HeartScript.Ast
 
         private static AstNode? BuildDoStatement(SymbolScope scope, MethodInfoBuilder builder, IParseNode node)
         {
-            var doWhileSequence = (SequenceNode)node;
+            var doSequence = (SequenceNode)node;
 
-            var bodyNode = (LabelNode)doWhileSequence.Children[1];
+            var bodyNode = (LabelNode)doSequence.Children[1];
             var body = BuildStatement(scope, builder, bodyNode);
             if (body == null)
                 throw new ArgumentException(nameof(body));
 
-            var conditionNode = (ExpressionNode)doWhileSequence.Children[4];
+            var conditionNode = (ExpressionNode)doSequence.Children[4];
             var condition = ExpressionBuilder.Build(scope, conditionNode);
 
             var loopNode = AstNode.Loop(null, null, condition, body, true);
