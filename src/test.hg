@@ -1,7 +1,7 @@
 root -> method+
 _ -> `\s*`
 
-type -> 'int' / 'double' / 'bool'
+type -> ('int' / 'double' / 'bool') '[]'*
 name -> !type `[_a-zA-Z]\w*`
 
 parameters -> (type name (',' type name)*)?

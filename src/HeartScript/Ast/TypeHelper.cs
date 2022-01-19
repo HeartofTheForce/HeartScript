@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Reflection.Emit;
 using Heart.Parsing;
 using Heart.Parsing.Patterns;
@@ -25,14 +26,25 @@ namespace HeartScript.Ast
 
         public static Type ResolveTypeNode(IParseNode typeNode)
         {
-            var valueNode = (ValueNode)typeNode;
+            var sequenceNode = (SequenceNode)typeNode;
+            var valueNode = (ValueNode)sequenceNode.Children[0];
+            var quantifierNode = (QuantifierNode)sequenceNode.Children[1];
+
+            Type type;
             switch (valueNode.Value)
             {
-                case "int": return typeof(int);
-                case "double": return typeof(double);
-                case "bool": return typeof(bool);
+                case "int": type = typeof(int); break;
+                case "double": type = typeof(double); break;
+                case "bool": type = typeof(bool); break;
                 default: throw new NotImplementedException();
             }
+
+            for (int i = 0; i < quantifierNode.Children.Count; i++)
+            {
+                type = type.MakeArrayType();
+            }
+
+            return type;
         }
 
         public static bool IsReal(Type type) =>
