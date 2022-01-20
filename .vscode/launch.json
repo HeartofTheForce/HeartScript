@@ -11,7 +11,7 @@
       "preLaunchTask": "build",
       "program": "${workspaceFolder}/src/HeartScript.Cli/bin/Debug/net5.0/HeartScript.Cli.dll",
       "logging": { "moduleLoad": false },
-      "args": ["./src/test.hs"],
+      "args": ["./src/demo.hs"],
       "cwd": "${workspaceFolder}",
       "console": "internalConsole",
       "stopAtEntry": false

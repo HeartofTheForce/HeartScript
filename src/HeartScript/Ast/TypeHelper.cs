@@ -32,6 +32,7 @@ namespace HeartScript.Ast
             Type type;
             switch (valueNode.Value)
             {
+                case "void": type = typeof(void); break;
                 case "int": type = typeof(int); break;
                 case "double": type = typeof(double); break;
                 case "bool": type = typeof(bool); break;

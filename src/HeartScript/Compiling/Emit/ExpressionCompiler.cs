@@ -14,6 +14,7 @@ namespace HeartScript.Compiling.Emit
             AstType.Assign,
             AstType.PostIncrement,
             AstType.PostDecrement,
+            AstType.Call,
         };
 
         public static void EmitExpression(ILGenerator ilGenerator, AstNode node, bool isStatement)
