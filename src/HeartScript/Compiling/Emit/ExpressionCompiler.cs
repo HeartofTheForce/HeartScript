@@ -168,10 +168,13 @@ namespace HeartScript.Compiling.Emit
                     break;
                 case AstType.Assign:
                     {
+                        AstNode operand;
                         if (!isStatement)
-                            EmitExpression(ctx, node.Right, false);
+                            operand = ctx.CacheNode(node.Right);
+                        else
+                            operand = node.Right;
 
-                        EmitSet(ctx, node.Left, node.Right, "The left-hand side of an assignment must be a variable or parameter");
+                        EmitSet(ctx, node.Left, operand, "The left-hand side of an assignment must be a variable or parameter");
                     }
                     break;
                 default: throw new NotImplementedException();
@@ -208,36 +211,43 @@ namespace HeartScript.Compiling.Emit
                     break;
                 case AstType.PostIncrement:
                     {
+                        AstNode operand;
                         if (!isStatement)
-                            EmitExpression(ctx, node.Operand, false);
+                            operand = ctx.CacheNode(node.Operand);
+                        else
+                            operand = node.Operand;
 
                         AstNode constantNode;
-                        if (node.Operand.Type == typeof(int))
+                        if (operand.Type == typeof(int))
                             constantNode = AstNode.Constant(1);
-                        else if (node.Operand.Type == typeof(double))
+                        else if (operand.Type == typeof(double))
                             constantNode = AstNode.Constant(1.0);
                         else
-                            throw new ArgumentException(nameof(node.Operand.Type));
+                            throw new ArgumentException(nameof(operand.Type));
 
-                        var valueNode = AstNode.Add(node.Operand, constantNode);
+                        var valueNode = AstNode.Add(operand, constantNode);
                         EmitSet(ctx, node.Operand, valueNode, "The operand of an increment or decrement operator must be a variable or parameter");
                     }
                     break;
                 case AstType.PostDecrement:
                     {
+                        AstNode operand;
                         if (!isStatement)
-                            EmitExpression(ctx, node.Operand, false);
+                            operand = ctx.CacheNode(node.Operand);
+                        else
+                            operand = node.Operand;
 
                         AstNode constantNode;
-                        if (node.Operand.Type == typeof(int))
+                        if (operand.Type == typeof(int))
                             constantNode = AstNode.Constant(1);
-                        else if (node.Operand.Type == typeof(double))
+                        else if (operand.Type == typeof(double))
                             constantNode = AstNode.Constant(1.0);
                         else
-                            throw new ArgumentException(nameof(node.Operand.Type));
+                            throw new ArgumentException(nameof(operand.Type));
 
-                        var valueNode = AstNode.Subtract(node.Operand, constantNode);
+                        var valueNode = AstNode.Subtract(operand, constantNode);
                         EmitSet(ctx, node.Operand, valueNode, "The operand of an increment or decrement operator must be a variable or parameter");
+
                     }
                     break;
                 default: throw new NotImplementedException();
@@ -246,7 +256,6 @@ namespace HeartScript.Compiling.Emit
 
         private static void EmitSet(MethodBodyContext ctx, AstNode targetNode, AstNode valueNode, string invalidTypeMessage)
         {
-            //TODO Emitting valueNode prevents using OpCodes.Dup for return values
             switch (targetNode)
             {
                 case ParameterNode parameterNode:

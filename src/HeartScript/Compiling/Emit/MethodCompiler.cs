@@ -24,7 +24,16 @@ namespace HeartScript.Compiling.Emit
             TempVariables = new Dictionary<Type, LocalBuilder>();
         }
 
-        public LocalBuilder GetTempLocal(Type type)
+        public AstNode CacheNode(AstNode node)
+        {
+            var temp = GetTempLocal(node.Type);
+            ExpressionCompiler.EmitExpression(this, node, false);
+            ILGenerator.Emit(OpCodes.Stloc, temp);
+            ILGenerator.Emit(OpCodes.Ldloc, temp);
+            return AstNode.Variable(temp.LocalIndex, node.Type);
+        }
+
+        private LocalBuilder GetTempLocal(Type type)
         {
             if (TempVariables.TryGetValue(type, out var localBuilder))
                 return localBuilder;
