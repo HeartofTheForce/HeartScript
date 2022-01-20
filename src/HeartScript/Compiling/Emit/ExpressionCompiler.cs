@@ -34,7 +34,7 @@ namespace HeartScript.Compiling.Emit
                 case MemberAccessNode memberAccessNode: EmitMemberAccess(ctx, memberAccessNode); break;
                 case ArrayConstructorNode arrayConstructorNode: EmitArrayConstructor(ctx, arrayConstructorNode); break;
                 case ArrayIndexNode arrayIndexNode: EmitArrayRead(ctx, arrayIndexNode); break;
-                case ArraySizeOfNode arraySizeOfNode: EmitArraySizeOf(ctx, arraySizeOfNode); break;
+                case ArrayLengthNode arrayLengthNode: EmitArrayLength(ctx, arrayLengthNode); break;
                 default: throw new NotImplementedException();
             }
         }
@@ -351,7 +351,7 @@ namespace HeartScript.Compiling.Emit
             ctx.ILGenerator.Emit(OpCodes.Ldelem, node.Type);
         }
 
-        private static void EmitArraySizeOf(MethodBodyContext ctx, ArraySizeOfNode node)
+        private static void EmitArrayLength(MethodBodyContext ctx, ArrayLengthNode node)
         {
             EmitExpression(ctx, node.Array, false);
             ctx.ILGenerator.Emit(OpCodes.Ldlen);

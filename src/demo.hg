@@ -44,7 +44,7 @@ expr ->
         #WantOperand (Nullary, Prefix)
         '()'         none none '(' expr ')'
         'new[]'      none none 'new' type '[' expr ']'
-        'sizeof'     none none 'sizeof' '(' expr ')'
+        'len'        none none 'len' '(' expr ')'
         'u+'         none 3    '+'
         'u-'         none 3    '-'
         '~'          none 3    '~'

@@ -1,6 +1,6 @@
 void main(int[] arr)
 {
-    int n = sizeof(arr);
+    int n = len(arr);
     quick_sort(arr, 0, n - 1);
 }
 

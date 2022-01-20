@@ -13,7 +13,7 @@ namespace HeartScript.Ast
         {
             ["()"] = BuildRoundBracket,
             ["new[]"] = BuildArrayConstructor,
-            ["sizeof"] = BuildSizeOf,
+            ["len"] = BuildLen,
             ["u+"] = BuildPrefix(AstNode.UnaryPlus),
             ["u-"] = BuildPrefix(AstNode.Negate),
             ["~"] = BuildPrefix(AstNode.Not),
@@ -79,12 +79,12 @@ namespace HeartScript.Ast
             return AstNode.ArrayIndex(array, index);
         }
 
-        private static AstNode BuildSizeOf(SymbolScope scope, ExpressionNode node)
+        private static AstNode BuildLen(SymbolScope scope, ExpressionNode node)
         {
             var sequenceNode = (SequenceNode)node.MidNode;
             var array = Build(scope, (ExpressionNode)sequenceNode.Children[2]);
 
-            return AstNode.ArraySizeOf(array);
+            return AstNode.ArrayLength(array);
         }
 
         private static AstNode ParseReal(SymbolScope scope, ExpressionNode node)

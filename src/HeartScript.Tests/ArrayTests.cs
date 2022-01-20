@@ -62,7 +62,7 @@ namespace HeartScript.Tests.VariableTests
                 Method = @"
                 double main(int[] arr)
                 {
-                    return sizeof(arr);
+                    return len(arr);
                 }",
                 Paramaters = new object[]{ new int[1] },
                 ExpectedResult = 1,
