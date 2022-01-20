@@ -113,7 +113,7 @@ namespace HeartScript.Tests.VariableTests
                 Message = $"Cannot convert, {typeof(double)} to {typeof(int)}"
             },
             //Cache Assign Edge Case
-            //Potential reuse of temp variables
+            //Overlapping temp variable usage (i = 1 & i = 0)
             new CompilerTestCase()
             {
                 Method = @"
