@@ -22,6 +22,7 @@ namespace HeartScript.Compiling.Emit
             ContinueLabel = new Stack<Label>();
         }
 
+        //TODO cache temp locals by type, move stloc/ldloc to AstNodes to prevent overlapping cache usage
         public AstNode CacheNode(AstNode node)
         {
             var temp = GetTempLocal(node.Type);
