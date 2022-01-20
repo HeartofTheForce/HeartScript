@@ -17,199 +17,199 @@ namespace HeartScript.Compiling.Emit
             AstType.Call,
         };
 
-        public static void EmitExpression(ILGenerator ilGenerator, AstNode node, bool isStatement)
+        public static void EmitExpression(MethodBodyContext ctx, AstNode node, bool isStatement)
         {
             if (isStatement && !s_validStatmentExpressions.Contains(node.NodeType))
                 throw new ArgumentException("Invalid statement expression");
 
             switch (node)
             {
-                case ConstantNode constantNode: EmitConstant(ilGenerator, constantNode); break;
-                case BinaryNode binaryNode: EmitBinary(ilGenerator, binaryNode, isStatement); break;
-                case UnaryNode unaryNode: EmitUnary(ilGenerator, unaryNode, isStatement); break;
-                case ConditionalNode conditionalNode: EmitConditional(ilGenerator, conditionalNode); break;
-                case CallNode callNode: EmitCall(ilGenerator, callNode); break;
-                case ParameterNode parameterNode: EmitParameter(ilGenerator, parameterNode); break;
-                case VariableNode variableNode: EmitVariable(ilGenerator, variableNode); break;
-                case MemberAccessNode memberAccessNode: EmitMemberAccess(ilGenerator, memberAccessNode); break;
-                case ArrayConstructorNode arrayConstructorNode: EmitArrayConstructor(ilGenerator, arrayConstructorNode); break;
-                case ArrayIndexNode arrayIndexNode: EmitArrayRead(ilGenerator, arrayIndexNode); break;
-                case ArraySizeOfNode arraySizeOfNode: EmitArraySizeOf(ilGenerator, arraySizeOfNode); break;
+                case ConstantNode constantNode: EmitConstant(ctx, constantNode); break;
+                case BinaryNode binaryNode: EmitBinary(ctx, binaryNode, isStatement); break;
+                case UnaryNode unaryNode: EmitUnary(ctx, unaryNode, isStatement); break;
+                case ConditionalNode conditionalNode: EmitConditional(ctx, conditionalNode); break;
+                case CallNode callNode: EmitCall(ctx, callNode); break;
+                case ParameterNode parameterNode: EmitParameter(ctx, parameterNode); break;
+                case VariableNode variableNode: EmitVariable(ctx, variableNode); break;
+                case MemberAccessNode memberAccessNode: EmitMemberAccess(ctx, memberAccessNode); break;
+                case ArrayConstructorNode arrayConstructorNode: EmitArrayConstructor(ctx, arrayConstructorNode); break;
+                case ArrayIndexNode arrayIndexNode: EmitArrayRead(ctx, arrayIndexNode); break;
+                case ArraySizeOfNode arraySizeOfNode: EmitArraySizeOf(ctx, arraySizeOfNode); break;
                 default: throw new NotImplementedException();
             }
         }
 
-        private static void EmitConstant(ILGenerator ilGenerator, ConstantNode node)
+        private static void EmitConstant(MethodBodyContext ctx, ConstantNode node)
         {
             if (node.Value == null)
                 throw new ArgumentException(nameof(node.Value));
 
             if (node.Type == typeof(int))
             {
-                ilGenerator.Emit(OpCodes.Ldc_I4, (int)node.Value);
+                ctx.ILGenerator.Emit(OpCodes.Ldc_I4, (int)node.Value);
                 return;
             }
 
             if (node.Type == typeof(double))
             {
-                ilGenerator.Emit(OpCodes.Ldc_R8, (double)node.Value);
+                ctx.ILGenerator.Emit(OpCodes.Ldc_R8, (double)node.Value);
                 return;
             }
 
             if (node.Type == typeof(bool))
             {
-                ilGenerator.Emit(OpCodes.Ldc_I4, (bool)node.Value ? 1 : 0);
+                ctx.ILGenerator.Emit(OpCodes.Ldc_I4, (bool)node.Value ? 1 : 0);
                 return;
             }
 
             throw new NotImplementedException();
         }
 
-        private static void EmitBinary(ILGenerator ilGenerator, BinaryNode node, bool isStatement)
+        private static void EmitBinary(MethodBodyContext ctx, BinaryNode node, bool isStatement)
         {
             switch (node.NodeType)
             {
                 case AstType.Multiply:
                     {
-                        EmitExpression(ilGenerator, node.Left, false);
-                        EmitExpression(ilGenerator, node.Right, false);
-                        ilGenerator.Emit(OpCodes.Mul);
+                        EmitExpression(ctx, node.Left, false);
+                        EmitExpression(ctx, node.Right, false);
+                        ctx.ILGenerator.Emit(OpCodes.Mul);
                     }
                     break;
                 case AstType.Divide:
                     {
-                        EmitExpression(ilGenerator, node.Left, false);
-                        EmitExpression(ilGenerator, node.Right, false);
-                        ilGenerator.Emit(OpCodes.Div);
+                        EmitExpression(ctx, node.Left, false);
+                        EmitExpression(ctx, node.Right, false);
+                        ctx.ILGenerator.Emit(OpCodes.Div);
                     }
                     break;
                 case AstType.Add:
                     {
-                        EmitExpression(ilGenerator, node.Left, false);
-                        EmitExpression(ilGenerator, node.Right, false);
-                        ilGenerator.Emit(OpCodes.Add);
+                        EmitExpression(ctx, node.Left, false);
+                        EmitExpression(ctx, node.Right, false);
+                        ctx.ILGenerator.Emit(OpCodes.Add);
                     }
                     break;
                 case AstType.Subtract:
                     {
-                        EmitExpression(ilGenerator, node.Left, false);
-                        EmitExpression(ilGenerator, node.Right, false);
-                        ilGenerator.Emit(OpCodes.Sub);
+                        EmitExpression(ctx, node.Left, false);
+                        EmitExpression(ctx, node.Right, false);
+                        ctx.ILGenerator.Emit(OpCodes.Sub);
                     }
                     break;
                 case AstType.LessThanOrEqual:
                     {
-                        EmitExpression(ilGenerator, node.Left, false);
-                        EmitExpression(ilGenerator, node.Right, false);
-                        ilGenerator.Emit(OpCodes.Cgt);
-                        ilGenerator.Emit(OpCodes.Ldc_I4, 0);
-                        ilGenerator.Emit(OpCodes.Ceq);
+                        EmitExpression(ctx, node.Left, false);
+                        EmitExpression(ctx, node.Right, false);
+                        ctx.ILGenerator.Emit(OpCodes.Cgt);
+                        ctx.ILGenerator.Emit(OpCodes.Ldc_I4, 0);
+                        ctx.ILGenerator.Emit(OpCodes.Ceq);
                     }
                     break;
                 case AstType.GreaterThanOrEqual:
                     {
-                        EmitExpression(ilGenerator, node.Left, false);
-                        EmitExpression(ilGenerator, node.Right, false);
-                        ilGenerator.Emit(OpCodes.Clt);
-                        ilGenerator.Emit(OpCodes.Ldc_I4, 0);
-                        ilGenerator.Emit(OpCodes.Ceq);
+                        EmitExpression(ctx, node.Left, false);
+                        EmitExpression(ctx, node.Right, false);
+                        ctx.ILGenerator.Emit(OpCodes.Clt);
+                        ctx.ILGenerator.Emit(OpCodes.Ldc_I4, 0);
+                        ctx.ILGenerator.Emit(OpCodes.Ceq);
                     }
                     break;
                 case AstType.LessThan:
                     {
-                        EmitExpression(ilGenerator, node.Left, false);
-                        EmitExpression(ilGenerator, node.Right, false);
-                        ilGenerator.Emit(OpCodes.Clt);
+                        EmitExpression(ctx, node.Left, false);
+                        EmitExpression(ctx, node.Right, false);
+                        ctx.ILGenerator.Emit(OpCodes.Clt);
                     }
                     break;
                 case AstType.GreaterThan:
                     {
-                        EmitExpression(ilGenerator, node.Left, false);
-                        EmitExpression(ilGenerator, node.Right, false);
-                        ilGenerator.Emit(OpCodes.Cgt);
+                        EmitExpression(ctx, node.Left, false);
+                        EmitExpression(ctx, node.Right, false);
+                        ctx.ILGenerator.Emit(OpCodes.Cgt);
                     }
                     break;
                 case AstType.Equal:
                     {
-                        EmitExpression(ilGenerator, node.Left, false);
-                        EmitExpression(ilGenerator, node.Right, false);
-                        ilGenerator.Emit(OpCodes.Ceq);
+                        EmitExpression(ctx, node.Left, false);
+                        EmitExpression(ctx, node.Right, false);
+                        ctx.ILGenerator.Emit(OpCodes.Ceq);
                     }
                     break;
                 case AstType.NotEqual:
                     {
-                        EmitExpression(ilGenerator, node.Left, false);
-                        EmitExpression(ilGenerator, node.Right, false);
-                        ilGenerator.Emit(OpCodes.Ceq);
-                        ilGenerator.Emit(OpCodes.Ldc_I4, 0);
-                        ilGenerator.Emit(OpCodes.Ceq);
+                        EmitExpression(ctx, node.Left, false);
+                        EmitExpression(ctx, node.Right, false);
+                        ctx.ILGenerator.Emit(OpCodes.Ceq);
+                        ctx.ILGenerator.Emit(OpCodes.Ldc_I4, 0);
+                        ctx.ILGenerator.Emit(OpCodes.Ceq);
                     }
                     break;
                 case AstType.And:
                     {
-                        EmitExpression(ilGenerator, node.Left, false);
-                        EmitExpression(ilGenerator, node.Right, false);
-                        ilGenerator.Emit(OpCodes.And);
+                        EmitExpression(ctx, node.Left, false);
+                        EmitExpression(ctx, node.Right, false);
+                        ctx.ILGenerator.Emit(OpCodes.And);
                     }
                     break;
                 case AstType.ExclusiveOr:
                     {
-                        EmitExpression(ilGenerator, node.Left, false);
-                        EmitExpression(ilGenerator, node.Right, false);
-                        ilGenerator.Emit(OpCodes.Xor);
+                        EmitExpression(ctx, node.Left, false);
+                        EmitExpression(ctx, node.Right, false);
+                        ctx.ILGenerator.Emit(OpCodes.Xor);
                     }
                     break;
                 case AstType.Or:
                     {
-                        EmitExpression(ilGenerator, node.Left, false);
-                        EmitExpression(ilGenerator, node.Right, false);
-                        ilGenerator.Emit(OpCodes.Or);
+                        EmitExpression(ctx, node.Left, false);
+                        EmitExpression(ctx, node.Right, false);
+                        ctx.ILGenerator.Emit(OpCodes.Or);
                     }
                     break;
                 case AstType.Assign:
                     {
                         if (!isStatement)
-                            EmitExpression(ilGenerator, node.Right, false);
+                            EmitExpression(ctx, node.Right, false);
 
-                        EmitSet(ilGenerator, node.Left, node.Right, "The left-hand side of an assignment must be a variable or parameter");
+                        EmitSet(ctx, node.Left, node.Right, "The left-hand side of an assignment must be a variable or parameter");
                     }
                     break;
                 default: throw new NotImplementedException();
             }
         }
 
-        private static void EmitUnary(ILGenerator ilGenerator, UnaryNode node, bool isStatement)
+        private static void EmitUnary(MethodBodyContext ctx, UnaryNode node, bool isStatement)
         {
             switch (node.NodeType)
             {
                 case AstType.Convert:
                     {
-                        EmitExpression(ilGenerator, node.Operand, false);
+                        EmitExpression(ctx, node.Operand, false);
                         var opCode = TypeHelper.ConvertOpCode(node.Operand.Type, node.Type);
-                        ilGenerator.Emit(opCode);
+                        ctx.ILGenerator.Emit(opCode);
                     }
                     break;
                 case AstType.UnaryPlus:
                     {
-                        EmitExpression(ilGenerator, node.Operand, false);
+                        EmitExpression(ctx, node.Operand, false);
                     }
                     break;
                 case AstType.Negate:
                     {
-                        EmitExpression(ilGenerator, node.Operand, false);
-                        ilGenerator.Emit(OpCodes.Neg);
+                        EmitExpression(ctx, node.Operand, false);
+                        ctx.ILGenerator.Emit(OpCodes.Neg);
                     }
                     break;
                 case AstType.Not:
                     {
-                        EmitExpression(ilGenerator, node.Operand, false);
-                        ilGenerator.Emit(OpCodes.Not);
+                        EmitExpression(ctx, node.Operand, false);
+                        ctx.ILGenerator.Emit(OpCodes.Not);
                     }
                     break;
                 case AstType.PostIncrement:
                     {
                         if (!isStatement)
-                            EmitExpression(ilGenerator, node.Operand, false);
+                            EmitExpression(ctx, node.Operand, false);
 
                         AstNode constantNode;
                         if (node.Operand.Type == typeof(int))
@@ -220,13 +220,13 @@ namespace HeartScript.Compiling.Emit
                             throw new ArgumentException(nameof(node.Operand.Type));
 
                         var valueNode = AstNode.Add(node.Operand, constantNode);
-                        EmitSet(ilGenerator, node.Operand, valueNode, "The operand of an increment or decrement operator must be a variable or parameter");
+                        EmitSet(ctx, node.Operand, valueNode, "The operand of an increment or decrement operator must be a variable or parameter");
                     }
                     break;
                 case AstType.PostDecrement:
                     {
                         if (!isStatement)
-                            EmitExpression(ilGenerator, node.Operand, false);
+                            EmitExpression(ctx, node.Operand, false);
 
                         AstNode constantNode;
                         if (node.Operand.Type == typeof(int))
@@ -237,115 +237,115 @@ namespace HeartScript.Compiling.Emit
                             throw new ArgumentException(nameof(node.Operand.Type));
 
                         var valueNode = AstNode.Subtract(node.Operand, constantNode);
-                        EmitSet(ilGenerator, node.Operand, valueNode, "The operand of an increment or decrement operator must be a variable or parameter");
+                        EmitSet(ctx, node.Operand, valueNode, "The operand of an increment or decrement operator must be a variable or parameter");
                     }
                     break;
                 default: throw new NotImplementedException();
             }
         }
 
-        private static void EmitSet(ILGenerator ilGenerator, AstNode targetNode, AstNode valueNode, string invalidTypeMessage)
+        private static void EmitSet(MethodBodyContext ctx, AstNode targetNode, AstNode valueNode, string invalidTypeMessage)
         {
             //TODO Emitting valueNode prevents using OpCodes.Dup for return values
             switch (targetNode)
             {
                 case ParameterNode parameterNode:
                     {
-                        EmitExpression(ilGenerator, valueNode, false);
-                        ilGenerator.Emit(OpCodes.Starg, parameterNode.Index);
+                        EmitExpression(ctx, valueNode, false);
+                        ctx.ILGenerator.Emit(OpCodes.Starg, parameterNode.Index);
                     }
                     break;
                 case VariableNode variableNode:
                     {
-                        EmitExpression(ilGenerator, valueNode, false);
-                        ilGenerator.Emit(OpCodes.Stloc, variableNode.Index);
+                        EmitExpression(ctx, valueNode, false);
+                        ctx.ILGenerator.Emit(OpCodes.Stloc, variableNode.Index);
                     }
                     break;
                 case ArrayIndexNode arrayIndexNode:
                     {
-                        EmitExpression(ilGenerator, arrayIndexNode.Array, false);
-                        EmitExpression(ilGenerator, arrayIndexNode.Index, false);
-                        EmitExpression(ilGenerator, valueNode, false);
-                        ilGenerator.Emit(OpCodes.Stelem, targetNode.Type);
+                        EmitExpression(ctx, arrayIndexNode.Array, false);
+                        EmitExpression(ctx, arrayIndexNode.Index, false);
+                        EmitExpression(ctx, valueNode, false);
+                        ctx.ILGenerator.Emit(OpCodes.Stelem, targetNode.Type);
                     }
                     break;
                 default: throw new ArgumentException(invalidTypeMessage);
             }
         }
 
-        private static void EmitConditional(ILGenerator ilGenerator, ConditionalNode node)
+        private static void EmitConditional(MethodBodyContext ctx, ConditionalNode node)
         {
-            var ifFalseLabel = ilGenerator.DefineLabel();
-            var endLabel = ilGenerator.DefineLabel();
+            var ifFalseLabel = ctx.ILGenerator.DefineLabel();
+            var endLabel = ctx.ILGenerator.DefineLabel();
 
-            EmitExpression(ilGenerator, node.Condition, false);
-            ilGenerator.Emit(OpCodes.Brfalse, ifFalseLabel);
+            EmitExpression(ctx, node.Condition, false);
+            ctx.ILGenerator.Emit(OpCodes.Brfalse, ifFalseLabel);
 
             //true
-            EmitExpression(ilGenerator, node.IfTrue, false);
-            ilGenerator.Emit(OpCodes.Br, endLabel);
+            EmitExpression(ctx, node.IfTrue, false);
+            ctx.ILGenerator.Emit(OpCodes.Br, endLabel);
 
             //false
-            ilGenerator.MarkLabel(ifFalseLabel);
-            EmitExpression(ilGenerator, node.IfFalse, false);
+            ctx.ILGenerator.MarkLabel(ifFalseLabel);
+            EmitExpression(ctx, node.IfFalse, false);
 
-            ilGenerator.MarkLabel(endLabel);
+            ctx.ILGenerator.MarkLabel(endLabel);
         }
 
-        private static void EmitCall(ILGenerator ilGenerator, CallNode node)
+        private static void EmitCall(MethodBodyContext ctx, CallNode node)
         {
             if (node.Instance != null)
-                EmitExpression(ilGenerator, node.Instance, false);
+                EmitExpression(ctx, node.Instance, false);
 
             foreach (var parameter in node.Parameters)
             {
-                EmitExpression(ilGenerator, parameter, false);
+                EmitExpression(ctx, parameter, false);
             }
 
-            ilGenerator.EmitCall(OpCodes.Call, node.MethodInfo, null);
+            ctx.ILGenerator.EmitCall(OpCodes.Call, node.MethodInfo, null);
         }
 
 
-        private static void EmitParameter(ILGenerator ilGenerator, ParameterNode node)
+        private static void EmitParameter(MethodBodyContext ctx, ParameterNode node)
         {
-            ilGenerator.Emit(OpCodes.Ldarg, node.Index);
+            ctx.ILGenerator.Emit(OpCodes.Ldarg, node.Index);
         }
 
-        private static void EmitVariable(ILGenerator ilGenerator, VariableNode node)
+        private static void EmitVariable(MethodBodyContext ctx, VariableNode node)
         {
-            ilGenerator.Emit(OpCodes.Ldloc, node.Index);
+            ctx.ILGenerator.Emit(OpCodes.Ldloc, node.Index);
         }
 
-        private static void EmitMemberAccess(ILGenerator ilGenerator, MemberAccessNode node)
+        private static void EmitMemberAccess(MethodBodyContext ctx, MemberAccessNode node)
         {
             if (node.Instance != null)
-                EmitExpression(ilGenerator, node.Instance, false);
+                EmitExpression(ctx, node.Instance, false);
 
             switch (node.Member)
             {
-                case FieldInfo fieldInfo: ilGenerator.Emit(OpCodes.Ldfld, fieldInfo); break;
-                case PropertyInfo propertyInfo: ilGenerator.EmitCall(OpCodes.Call, propertyInfo.GetMethod, null); break;
+                case FieldInfo fieldInfo: ctx.ILGenerator.Emit(OpCodes.Ldfld, fieldInfo); break;
+                case PropertyInfo propertyInfo: ctx.ILGenerator.EmitCall(OpCodes.Call, propertyInfo.GetMethod, null); break;
                 default: throw new NotImplementedException();
             };
         }
 
-        private static void EmitArrayConstructor(ILGenerator ilGenerator, ArrayConstructorNode node)
+        private static void EmitArrayConstructor(MethodBodyContext ctx, ArrayConstructorNode node)
         {
-            EmitExpression(ilGenerator, node.Length, false);
-            ilGenerator.Emit(OpCodes.Newarr, node.Type);
+            EmitExpression(ctx, node.Length, false);
+            ctx.ILGenerator.Emit(OpCodes.Newarr, node.Type);
         }
 
-        private static void EmitArrayRead(ILGenerator ilGenerator, ArrayIndexNode node)
+        private static void EmitArrayRead(MethodBodyContext ctx, ArrayIndexNode node)
         {
-            EmitExpression(ilGenerator, node.Array, false);
-            EmitExpression(ilGenerator, node.Index, false);
-            ilGenerator.Emit(OpCodes.Ldelem, node.Type);
+            EmitExpression(ctx, node.Array, false);
+            EmitExpression(ctx, node.Index, false);
+            ctx.ILGenerator.Emit(OpCodes.Ldelem, node.Type);
         }
 
-        private static void EmitArraySizeOf(ILGenerator ilGenerator, ArraySizeOfNode node)
+        private static void EmitArraySizeOf(MethodBodyContext ctx, ArraySizeOfNode node)
         {
-            EmitExpression(ilGenerator, node.Array, false);
-            ilGenerator.Emit(OpCodes.Ldlen);
+            EmitExpression(ctx, node.Array, false);
+            ctx.ILGenerator.Emit(OpCodes.Ldlen);
         }
     }
 }

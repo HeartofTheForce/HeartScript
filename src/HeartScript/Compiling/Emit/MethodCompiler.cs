@@ -1,148 +1,163 @@
+using System;
 using System.Collections.Generic;
 using System.Reflection.Emit;
 using HeartScript.Ast.Nodes;
 
 namespace HeartScript.Compiling.Emit
 {
-    public static class MethodCompiler
+    public class MethodBodyContext
     {
-        private class MethodBodyContext
-        {
-            public Label ReturnLabel { get; set; }
-            public LocalBuilder? ReturnLocal { get; set; }
-            public Stack<Label> BreakLabel { get; set; }
-            public Stack<Label> ContinueLabel { get; set; }
+        public ILGenerator ILGenerator { get; }
+        public Label ReturnLabel { get; }
+        public LocalBuilder? ReturnLocal { get; }
+        public Stack<Label> BreakLabel { get; }
+        public Stack<Label> ContinueLabel { get; }
+        private Dictionary<Type, LocalBuilder> TempVariables { get; }
 
-            public MethodBodyContext(Label returnLabel, LocalBuilder? returnLocal)
-            {
-                ReturnLabel = returnLabel;
-                ReturnLocal = returnLocal;
-                BreakLabel = new Stack<Label>();
-                ContinueLabel = new Stack<Label>();
-            }
+        public MethodBodyContext(ILGenerator iLGenerator, LocalBuilder? returnLocal)
+        {
+            ILGenerator = iLGenerator;
+            ReturnLabel = iLGenerator.DefineLabel();
+            ReturnLocal = returnLocal;
+            BreakLabel = new Stack<Label>();
+            ContinueLabel = new Stack<Label>();
+            TempVariables = new Dictionary<Type, LocalBuilder>();
         }
 
+        public LocalBuilder GetTempLocal(Type type)
+        {
+            if (TempVariables.TryGetValue(type, out var localBuilder))
+                return localBuilder;
+
+            localBuilder = ILGenerator.DeclareLocal(type);
+            TempVariables[type] = localBuilder;
+
+            return localBuilder;
+        }
+    }
+
+    public static class MethodCompiler
+    {
         public static void EmitMethodBody(MethodBuilder methodBuilder, MethodBodyNode node)
         {
             var ilGenerator = methodBuilder.GetILGenerator();
-
             foreach (var variable in node.Variables)
             {
                 ilGenerator.DeclareLocal(variable.Type);
             }
 
             var ctx = new MethodBodyContext(
-                ilGenerator.DefineLabel(),
+                ilGenerator,
                 methodBuilder.ReturnType != typeof(void) ? ilGenerator.DeclareLocal(methodBuilder.ReturnType) : null);
 
-            EmitStatement(ilGenerator, ctx, node.Body);
+            EmitStatement(ctx, node.Body);
 
-            ilGenerator.MarkLabel(ctx.ReturnLabel);
+            ctx.ILGenerator.MarkLabel(ctx.ReturnLabel);
             if (ctx.ReturnLocal != null)
-                ilGenerator.Emit(OpCodes.Ldloc, ctx.ReturnLocal);
+                ctx.ILGenerator.Emit(OpCodes.Ldloc, ctx.ReturnLocal);
 
-            ilGenerator.Emit(OpCodes.Ret);
+            ctx.ILGenerator.Emit(OpCodes.Ret);
         }
 
-        private static void EmitStatement(ILGenerator ilGenerator, MethodBodyContext ctx, AstNode node)
+        private static void EmitStatement(MethodBodyContext ctx, AstNode node)
         {
             switch (node)
             {
-                case ReturnNode returnNode: EmitReturn(ilGenerator, ctx, returnNode); break;
-                case BlockNode blockNode: EmitBlock(ilGenerator, ctx, blockNode); break;
-                case LoopNode loopNode: EmitLoop(ilGenerator, ctx, loopNode); break;
-                case IfElseNode ifElseNode: EmitIfElse(ilGenerator, ctx, ifElseNode); break;
-                case BreakNode _: ilGenerator.Emit(OpCodes.Br, ctx.BreakLabel.Peek()); break;
-                case ContinueNode _: ilGenerator.Emit(OpCodes.Br, ctx.ContinueLabel.Peek()); break;
-                default: ExpressionCompiler.EmitExpression(ilGenerator, node, true); break;
+                case ReturnNode returnNode: EmitReturn(ctx, returnNode); break;
+                case BlockNode blockNode: EmitBlock(ctx, blockNode); break;
+                case LoopNode loopNode: EmitLoop(ctx, loopNode); break;
+                case IfElseNode ifElseNode: EmitIfElse(ctx, ifElseNode); break;
+                case BreakNode _: ctx.ILGenerator.Emit(OpCodes.Br, ctx.BreakLabel.Peek()); break;
+                case ContinueNode _: ctx.ILGenerator.Emit(OpCodes.Br, ctx.ContinueLabel.Peek()); break;
+                default: ExpressionCompiler.EmitExpression(ctx, node, true); break;
             }
         }
 
-        private static void EmitReturn(ILGenerator ilGenerator, MethodBodyContext ctx, ReturnNode node)
+        private static void EmitReturn(MethodBodyContext ctx, ReturnNode node)
         {
             if (node.Node != null)
             {
-                ExpressionCompiler.EmitExpression(ilGenerator, node.Node, false);
-                ilGenerator.Emit(OpCodes.Stloc, ctx.ReturnLocal);
+                ExpressionCompiler.EmitExpression(ctx, node.Node, false);
+                ctx.ILGenerator.Emit(OpCodes.Stloc, ctx.ReturnLocal);
             }
 
-            ilGenerator.Emit(OpCodes.Br, ctx.ReturnLabel);
+            ctx.ILGenerator.Emit(OpCodes.Br, ctx.ReturnLabel);
         }
 
-        private static void EmitBlock(ILGenerator ilGenerator, MethodBodyContext ctx, BlockNode node)
+        private static void EmitBlock(MethodBodyContext ctx, BlockNode node)
         {
             foreach (var statement in node.Statements)
             {
-                EmitStatement(ilGenerator, ctx, statement);
+                EmitStatement(ctx, statement);
             }
         }
 
-        private static void EmitLoop(ILGenerator ilGenerator, MethodBodyContext ctx, LoopNode loopNode)
+        private static void EmitLoop(MethodBodyContext ctx, LoopNode loopNode)
         {
-            var loopHead = ilGenerator.DefineLabel();
-            var loopCondition = ilGenerator.DefineLabel();
-            var loopStep = ilGenerator.DefineLabel();
-            var loopTail = ilGenerator.DefineLabel();
+            var loopHead = ctx.ILGenerator.DefineLabel();
+            var loopCondition = ctx.ILGenerator.DefineLabel();
+            var loopStep = ctx.ILGenerator.DefineLabel();
+            var loopTail = ctx.ILGenerator.DefineLabel();
 
             ctx.BreakLabel.Push(loopTail);
             ctx.ContinueLabel.Push(loopStep);
 
             if (loopNode.Initialize != null)
-                EmitStatement(ilGenerator, ctx, loopNode.Initialize);
+                EmitStatement(ctx, loopNode.Initialize);
 
             if (!loopNode.RunAtLeastOnce)
-                ilGenerator.Emit(OpCodes.Br, loopCondition);
+                ctx.ILGenerator.Emit(OpCodes.Br, loopCondition);
 
-            ilGenerator.MarkLabel(loopHead);
-            EmitStatement(ilGenerator, ctx, loopNode.Body);
+            ctx.ILGenerator.MarkLabel(loopHead);
+            EmitStatement(ctx, loopNode.Body);
 
-            ilGenerator.MarkLabel(loopStep);
+            ctx.ILGenerator.MarkLabel(loopStep);
             if (loopNode.Step != null)
-                EmitStatement(ilGenerator, ctx, loopNode.Step);
+                EmitStatement(ctx, loopNode.Step);
 
-            ilGenerator.MarkLabel(loopCondition);
+            ctx.ILGenerator.MarkLabel(loopCondition);
             if (loopNode.Condition != null)
             {
-                ExpressionCompiler.EmitExpression(ilGenerator, loopNode.Condition, false);
-                ilGenerator.Emit(OpCodes.Brtrue, loopHead);
+                ExpressionCompiler.EmitExpression(ctx, loopNode.Condition, false);
+                ctx.ILGenerator.Emit(OpCodes.Brtrue, loopHead);
             }
 
-            ilGenerator.MarkLabel(loopTail);
+            ctx.ILGenerator.MarkLabel(loopTail);
 
             ctx.BreakLabel.Pop();
             ctx.ContinueLabel.Pop();
         }
 
-        private static void EmitIfElse(ILGenerator ilGenerator, MethodBodyContext ctx, IfElseNode node)
+        private static void EmitIfElse(MethodBodyContext ctx, IfElseNode node)
         {
             if (node.IfFalse != null)
             {
-                var ifFalseLabel = ilGenerator.DefineLabel();
-                var endLabel = ilGenerator.DefineLabel();
+                var ifFalseLabel = ctx.ILGenerator.DefineLabel();
+                var endLabel = ctx.ILGenerator.DefineLabel();
 
-                ExpressionCompiler.EmitExpression(ilGenerator, node.Condition, false);
-                ilGenerator.Emit(OpCodes.Brfalse, ifFalseLabel);
+                ExpressionCompiler.EmitExpression(ctx, node.Condition, false);
+                ctx.ILGenerator.Emit(OpCodes.Brfalse, ifFalseLabel);
 
                 //true
-                EmitStatement(ilGenerator, ctx, node.IfTrue);
-                ilGenerator.Emit(OpCodes.Br, endLabel);
+                EmitStatement(ctx, node.IfTrue);
+                ctx.ILGenerator.Emit(OpCodes.Br, endLabel);
 
                 //false
-                ilGenerator.MarkLabel(ifFalseLabel);
-                EmitStatement(ilGenerator, ctx, node.IfFalse);
+                ctx.ILGenerator.MarkLabel(ifFalseLabel);
+                EmitStatement(ctx, node.IfFalse);
 
-                ilGenerator.MarkLabel(endLabel);
+                ctx.ILGenerator.MarkLabel(endLabel);
             }
             else
             {
-                var endLabel = ilGenerator.DefineLabel();
-                ExpressionCompiler.EmitExpression(ilGenerator, node.Condition, false);
-                ilGenerator.Emit(OpCodes.Brfalse, endLabel);
+                var endLabel = ctx.ILGenerator.DefineLabel();
+                ExpressionCompiler.EmitExpression(ctx, node.Condition, false);
+                ctx.ILGenerator.Emit(OpCodes.Brfalse, endLabel);
 
                 //true
-                EmitStatement(ilGenerator, ctx, node.IfTrue);
+                EmitStatement(ctx, node.IfTrue);
 
-                ilGenerator.MarkLabel(endLabel);
+                ctx.ILGenerator.MarkLabel(endLabel);
             }
         }
     }
