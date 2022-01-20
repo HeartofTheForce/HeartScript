@@ -1,7 +1,7 @@
 root -> method+
 _ -> `\s*`
 
-type -> 'int' / 'double' / 'bool'
+type -> ('void' / 'int' / 'double' / 'bool') '[]'*
 name -> !type `[_a-zA-Z]\w*`
 
 parameters -> (type name (',' type name)*)?
@@ -43,9 +43,11 @@ expr ->
     [
         #WantOperand (Nullary, Prefix)
         '()'         none none '(' expr ')'
-        'u+'         none 2    '+'
-        'u-'         none 2    '-'
-        '~'          none 2    '~'
+        'new[]'      none none 'new' type '[' expr ']'
+        'len'        none none 'len' '(' expr ')'
+        'u+'         none 3    '+'
+        'u-'         none 3    '-'
+        '~'          none 3    '~'
         'real'       none none `\d+\.\d+`
         'integral'   none none `\d+`
         'boolean'    none none 'true' / 'false'
@@ -54,8 +56,9 @@ expr ->
         #HaveOperand (Postfix, Infix)
         '.'          0    0    '.'
         '$'          1    none '(' (expr (',' expr)*)? ')'
-        'post++'     3    none '++'
-        'post--'     3    none '--'
+        '[]'         1    none '[' expr ']'
+        'post++'     1    none '++'
+        'post--'     1    none '--'
         '*'          4    4    '*'
         '/'          4    4    '/'
         '+'          5    5    '+'
@@ -69,6 +72,6 @@ expr ->
         '&'          8    8    '&'
         '^'          9    9    '^'
         '|'          10   10   '|'
-        '='          1    99   '='
+        '='          2    99   '='
         '?:'         11   99   '?' expr ':'
     ]

@@ -13,9 +13,11 @@ namespace HeartScript.Ast.Nodes
 
             Value = value;
         }
+    }
 
-        public ConstantNode(object value) : this(value, value.GetType())
-        {
-        }
+    public partial class AstNode
+    {
+        public static ConstantNode Constant(object? value, Type type) => new ConstantNode(value, type);
+        public static ConstantNode Constant(object value) => new ConstantNode(value, value.GetType());
     }
 }

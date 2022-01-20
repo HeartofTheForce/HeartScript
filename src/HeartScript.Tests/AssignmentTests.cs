@@ -111,7 +111,24 @@ namespace HeartScript.Tests.VariableTests
                     return b;
                 }",
                 Message = $"Cannot convert, {typeof(double)} to {typeof(int)}"
-            }
+            },
+            //Cache Assign Edge Case
+            //Overlapping temp variable usage (i = 1 & i = 0)
+            new CompilerTestCase()
+            {
+                Method = @"
+                int main()
+                {
+                    int[] arr = new int[2];
+                    int i;
+                    int j;
+                    j = arr[i = 1] = i = 0;
+
+                    return arr[1];
+                }",
+                Paramaters = Array.Empty<object>(),
+                ExpectedResult = 0
+            },
         };
 
         [TestCaseSource(nameof(s_testCases))]

@@ -14,32 +14,44 @@ namespace HeartScript.Cli
             {
                 string source = File.ReadAllText(args[0]);
 
-                Console.WriteLine("Input");
-                Console.WriteLine(source);
-
                 var ctx = new ParserContext(source);
-                var parser = ParsingHelper.BuildPatternParser("./src/test.hg");
+                var parser = ParsingHelper.BuildPatternParser("./src/demo.hg");
                 var pattern = parser.Patterns["root"].Trim();
                 var node = pattern.MatchComplete(parser, ctx);
 
-                Console.WriteLine("Parsed");
-                Console.WriteLine(StringCompiler.Compile(node));
+                int arrayLength = 10;
+                int[] scriptArray = RandomArray(arrayLength, 0, 100);
+                int[] referenceArray = new int[arrayLength];
+                Array.Copy(scriptArray, referenceArray, arrayLength);
 
                 object[]? parameters = new object[]
                 {
-                    1.1,
-                    2.2,
-                    3.3,
+                    scriptArray,
                 };
                 var compiledMethodInfo = EmitCompiler.CompileFunction(node);
+                compiledMethodInfo.Invoke(null, parameters);
 
+                Console.WriteLine("Input");
+                Console.WriteLine(string.Join(", ", referenceArray));
                 Console.WriteLine("Output");
-                Console.WriteLine(compiledMethodInfo.Invoke(null, parameters));
+                Console.WriteLine(string.Join(", ", scriptArray));
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex);
             }
+        }
+
+        private static readonly Random s_random = new Random();
+        private static int[] RandomArray(int length, int min, int max)
+        {
+            int[] result = new int[length];
+            for (int i = 0; i < length; i++)
+            {
+                result[i] = s_random.Next(min, max);
+            }
+
+            return result;
         }
     }
 }

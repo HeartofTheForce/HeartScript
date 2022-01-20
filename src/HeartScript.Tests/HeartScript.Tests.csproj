@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="../test.hg" CopyToOutputDirectory="Always" />
+    <None Include="../demo.hg" CopyToOutputDirectory="Always" />
   </ItemGroup>
 
 </Project>
