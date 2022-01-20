@@ -111,7 +111,7 @@ namespace HeartScript.Tests.VariableTests
                     return b;
                 }",
                 Message = $"Cannot convert, {typeof(double)} to {typeof(int)}"
-            }
+            },
         };
 
         [TestCaseSource(nameof(s_testCases))]
