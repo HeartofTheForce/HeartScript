@@ -31,6 +31,8 @@ namespace HeartScript.Compiling.Emit
                 case ParameterNode parameterNode: EmitParameter(ilGenerator, parameterNode); break;
                 case VariableNode variableNode: EmitVariable(ilGenerator, variableNode); break;
                 case MemberAccessNode memberAccessNode: EmitMemberAccess(ilGenerator, memberAccessNode); break;
+                case ArrayConstructorNode arrayConstructorNode: EmitArrayConstructor(ilGenerator, arrayConstructorNode); break;
+                case ArrayIndexNode arrayIndexNode: EmitArrayRead(ilGenerator, arrayIndexNode); break;
                 default: throw new NotImplementedException();
             }
         }
@@ -164,11 +166,10 @@ namespace HeartScript.Compiling.Emit
                     break;
                 case AstType.Assign:
                     {
-                        EmitExpression(ilGenerator, node.Right, false);
                         if (!isStatement)
-                            ilGenerator.Emit(OpCodes.Dup);
+                            EmitExpression(ilGenerator, node.Right, false);
 
-                        EmitSet(ilGenerator, node.Left, "The left-hand side of an assignment must be a variable or parameter");
+                        EmitSet(ilGenerator, node.Left, node.Right, "The left-hand side of an assignment must be a variable or parameter");
                     }
                     break;
                 default: throw new NotImplementedException();
@@ -205,50 +206,66 @@ namespace HeartScript.Compiling.Emit
                     break;
                 case AstType.PostIncrement:
                     {
-                        EmitExpression(ilGenerator, node.Operand, false);
                         if (!isStatement)
-                            ilGenerator.Emit(OpCodes.Dup);
+                            EmitExpression(ilGenerator, node.Operand, false);
 
+                        AstNode constantNode;
                         if (node.Operand.Type == typeof(int))
-                            ilGenerator.Emit(OpCodes.Ldc_I4, 1);
+                            constantNode = AstNode.Constant(1);
                         else if (node.Operand.Type == typeof(double))
-                            ilGenerator.Emit(OpCodes.Ldc_R8, 1.0);
+                            constantNode = AstNode.Constant(1.0);
                         else
                             throw new ArgumentException(nameof(node.Operand.Type));
 
-                        ilGenerator.Emit(OpCodes.Add);
-                        EmitSet(ilGenerator, node.Operand, "The operand of an increment or decrement operator must be a variable or parameter");
+                        var valueNode = AstNode.Add(node.Operand, constantNode);
+                        EmitSet(ilGenerator, node.Operand, valueNode, "The operand of an increment or decrement operator must be a variable or parameter");
                     }
                     break;
                 case AstType.PostDecrement:
                     {
-                        EmitExpression(ilGenerator, node.Operand, false);
                         if (!isStatement)
-                            ilGenerator.Emit(OpCodes.Dup);
+                            EmitExpression(ilGenerator, node.Operand, false);
 
+                        AstNode constantNode;
                         if (node.Operand.Type == typeof(int))
-                            ilGenerator.Emit(OpCodes.Ldc_I4, 1);
+                            constantNode = AstNode.Constant(1);
                         else if (node.Operand.Type == typeof(double))
-                            ilGenerator.Emit(OpCodes.Ldc_R8, 1.0);
+                            constantNode = AstNode.Constant(1.0);
                         else
                             throw new ArgumentException(nameof(node.Operand.Type));
 
-                        ilGenerator.Emit(OpCodes.Sub);
-                        EmitSet(ilGenerator, node.Operand, "The operand of an increment or decrement operator must be a variable or parameter");
+                        var valueNode = AstNode.Subtract(node.Operand, constantNode);
+                        EmitSet(ilGenerator, node.Operand, valueNode, "The operand of an increment or decrement operator must be a variable or parameter");
                     }
                     break;
                 default: throw new NotImplementedException();
             }
         }
 
-        private static void EmitSet(ILGenerator ilGenerator, AstNode node, string invalidTypeMessage)
+        private static void EmitSet(ILGenerator ilGenerator, AstNode targetNode, AstNode valueNode, string invalidTypeMessage)
         {
-            switch (node)
+            switch (targetNode)
             {
                 case ParameterNode parameterNode:
-                    ilGenerator.Emit(OpCodes.Starg, parameterNode.Index); break;
+                    {
+                        EmitExpression(ilGenerator, valueNode, false);
+                        ilGenerator.Emit(OpCodes.Starg, parameterNode.Index);
+                    }
+                    break;
                 case VariableNode variableNode:
-                    ilGenerator.Emit(OpCodes.Stloc, variableNode.Index); break;
+                    {
+                        EmitExpression(ilGenerator, valueNode, false);
+                        ilGenerator.Emit(OpCodes.Stloc, variableNode.Index);
+                    }
+                    break;
+                case ArrayIndexNode arrayIndexNode:
+                    {
+                        EmitExpression(ilGenerator, arrayIndexNode.Array, false);
+                        EmitExpression(ilGenerator, arrayIndexNode.Index, false);
+                        EmitExpression(ilGenerator, valueNode, false);
+                        ilGenerator.Emit(OpCodes.Stelem, targetNode.Type);
+                    }
+                    break;
                 default: throw new ArgumentException(invalidTypeMessage);
             }
         }
@@ -307,6 +324,19 @@ namespace HeartScript.Compiling.Emit
                 case PropertyInfo propertyInfo: ilGenerator.EmitCall(OpCodes.Call, propertyInfo.GetMethod, null); break;
                 default: throw new NotImplementedException();
             };
+        }
+
+        private static void EmitArrayConstructor(ILGenerator ilGenerator, ArrayConstructorNode node)
+        {
+            EmitExpression(ilGenerator, node.Length, false);
+            ilGenerator.Emit(OpCodes.Newarr, node.Type);
+        }
+
+        private static void EmitArrayRead(ILGenerator ilGenerator, ArrayIndexNode node)
+        {
+            EmitExpression(ilGenerator, node.Array, false);
+            EmitExpression(ilGenerator, node.Index, false);
+            ilGenerator.Emit(OpCodes.Ldelem, node.Type);
         }
     }
 }

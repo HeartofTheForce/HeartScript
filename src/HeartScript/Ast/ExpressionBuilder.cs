@@ -12,11 +12,17 @@ namespace HeartScript.Ast
         private static readonly Dictionary<string, AstNodeBuilder> s_nodeBuilders = new Dictionary<string, AstNodeBuilder>()
         {
             ["()"] = BuildRoundBracket,
-            ["$"] = CallBuilder.BuildStaticCall,
-            ["."] = MemberAccessBuilder.BuildMemberAccess,
+            ["new[]"] = BuildArrayConstructor,
             ["u+"] = BuildPrefix(AstNode.UnaryPlus),
             ["u-"] = BuildPrefix(AstNode.Negate),
             ["~"] = BuildPrefix(AstNode.Not),
+            ["real"] = ParseReal,
+            ["integral"] = ParseIntegral,
+            ["boolean"] = ParseBoolean,
+            ["identifier"] = ParseIdentifier,
+            ["."] = MemberAccessBuilder.BuildMemberAccess,
+            ["$"] = CallBuilder.BuildStaticCall,
+            ["[]"] = BuildArrayIndex,
             ["post++"] = BuildPostfix(AstNode.PostIncrement),
             ["post--"] = BuildPostfix(AstNode.PostDecrement),
             ["*"] = BuildBinary(AstNode.Multiply),
@@ -34,10 +40,6 @@ namespace HeartScript.Ast
             ["|"] = BuildBinary(AstNode.Or),
             ["="] = BuildBinary(AstNode.Assign),
             ["?:"] = BuildTernary,
-            ["real"] = ParseReal,
-            ["integral"] = ParseIntegral,
-            ["boolean"] = ParseBoolean,
-            ["identifier"] = ParseIdentifier,
         };
 
         public static AstNode Build(SymbolScope scope, ExpressionNode node)
@@ -48,17 +50,33 @@ namespace HeartScript.Ast
             throw new ArgumentException($"{node.Key} has no matching builder");
         }
 
-        private static AstNode BuildRoundBracket(SymbolScope scope, ExpressionNode node)
+        private static AstNode BuildArrayConstructor(SymbolScope scope, ExpressionNode node)
         {
             var sequenceNode = (SequenceNode)node.MidNode;
-            return Build(scope, (ExpressionNode)sequenceNode.Children[1]);
+            var type = TypeHelper.ResolveTypeNode(sequenceNode.Children[1]).MakeArrayType();
+            var length = Build(scope, (ExpressionNode)sequenceNode.Children[3]);
+
+            return AstNode.ArrayConstructor(type, length);
+        }
+
+        private static AstNode BuildArrayIndex(SymbolScope scope, ExpressionNode node)
+        {
+            if (node.LeftNode == null)
+                throw new Exception($"{nameof(node.LeftNode)} cannot be null");
+
+            var array = Build(scope, node.LeftNode);
+
+            var sequenceNode = (SequenceNode)node.MidNode;
+            var index = Build(scope, (ExpressionNode)sequenceNode.Children[1]);
+
+            return AstNode.ArrayIndexNode(array, index);
         }
 
         private static AstNode ParseReal(SymbolScope scope, ExpressionNode node)
         {
             var valueNode = (ValueNode)node.MidNode;
             if (double.TryParse(valueNode.Value, out double value))
-                return new ConstantNode(value);
+                return AstNode.Constant(value);
 
             throw new ArgumentException(nameof(node));
         }
@@ -67,7 +85,7 @@ namespace HeartScript.Ast
         {
             var valueNode = (ValueNode)node.MidNode;
             if (int.TryParse(valueNode.Value, out int value))
-                return new ConstantNode(value);
+                return AstNode.Constant(value);
 
             throw new ArgumentException(nameof(node));
         }
@@ -76,7 +94,7 @@ namespace HeartScript.Ast
         {
             var valueNode = (ValueNode)node.MidNode;
             if (bool.TryParse(valueNode.Value, out bool value))
-                return new ConstantNode(value);
+                return AstNode.Constant(value);
 
             throw new ArgumentException(nameof(node));
         }
@@ -156,6 +174,12 @@ namespace HeartScript.Ast
                 right = AstNode.Convert(right, mid.Type);
 
             return AstNode.Conditional(left, mid, right);
+        }
+
+        private static AstNode BuildRoundBracket(SymbolScope scope, ExpressionNode node)
+        {
+            var sequenceNode = (SequenceNode)node.MidNode;
+            return Build(scope, (ExpressionNode)sequenceNode.Children[1]);
         }
     }
 }
