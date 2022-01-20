@@ -8,7 +8,7 @@ namespace HeartScript.Ast.Nodes
 
         public ArrayConstructorNode(Type type, AstNode length) : base(type, AstType.Default)
         {
-            if (TypeHelper.IsIntegral(length.Type))
+            if (!TypeHelper.IsIntegral(length.Type))
                 throw new ArgumentException($"{nameof(length)} must be integral");
 
             Length = length;

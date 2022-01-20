@@ -12,7 +12,7 @@ namespace HeartScript.Ast.Nodes
             if (!array.Type.IsArray)
                 throw new ArgumentException($"{nameof(array)} must be an array");
 
-            if (TypeHelper.IsIntegral(index.Type))
+            if (!TypeHelper.IsIntegral(index.Type))
                 throw new ArgumentException($"{nameof(index)} must be integral");
 
             Array = array;
