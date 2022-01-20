@@ -56,6 +56,17 @@ namespace HeartScript.Tests.VariableTests
                 Paramaters = new object[]{ new int[1] },
                 ExpectedResult = 1,
             },
+            //Size Of Array
+            new CompilerTestCase()
+            {
+                Method = @"
+                double main(int[] arr)
+                {
+                    return sizeof(arr);
+                }",
+                Paramaters = new object[]{ new int[1] },
+                ExpectedResult = 1,
+            },
         };
 
         [TestCaseSource(nameof(s_testCases))]

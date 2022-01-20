@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Reflection.Emit;
 using Heart.Parsing;
 using Heart.Parsing.Patterns;

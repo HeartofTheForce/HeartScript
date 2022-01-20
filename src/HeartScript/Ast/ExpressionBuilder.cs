@@ -13,6 +13,7 @@ namespace HeartScript.Ast
         {
             ["()"] = BuildRoundBracket,
             ["new[]"] = BuildArrayConstructor,
+            ["sizeof"] = BuildSizeOf,
             ["u+"] = BuildPrefix(AstNode.UnaryPlus),
             ["u-"] = BuildPrefix(AstNode.Negate),
             ["~"] = BuildPrefix(AstNode.Not),
@@ -50,6 +51,12 @@ namespace HeartScript.Ast
             throw new ArgumentException($"{node.Key} has no matching builder");
         }
 
+        private static AstNode BuildRoundBracket(SymbolScope scope, ExpressionNode node)
+        {
+            var sequenceNode = (SequenceNode)node.MidNode;
+            return Build(scope, (ExpressionNode)sequenceNode.Children[1]);
+        }
+
         private static AstNode BuildArrayConstructor(SymbolScope scope, ExpressionNode node)
         {
             var sequenceNode = (SequenceNode)node.MidNode;
@@ -69,7 +76,15 @@ namespace HeartScript.Ast
             var sequenceNode = (SequenceNode)node.MidNode;
             var index = Build(scope, (ExpressionNode)sequenceNode.Children[1]);
 
-            return AstNode.ArrayIndexNode(array, index);
+            return AstNode.ArrayIndex(array, index);
+        }
+
+        private static AstNode BuildSizeOf(SymbolScope scope, ExpressionNode node)
+        {
+            var sequenceNode = (SequenceNode)node.MidNode;
+            var array = Build(scope, (ExpressionNode)sequenceNode.Children[2]);
+
+            return AstNode.ArraySizeOf(array);
         }
 
         private static AstNode ParseReal(SymbolScope scope, ExpressionNode node)
@@ -174,12 +189,6 @@ namespace HeartScript.Ast
                 right = AstNode.Convert(right, mid.Type);
 
             return AstNode.Conditional(left, mid, right);
-        }
-
-        private static AstNode BuildRoundBracket(SymbolScope scope, ExpressionNode node)
-        {
-            var sequenceNode = (SequenceNode)node.MidNode;
-            return Build(scope, (ExpressionNode)sequenceNode.Children[1]);
         }
     }
 }

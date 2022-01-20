@@ -33,6 +33,7 @@ namespace HeartScript.Compiling.Emit
                 case MemberAccessNode memberAccessNode: EmitMemberAccess(ilGenerator, memberAccessNode); break;
                 case ArrayConstructorNode arrayConstructorNode: EmitArrayConstructor(ilGenerator, arrayConstructorNode); break;
                 case ArrayIndexNode arrayIndexNode: EmitArrayRead(ilGenerator, arrayIndexNode); break;
+                case ArraySizeOfNode arraySizeOfNode: EmitArraySizeOf(ilGenerator, arraySizeOfNode); break;
                 default: throw new NotImplementedException();
             }
         }
@@ -244,6 +245,7 @@ namespace HeartScript.Compiling.Emit
 
         private static void EmitSet(ILGenerator ilGenerator, AstNode targetNode, AstNode valueNode, string invalidTypeMessage)
         {
+            //TODO Emitting valueNode prevents using OpCodes.Dup for return values
             switch (targetNode)
             {
                 case ParameterNode parameterNode:
@@ -337,6 +339,12 @@ namespace HeartScript.Compiling.Emit
             EmitExpression(ilGenerator, node.Array, false);
             EmitExpression(ilGenerator, node.Index, false);
             ilGenerator.Emit(OpCodes.Ldelem, node.Type);
+        }
+
+        private static void EmitArraySizeOf(ILGenerator ilGenerator, ArraySizeOfNode node)
+        {
+            EmitExpression(ilGenerator, node.Array, false);
+            ilGenerator.Emit(OpCodes.Ldlen);
         }
     }
 }

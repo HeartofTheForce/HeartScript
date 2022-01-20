@@ -22,6 +22,6 @@ namespace HeartScript.Ast.Nodes
 
     public partial class AstNode
     {
-        public static ArrayIndexNode ArrayIndexNode(AstNode array, AstNode index) => new ArrayIndexNode(array, index);
+        public static ArrayIndexNode ArrayIndex(AstNode array, AstNode index) => new ArrayIndexNode(array, index);
     }
 }
