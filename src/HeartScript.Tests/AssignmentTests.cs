@@ -112,6 +112,23 @@ namespace HeartScript.Tests.VariableTests
                 }",
                 Message = $"Cannot convert, {typeof(double)} to {typeof(int)}"
             },
+            //Cache Assign Edge Case
+            //Potential reuse of temp variables
+            new CompilerTestCase()
+            {
+                Method = @"
+                int main()
+                {
+                    int[] arr = new int[2];
+                    int i;
+                    int j;
+                    j = arr[i = 1] = i = 0;
+
+                    return arr[1];
+                }",
+                Paramaters = Array.Empty<object>(),
+                ExpectedResult = 0
+            },
         };
 
         [TestCaseSource(nameof(s_testCases))]

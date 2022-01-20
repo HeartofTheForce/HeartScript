@@ -12,7 +12,6 @@ namespace HeartScript.Compiling.Emit
         public LocalBuilder? ReturnLocal { get; }
         public Stack<Label> BreakLabel { get; }
         public Stack<Label> ContinueLabel { get; }
-        private Dictionary<Type, LocalBuilder> TempVariables { get; }
 
         public MethodBodyContext(ILGenerator iLGenerator, LocalBuilder? returnLocal)
         {
@@ -21,7 +20,6 @@ namespace HeartScript.Compiling.Emit
             ReturnLocal = returnLocal;
             BreakLabel = new Stack<Label>();
             ContinueLabel = new Stack<Label>();
-            TempVariables = new Dictionary<Type, LocalBuilder>();
         }
 
         public AstNode CacheNode(AstNode node)
@@ -35,13 +33,7 @@ namespace HeartScript.Compiling.Emit
 
         private LocalBuilder GetTempLocal(Type type)
         {
-            if (TempVariables.TryGetValue(type, out var localBuilder))
-                return localBuilder;
-
-            localBuilder = ILGenerator.DeclareLocal(type);
-            TempVariables[type] = localBuilder;
-
-            return localBuilder;
+            return ILGenerator.DeclareLocal(type);
         }
     }
 
