@@ -30,6 +30,29 @@ namespace HeartScript.Tests.VariableTests
                 }",
                 ExpectedResult = 1,
             },
+            //Post Increment Array Statement
+            new CompilerTestCase()
+            {
+                Method = @"
+                int main(int[] arr)
+                {
+                    arr[0]++;
+                    return arr[0];
+                }",
+                Paramaters = new object[]{ new int[1] },
+                ExpectedResult = 1,
+            },
+            //Post Increment Array Expression
+            new CompilerTestCase()
+            {
+                Method = @"
+                int main(int[] arr)
+                {
+                    return arr[0]++;
+                }",
+                Paramaters = new object[]{ new int[1] },
+                ExpectedResult = 0,
+            },
             //Post Decrement Statement
             new CompilerTestCase()
             {
@@ -52,6 +75,29 @@ namespace HeartScript.Tests.VariableTests
                     return i--;
                 }",
                 ExpectedResult = 1,
+            },
+            //Post Decrement Array Expression
+            new CompilerTestCase()
+            {
+                Method = @"
+                int main(int[] arr)
+                {
+                    return arr[0]--;
+                }",
+                Paramaters = new object[]{ new int[1] },
+                ExpectedResult = 0,
+            },
+            //Post Decrement Array Statement
+            new CompilerTestCase()
+            {
+                Method = @"
+                int main(int[] arr)
+                {
+                    arr[0]--;
+                    return arr[0];
+                }",
+                Paramaters = new object[]{ new int[1] },
+                ExpectedResult = -1,
             },
         };
 

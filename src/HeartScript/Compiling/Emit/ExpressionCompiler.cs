@@ -203,12 +203,6 @@ namespace HeartScript.Compiling.Emit
                         ctx.ILGenerator.Emit(OpCodes.Not);
                     }
                     break;
-                case AstType.Duplicate:
-                    {
-                        EmitExpression(ctx, node.Operand, false);
-                        ctx.ILGenerator.Emit(OpCodes.Dup);
-                    }
-                    break;
                 case AstType.PostIncrement:
                     {
                         AstNode constantNode;
@@ -220,13 +214,20 @@ namespace HeartScript.Compiling.Emit
                             throw new ArgumentException(nameof(node.Operand.Type));
 
                         AstNode operand;
+                        LocalBuilder? localBuilder = null;
                         if (isStatement)
                             operand = node.Operand;
                         else
-                            operand = AstNode.Duplicate(node.Operand);
+                        {
+                            localBuilder = ctx.GetSharedLocal(node.Operand.Type);
+                            operand = AstNode.Assign(AstNode.Variable(localBuilder.LocalIndex, localBuilder.LocalType), node.Operand);
+                        }
 
                         var valueNode = AstNode.Add(operand, constantNode);
                         EmitSet(ctx, node.Operand, valueNode, false, "The operand of an increment or decrement operator must be a variable or parameter");
+
+                        if (localBuilder != null)
+                            ctx.ILGenerator.Emit(OpCodes.Ldloc, localBuilder);
                     }
                     break;
                 case AstType.PostDecrement:
@@ -240,14 +241,20 @@ namespace HeartScript.Compiling.Emit
                             throw new ArgumentException(nameof(node.Operand.Type));
 
                         AstNode operand;
+                        LocalBuilder? localBuilder = null;
                         if (isStatement)
                             operand = node.Operand;
                         else
-                            operand = AstNode.Duplicate(node.Operand);
+                        {
+                            localBuilder = ctx.GetSharedLocal(node.Operand.Type);
+                            operand = AstNode.Assign(AstNode.Variable(localBuilder.LocalIndex, localBuilder.LocalType), node.Operand);
+                        }
 
                         var valueNode = AstNode.Subtract(operand, constantNode);
                         EmitSet(ctx, node.Operand, valueNode, false, "The operand of an increment or decrement operator must be a variable or parameter");
 
+                        if (localBuilder != null)
+                            ctx.ILGenerator.Emit(OpCodes.Ldloc, localBuilder);
                     }
                     break;
                 default: throw new NotImplementedException();

@@ -23,7 +23,6 @@ namespace HeartScript.Ast
         Or,
         Assign,
         Convert,
-        Duplicate,
         Call,
     }
 }
