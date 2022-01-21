@@ -13,6 +13,8 @@ namespace HeartScript.Compiling.Emit
         public Stack<Label> BreakLabel { get; }
         public Stack<Label> ContinueLabel { get; }
 
+        private Dictionary<Type, LocalBuilder> TempLocals { get; }
+
         public MethodBodyContext(ILGenerator iLGenerator, LocalBuilder? returnLocal)
         {
             ILGenerator = iLGenerator;
@@ -20,21 +22,18 @@ namespace HeartScript.Compiling.Emit
             ReturnLocal = returnLocal;
             BreakLabel = new Stack<Label>();
             ContinueLabel = new Stack<Label>();
+            TempLocals = new Dictionary<Type, LocalBuilder>();
         }
 
-        //TODO cache temp locals by type, move stloc/ldloc to AstNodes to prevent overlapping cache usage
-        public AstNode CacheNode(AstNode node)
+        public LocalBuilder GetSharedLocal(Type type)
         {
-            var temp = GetTempLocal(node.Type);
-            ExpressionCompiler.EmitExpression(this, node, false);
-            ILGenerator.Emit(OpCodes.Stloc, temp);
-            ILGenerator.Emit(OpCodes.Ldloc, temp);
-            return AstNode.Variable(temp.LocalIndex, node.Type);
-        }
+            if (TempLocals.TryGetValue(type, out var localBuilder))
+                return localBuilder;
 
-        private LocalBuilder GetTempLocal(Type type)
-        {
-            return ILGenerator.DeclareLocal(type);
+            localBuilder = ILGenerator.DeclareLocal(type);
+            TempLocals[type] = localBuilder;
+
+            return localBuilder;
         }
     }
 

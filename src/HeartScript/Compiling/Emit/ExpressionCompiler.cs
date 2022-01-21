@@ -168,13 +168,7 @@ namespace HeartScript.Compiling.Emit
                     break;
                 case AstType.Assign:
                     {
-                        AstNode operand;
-                        if (!isStatement)
-                            operand = ctx.CacheNode(node.Right);
-                        else
-                            operand = node.Right;
-
-                        EmitSet(ctx, node.Left, operand, "The left-hand side of an assignment must be a variable or parameter");
+                        EmitSet(ctx, node.Left, node.Right, !isStatement, "The left-hand side of an assignment must be a variable or parameter");
                     }
                     break;
                 default: throw new NotImplementedException();
@@ -211,42 +205,36 @@ namespace HeartScript.Compiling.Emit
                     break;
                 case AstType.PostIncrement:
                     {
-                        AstNode operand;
                         if (!isStatement)
-                            operand = ctx.CacheNode(node.Operand);
-                        else
-                            operand = node.Operand;
+                            EmitExpression(ctx, node.Operand, false);
 
                         AstNode constantNode;
-                        if (operand.Type == typeof(int))
+                        if (node.Operand.Type == typeof(int))
                             constantNode = AstNode.Constant(1);
-                        else if (operand.Type == typeof(double))
+                        else if (node.Operand.Type == typeof(double))
                             constantNode = AstNode.Constant(1.0);
                         else
-                            throw new ArgumentException(nameof(operand.Type));
+                            throw new ArgumentException(nameof(node.Operand.Type));
 
-                        var valueNode = AstNode.Add(operand, constantNode);
-                        EmitSet(ctx, node.Operand, valueNode, "The operand of an increment or decrement operator must be a variable or parameter");
+                        var valueNode = AstNode.Add(node.Operand, constantNode);
+                        EmitSet(ctx, node.Operand, valueNode, false, "The operand of an increment or decrement operator must be a variable or parameter");
                     }
                     break;
                 case AstType.PostDecrement:
                     {
-                        AstNode operand;
                         if (!isStatement)
-                            operand = ctx.CacheNode(node.Operand);
-                        else
-                            operand = node.Operand;
+                            EmitExpression(ctx, node.Operand, false);
 
                         AstNode constantNode;
-                        if (operand.Type == typeof(int))
+                        if (node.Operand.Type == typeof(int))
                             constantNode = AstNode.Constant(1);
-                        else if (operand.Type == typeof(double))
+                        else if (node.Operand.Type == typeof(double))
                             constantNode = AstNode.Constant(1.0);
                         else
-                            throw new ArgumentException(nameof(operand.Type));
+                            throw new ArgumentException(nameof(node.Operand.Type));
 
-                        var valueNode = AstNode.Subtract(operand, constantNode);
-                        EmitSet(ctx, node.Operand, valueNode, "The operand of an increment or decrement operator must be a variable or parameter");
+                        var valueNode = AstNode.Subtract(node.Operand, constantNode);
+                        EmitSet(ctx, node.Operand, valueNode, false, "The operand of an increment or decrement operator must be a variable or parameter");
 
                     }
                     break;
@@ -254,19 +242,25 @@ namespace HeartScript.Compiling.Emit
             }
         }
 
-        private static void EmitSet(MethodBodyContext ctx, AstNode targetNode, AstNode valueNode, string invalidTypeMessage)
+        private static void EmitSet(MethodBodyContext ctx, AstNode targetNode, AstNode valueNode, bool pushValue, string invalidTypeMessage)
         {
             switch (targetNode)
             {
                 case ParameterNode parameterNode:
                     {
                         EmitExpression(ctx, valueNode, false);
+                        if (pushValue)
+                            ctx.ILGenerator.Emit(OpCodes.Dup);
+
                         ctx.ILGenerator.Emit(OpCodes.Starg, parameterNode.Index);
                     }
                     break;
                 case VariableNode variableNode:
                     {
                         EmitExpression(ctx, valueNode, false);
+                        if (pushValue)
+                            ctx.ILGenerator.Emit(OpCodes.Dup);
+
                         ctx.ILGenerator.Emit(OpCodes.Stloc, variableNode.Index);
                     }
                     break;
@@ -275,7 +269,19 @@ namespace HeartScript.Compiling.Emit
                         EmitExpression(ctx, arrayIndexNode.Array, false);
                         EmitExpression(ctx, arrayIndexNode.Index, false);
                         EmitExpression(ctx, valueNode, false);
+
+                        LocalBuilder? localBuilder = null;
+                        if (pushValue)
+                        {
+                            localBuilder = ctx.GetSharedLocal(valueNode.Type);
+                            ctx.ILGenerator.Emit(OpCodes.Dup);
+                            ctx.ILGenerator.Emit(OpCodes.Stloc, localBuilder);
+                        }
+
                         ctx.ILGenerator.Emit(OpCodes.Stelem, targetNode.Type);
+
+                        if (localBuilder != null)
+                            ctx.ILGenerator.Emit(OpCodes.Ldloc, localBuilder);
                     }
                     break;
                 default: throw new ArgumentException(invalidTypeMessage);
