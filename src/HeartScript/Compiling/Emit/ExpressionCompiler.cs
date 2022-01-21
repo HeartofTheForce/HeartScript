@@ -203,11 +203,14 @@ namespace HeartScript.Compiling.Emit
                         ctx.ILGenerator.Emit(OpCodes.Not);
                     }
                     break;
+                case AstType.Duplicate:
+                    {
+                        EmitExpression(ctx, node.Operand, false);
+                        ctx.ILGenerator.Emit(OpCodes.Dup);
+                    }
+                    break;
                 case AstType.PostIncrement:
                     {
-                        if (!isStatement)
-                            EmitExpression(ctx, node.Operand, false);
-
                         AstNode constantNode;
                         if (node.Operand.Type == typeof(int))
                             constantNode = AstNode.Constant(1);
@@ -216,15 +219,18 @@ namespace HeartScript.Compiling.Emit
                         else
                             throw new ArgumentException(nameof(node.Operand.Type));
 
-                        var valueNode = AstNode.Add(node.Operand, constantNode);
+                        AstNode operand;
+                        if (isStatement)
+                            operand = node.Operand;
+                        else
+                            operand = AstNode.Duplicate(node.Operand);
+
+                        var valueNode = AstNode.Add(operand, constantNode);
                         EmitSet(ctx, node.Operand, valueNode, false, "The operand of an increment or decrement operator must be a variable or parameter");
                     }
                     break;
                 case AstType.PostDecrement:
                     {
-                        if (!isStatement)
-                            EmitExpression(ctx, node.Operand, false);
-
                         AstNode constantNode;
                         if (node.Operand.Type == typeof(int))
                             constantNode = AstNode.Constant(1);
@@ -233,7 +239,13 @@ namespace HeartScript.Compiling.Emit
                         else
                             throw new ArgumentException(nameof(node.Operand.Type));
 
-                        var valueNode = AstNode.Subtract(node.Operand, constantNode);
+                        AstNode operand;
+                        if (isStatement)
+                            operand = node.Operand;
+                        else
+                            operand = AstNode.Duplicate(node.Operand);
+
+                        var valueNode = AstNode.Subtract(operand, constantNode);
                         EmitSet(ctx, node.Operand, valueNode, false, "The operand of an increment or decrement operator must be a variable or parameter");
 
                     }
