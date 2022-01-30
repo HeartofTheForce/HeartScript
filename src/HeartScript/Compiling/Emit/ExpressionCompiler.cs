@@ -205,60 +205,43 @@ namespace HeartScript.Compiling.Emit
                     break;
                 case AstType.PostIncrement:
                     {
-                        AstNode constantNode;
-                        if (node.Operand.Type == typeof(int))
-                            constantNode = AstNode.Constant(1);
-                        else if (node.Operand.Type == typeof(double))
-                            constantNode = AstNode.Constant(1.0);
-                        else
-                            throw new ArgumentException(nameof(node.Operand.Type));
-
-                        AstNode operand;
-                        LocalBuilder? localBuilder = null;
-                        if (isStatement)
-                            operand = node.Operand;
-                        else
-                        {
-                            localBuilder = ctx.GetSharedLocal(node.Operand.Type);
-                            operand = AstNode.Assign(AstNode.Variable(localBuilder.LocalIndex, localBuilder.LocalType), node.Operand);
-                        }
-
-                        var valueNode = AstNode.Add(operand, constantNode);
-                        EmitSet(ctx, node.Operand, valueNode, false, "The operand of an increment or decrement operator must be a variable or parameter");
-
-                        if (localBuilder != null)
-                            ctx.ILGenerator.Emit(OpCodes.Ldloc, localBuilder);
+                        PostCrement(ctx, node, isStatement, AstNode.Add);
                     }
                     break;
                 case AstType.PostDecrement:
                     {
-                        AstNode constantNode;
-                        if (node.Operand.Type == typeof(int))
-                            constantNode = AstNode.Constant(1);
-                        else if (node.Operand.Type == typeof(double))
-                            constantNode = AstNode.Constant(1.0);
-                        else
-                            throw new ArgumentException(nameof(node.Operand.Type));
-
-                        AstNode operand;
-                        LocalBuilder? localBuilder = null;
-                        if (isStatement)
-                            operand = node.Operand;
-                        else
-                        {
-                            localBuilder = ctx.GetSharedLocal(node.Operand.Type);
-                            operand = AstNode.Assign(AstNode.Variable(localBuilder.LocalIndex, localBuilder.LocalType), node.Operand);
-                        }
-
-                        var valueNode = AstNode.Subtract(operand, constantNode);
-                        EmitSet(ctx, node.Operand, valueNode, false, "The operand of an increment or decrement operator must be a variable or parameter");
-
-                        if (localBuilder != null)
-                            ctx.ILGenerator.Emit(OpCodes.Ldloc, localBuilder);
+                        PostCrement(ctx, node, isStatement, AstNode.Subtract);
                     }
                     break;
                 default: throw new NotImplementedException();
             }
+        }
+
+        private static void PostCrement(MethodBodyContext ctx, UnaryNode node, bool isStatement, Func<AstNode, AstNode, AstNode> nodeBuilder)
+        {
+            AstNode constantNode;
+            if (node.Operand.Type == typeof(int))
+                constantNode = AstNode.Constant(1);
+            else if (node.Operand.Type == typeof(double))
+                constantNode = AstNode.Constant(1.0);
+            else
+                throw new ArgumentException(nameof(node.Operand.Type));
+
+            AstNode operand;
+            LocalBuilder? localBuilder = null;
+            if (isStatement)
+                operand = node.Operand;
+            else
+            {
+                localBuilder = ctx.GetSharedLocal(node.Operand.Type);
+                operand = AstNode.Assign(AstNode.Variable(localBuilder.LocalIndex, localBuilder.LocalType), node.Operand);
+            }
+
+            var valueNode = nodeBuilder(operand, constantNode);
+            EmitSet(ctx, node.Operand, valueNode, false, "The operand of an increment or decrement operator must be a variable or parameter");
+
+            if (localBuilder != null)
+                ctx.ILGenerator.Emit(OpCodes.Ldloc, localBuilder);
         }
 
         private static void EmitSet(MethodBodyContext ctx, AstNode targetNode, AstNode valueNode, bool pushValue, string invalidTypeMessage)
