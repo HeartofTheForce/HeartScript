@@ -168,7 +168,7 @@ namespace HeartScript.Compiling.Emit
                     break;
                 case AstType.Assign:
                     {
-                        EmitSet(ctx, node.Left, node.Right, !isStatement, "The left-hand side of an assignment must be a variable or parameter");
+                        EmitSet(ctx, node.Left, node.Right, false, !isStatement, "The left-hand side of an assignment must be a variable or parameter");
                     }
                     break;
                 default: throw new NotImplementedException();
@@ -227,30 +227,21 @@ namespace HeartScript.Compiling.Emit
             else
                 throw new ArgumentException(nameof(node.Operand.Type));
 
-            AstNode operand;
-            LocalBuilder? localBuilder = null;
-            if (isStatement)
-                operand = node.Operand;
-            else
-            {
-                localBuilder = ctx.GetSharedLocal(node.Operand.Type);
-                operand = AstNode.Assign(AstNode.Variable(localBuilder.LocalIndex, localBuilder.LocalType), node.Operand);
-            }
-
-            var valueNode = nodeBuilder(operand, constantNode);
-            EmitSet(ctx, node.Operand, valueNode, false, "The operand of an increment or decrement operator must be a variable or parameter");
-
-            if (localBuilder != null)
-                ctx.ILGenerator.Emit(OpCodes.Ldloc, localBuilder);
+            var valueNode = nodeBuilder(node.Operand, constantNode);
+            EmitSet(ctx, node.Operand, valueNode, !isStatement, false, "The operand of an increment or decrement operator must be a variable or parameter");
         }
 
-        private static void EmitSet(MethodBodyContext ctx, AstNode targetNode, AstNode valueNode, bool pushValue, string invalidTypeMessage)
+        private static void EmitSet(MethodBodyContext ctx, AstNode targetNode, AstNode valueNode, bool pushTarget, bool pushValue, string invalidTypeMessage)
         {
             switch (targetNode)
             {
                 case ParameterNode parameterNode:
                     {
+                        if(pushTarget)
+                            EmitParameter(ctx, parameterNode);
+
                         EmitExpression(ctx, valueNode, false);
+
                         if (pushValue)
                             ctx.ILGenerator.Emit(OpCodes.Dup);
 
@@ -259,7 +250,11 @@ namespace HeartScript.Compiling.Emit
                     break;
                 case VariableNode variableNode:
                     {
+                        if(pushTarget)
+                            EmitVariable(ctx, variableNode);
+
                         EmitExpression(ctx, valueNode, false);
+
                         if (pushValue)
                             ctx.ILGenerator.Emit(OpCodes.Dup);
 
@@ -268,6 +263,9 @@ namespace HeartScript.Compiling.Emit
                     break;
                 case ArrayIndexNode arrayIndexNode:
                     {
+                        if(pushTarget)
+                            EmitArrayRead(ctx, arrayIndexNode);
+
                         EmitExpression(ctx, arrayIndexNode.Array, false);
                         EmitExpression(ctx, arrayIndexNode.Index, false);
                         EmitExpression(ctx, valueNode, false);

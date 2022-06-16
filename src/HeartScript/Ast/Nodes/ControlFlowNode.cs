@@ -6,6 +6,7 @@ namespace HeartScript.Ast.Nodes
         {
         }
     }
+
     public class ContinueNode : AstNode
     {
         public ContinueNode() : base(typeof(void), AstType.Default)
