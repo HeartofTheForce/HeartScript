@@ -24,10 +24,9 @@ namespace HeartScript.Tests.ExpressionTests
         public void Execute()
         {
             string source = $"{s_typeLookup[typeof(T)]} main() => {Infix};";
-            var ctx = new ParserContext(source);
 
             var pattern = Utility.Parser.Patterns["root"].Trim();
-            var node = pattern.MatchComplete(Utility.Parser, ctx);
+            var node = Utility.Parser.MatchComplete(pattern, source);
 
             var compiledExpression = EmitCompiler.CompileFunction<Func<T>>(node);
 

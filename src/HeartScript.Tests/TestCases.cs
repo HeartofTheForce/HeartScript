@@ -21,9 +21,8 @@ namespace HeartScript.Tests
 
         public void Execute()
         {
-            var ctx = new ParserContext(Method);
             var pattern = Utility.Parser.Patterns["root"].Trim();
-            var node = pattern.MatchComplete(Utility.Parser, ctx);
+            var node = Utility.Parser.MatchComplete(pattern, Method);
 
             var compiledMethodInfo = EmitCompiler.CompileFunction(node);
 
@@ -45,9 +44,8 @@ namespace HeartScript.Tests
 
         public void Execute()
         {
-            var ctx = new ParserContext(Method);
             var pattern = Utility.Parser.Patterns["root"].Trim();
-            var node = pattern.MatchComplete(Utility.Parser, ctx);
+            var node = Utility.Parser.MatchComplete(pattern, Method);
 
             var exception = Assert.Throws<T>(() => EmitCompiler.CompileFunction(node));
             Assert.AreEqual(Message, exception.Message);

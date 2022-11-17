@@ -14,10 +14,9 @@ namespace HeartScript.Cli
             {
                 string source = File.ReadAllText(args[0]);
 
-                var ctx = new ParserContext(source);
                 var parser = ParsingHelper.BuildPatternParser("./src/demo.hg");
                 var pattern = parser.Patterns["root"].Trim();
-                var node = pattern.MatchComplete(parser, ctx);
+                var node = parser.MatchComplete(pattern, source);
 
                 int arrayLength = 10;
                 int[] scriptArray = RandomArray(arrayLength, 0, 100);

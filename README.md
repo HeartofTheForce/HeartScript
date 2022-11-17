@@ -13,7 +13,7 @@ C-like IL compiled custom language
 
 # Example
 
-`dotnet run -p ./src/HeartScript.Cli ./src/demo.hs`
+`dotnet run --project ./src/HeartScript.Cli ./src/demo.hs`
 
 -   Quicksort implementation [demo.hs](./src/demo.hs)
 -   Grammar used to parse the language [demo.hg](./src/demo.hg)
