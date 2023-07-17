@@ -11,7 +11,7 @@ namespace HeartScript.Ast
     {
         public static AstNode BuildStaticCall(SymbolScope scope, ExpressionNode callNode)
         {
-            var parameterNodes = ParseNodeHelper.FindChildren<ExpressionNode>(callNode.MidNode);
+            var parameterNodes = callNode.MidNode.FindChildren<ExpressionNode>();
             var parameters = new AstNode[parameterNodes.Count];
             var parameterTypes = new Type[parameterNodes.Count];
 
