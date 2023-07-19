@@ -91,9 +91,8 @@ namespace HeartScript.Ast
             }
 
             var bindingFlags = BindingFlags.Public | BindingFlags.Static;
-            var scripMethod = type.GetMethod(methodName, bindingFlags, parameterTypes);
-            if (scripMethod == null)
-                throw new Exception($"{type.Name} has no overload matching '{methodName}({string.Join(',', parameterTypes.Select(x => x.Name))})'");
+            var scripMethod = type.GetMethod(methodName, bindingFlags, parameterTypes)
+                ?? throw new Exception($"{type.Name} has no overload matching '{methodName}({string.Join(',', parameterTypes.Select(x => x.Name))})'");
 
             return scripMethod;
         }

@@ -1,6 +1,5 @@
 using System;
 using HeartScript.Compiling.Emit;
-using Heart.Parsing;
 using Heart.Parsing.Patterns;
 using NUnit.Framework;
 #pragma warning disable CS8618
@@ -47,8 +46,8 @@ namespace HeartScript.Tests
             var pattern = Utility.Parser.Patterns["root"].Trim();
             var node = Utility.Parser.MatchComplete(pattern, Method);
 
-            var exception = Assert.Throws<T>(() => EmitCompiler.CompileFunction(node));
-            Assert.AreEqual(Message, exception.Message);
+            var ex = Assert.Throws<T>(() => EmitCompiler.CompileFunction(node));
+            Assert.AreEqual(Message, ex?.Message);
         }
 
         public override string ToString()
